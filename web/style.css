@@ -330,6 +330,9 @@ dialog::backdrop { background:#100e19d9; }
 #condition-strip button { padding:4px 8px; font-size:11px; color:#ded5b9; }
 #condition-strip [data-condition=poison] { color:#c4dc8d; }
 #condition-strip [data-condition=frost] { color:#b3e7ef; }
+#condition-strip [data-condition=light_wisp] { color:#9ce9ef; }
+#condition-strip [data-condition=light_soul] { color:#f9df91; }
+#condition-strip [data-condition=light_radiant] { color:#ffa7bc; }
 
 .map-key { display:flex; flex-wrap:wrap; gap:4px 9px; margin-top:6px; color:#c8c2ac; font-size:10px; }
 .map-key span::before { display:inline-block; content:""; width:7px; height:7px; margin-right:4px; background:#98b48d; }
@@ -337,6 +340,7 @@ dialog::backdrop { background:#100e19d9; }
 .map-key span:nth-child(3)::before { background:#505e78; }
 .map-key .map-player-key::before { background:#edffc4; }
 .map-key #map-path-key::before { background:#edcd8b; }
+.map-key #map-pit-key::before { background:#030407; box-shadow:inset 0 0 0 1px #99836e; }
 
 .map-zoom { display:flex; gap:3px; align-items:start; pointer-events:auto; }
 .map-zoom button { min-width:29px; min-height:27px; padding:2px 5px; font-size:12px; background:#1a1725ec; }
@@ -502,8 +506,9 @@ dialog::backdrop { background:#100e19d9; }
  border:9px solid #c6ad84; border-top-color:#eadaba; border-bottom-color:#aa8765;
  border-radius:0;
  box-shadow:0 0 0 2px #775c51,0 0 0 4px #302332,0 7px 0 1px #1b1522;
- background:#111321;
+ background:radial-gradient(ellipse at center,#302b36,#24212c);
 }
+#board, #minimap { --dungeon-fog:#171e29; }
 .map-wrap::after {
  content:""; position:absolute; z-index:2; inset:0; pointer-events:none;
  background:

@@ -33,6 +33,73 @@ class ExpeditionMechanicsTests(unittest.TestCase):
         game.update_visibility()
         return enemy
 
+    def test_player_kills_restore_sanity_and_summons_do_not(self):
+        game = self.arena()
+        game.sanity = 100
+        game.weapon = 'fan'
+        self.enemy(game, 4, 5, hp=1)
+        self.enemy(game, 5, 4, hp=1)
+        self.enemy(game, 5, 6, kind='broodling', hp=1, summoner=12)
+        go(game, 'wave', 'right')
+        self.assertEqual(game.sanity, 139)
+        gains = [fx['amount'] for fx in game.effects if fx['kind'] == 'sanity_gain']
+        self.assertEqual(gains, [40])
+
+    def test_wisp_boosts_damage_and_soul_boosts_charge_independently(self):
+        game = self.arena()
+        game.sanity = 450
+        game.player['energy'] = 0
+        game.upgrades = ['echo']
+        game.echo_charges = 2
+        game.features.append(dict(id='test-light', kind='light_wisp', x=3, y=5, used=False))
+        go(game, 'guard')
+        self.assertEqual((game.sanity, game.light_blessings), (449, {'light_wisp': 65}))
+        go(game, 'charge')
+        self.assertEqual(game.player['energy'], 2)
+        game.light_blessings['light_wisp'] = 2
+        game.features.append(dict(id='test-soul', kind='light_soul', x=3, y=5, used=False))
+        go(game, 'guard')
+        self.assertEqual(game.light_blessings, {'light_wisp': 1, 'light_soul': 105})
+        enemy = self.enemy(game, 4, 5, hp=3)
+        self.assertEqual(game.preview_details('wave', 'right')['hits'][0]['damage'], 2)
+        self.assertEqual(game.light_blessings['light_wisp'], 1)
+        go(game, 'wave', 'right')
+        self.assertEqual(enemy['hp'], 1)
+        self.assertEqual(game.light_blessings, {'light_soul': 104})
+        self.assertEqual(game.state()['waveStats']['damage'], 1)
+        game.enemies.clear()
+        go(game, 'charge')
+        self.assertEqual(game.player['energy'], 3)
+
+    def test_light_step_progress_survives_reload_and_refresh(self):
+        game = self.arena()
+        game.player['hp'] = 3
+        game.light_blessings = {'light_radiant': 80}
+        for _ in range(24):
+            go(game, 'move', 'right')
+            go(game, 'move', 'left')
+        game.features.append(dict(id='test-light', kind='light_soul', x=3, y=5, used=False))
+        go(game, 'guard')
+        game = FloorDungeon.restore(game.dump())
+        self.assertEqual(game.light_blessings, {'light_radiant': 31, 'light_soul': 105})
+        self.assertEqual((game.light_steps, game.player['hp']), (48, 3))
+        go(game, 'move', 'right')
+        self.assertEqual((game.light_steps, game.player['hp']), (49, 3))
+        go(game, 'move', 'left')
+        self.assertEqual((game.light_steps, game.player['hp']), (0, 4))
+
+    def test_radiant_only_counts_steps_for_its_own_duration(self):
+        game = self.arena()
+        game.light_blessings = {'light_wisp': 10}
+        game.features.append(dict(id='test-radiant', kind='light_radiant', x=3, y=5, used=False))
+        go(game, 'guard')
+        self.assertEqual(game.light_blessings, {'light_wisp': 9, 'light_radiant': 155})
+        game.light_blessings['light_radiant'] = 1
+        go(game, 'move', 'right')
+        self.assertEqual((game.light_blessings, game.light_steps), ({'light_wisp': 8}, 0))
+        go(game, 'move', 'left')
+        self.assertEqual(game.light_steps, 0)
+
     def test_fan_hits_multiple_and_power_shortens_range(self):
         game = self.arena()
         near = self.enemy(game, 4, 5)
@@ -103,10 +170,14 @@ class ExpeditionMechanicsTests(unittest.TestCase):
         self.assertEqual(game.tile_at([16, 6])['slash'], chr(92))
         self.assertEqual(game.trace([14, 6], 'right')[-1], [16, 8])
 
-    def test_floor_collapses_on_second_entry_for_either_actor(self):
+    def test_floor_opens_on_first_entry_and_reentering_drops_either_actor(self):
         game = self.arena(5, 17)
         go(game, 'move', 'right')
-        self.assertEqual(game.tile_at([6, 17])['stage'], 1)
+        self.assertEqual(game.tile_at([6, 17])['stage'], 2)
+        self.assertEqual((game.depth, game.player['hp']), (1, 5))
+        game = FloorDungeon.restore(game.dump())
+        pit = next(tile for tile in game.state()['terrain'] if position(tile) == (6, 17))
+        self.assertEqual(pit['stage'], 2)
         go(game, 'guard')
         self.assertEqual(game.player['hp'], 5)
         go(game, 'move', 'left')

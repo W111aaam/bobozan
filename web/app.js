@@ -82,7 +82,7 @@ function renderControls(){
  $('resume-travel').textContent=state&&travelNeedsCaution()?'继续一步':'继续前往';
  $('inspect-cell').disabled=!state||busy;
  $('inspect-cell').setAttribute('aria-pressed',String(inspecting));
- $('map-toast').textContent=inspecting?'点击地格查看 · 不消耗行动':aimingItem==='anchor_chain'?(lureSelection?'确认拉动 · 方框为落点':'选择高亮的敌人或空地'):aimingItem==='plant'?'选择播种位置 · 四格内空地':aimingItem?(lureSelection?(aimingItem==='frost_smoke'?'蓝圈标记可能受冻的敌人 · 范围内浅水结冰':'确认投掷，或点选其他落点'):'选择四格内的高亮地格 · 障碍近侧落地'):aim?'选择发射方向 · 箭头键 / 点击射线':'';
+ $('map-toast').textContent=inspecting?'点击地格查看 · 不消耗行动':aimingItem==='anchor_chain'?(lureSelection?'确认拉动 · 方框为落点':'选择高亮的敌人或空地'):aimingItem==='plant'?'选择播种位置 · 四格内空地':aimingItem?(lureSelection?(aimingItem==='frost_smoke'?'蓝圈标记可能受冻的敌人 · 范围内浅水结冰':'确认投掷，或点选其他落点'):'选择四格内的高亮地格 · 障碍近侧落地'):aim?'左键点射线或敌人发射 · 右键查看':'';
  $('map-toast').classList.toggle('visible',inspecting||!!aim||!!aimingItem);
  $('skip-reward').disabled=busy;
  $('organize-for-supply').disabled=busy;
@@ -96,7 +96,12 @@ function ray(direction){
  if(aim==='reflect')return aimDetails?.[direction]?.cells??[];
  return aimDetails?.[direction]?.cells??state.aimPaths?.[direction]??[];
 }
-const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice:'战术补给箱',shrine:'疗愈泉水',dry_spring:'干涸泉水',light_wisp:'微光 · 65 理智',light_soul:'圣光 · 105 理智',light_radiant:'辉光 · 155 理智',key:'钥匙',kit:'药剂',cache:'战术补给',
+const LIGHT_INFO={
+ light_wisp:{name:'微光',turns:65,effect:'波与重波伤害 +1',glyph:'◈',color:'#9ce9ef'},
+ light_soul:{name:'圣光',turns:105,effect:'每次攒额外获得 1 能量',glyph:'✦',color:'#f9df91'},
+ light_radiant:{name:'辉光',turns:155,effect:'每实际走满 50 步回复 1 生命',glyph:'☀',color:'#ffa7bc'}
+};
+const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice:'战术补给箱',shrine:'疗愈泉水',dry_spring:'干涸泉水',key:'钥匙',kit:'药剂',cache:'战术补给',
  lure_cache:'诱饵',smoke:'烟雾弹',wonder:'镜间奇遇',dew:'露珠',grass_seed:'响草种子',sun_seed:'阳草种子',chart:'测绘卷轴',recall:'回程卷轴',ankh:'护命符',terror:'惊退卷轴',
  echo_smoke:'响雾弹',stolen_energy:'被偷走的能量',rune_shard:'刻印碎片'};
 function emptyChest(feature){
@@ -106,7 +111,10 @@ function emptyChest(feature){
   ||(feature.kind==='lure_cache'&&feature.remaining_items?.length)
  ));
 }
-function featureName(f){return emptyChest(f)?'空箱子':f.kind==='shrine'&&f.used?'已耗尽的泉水':f.itemName||FEATURE_NAMES[f.kind]}
+function featureName(f){
+ const light=LIGHT_INFO[f.kind];
+ return light?`${light.name} · ${light.turns} 理智`:emptyChest(f)?'空箱子':f.kind==='shrine'&&f.used?'已耗尽的泉水':f.itemName||FEATURE_NAMES[f.kind];
+}
 function unopenedSupplyAt(cell){
  return state.features.some(f=>f.kind==='supply_choice'&&!f.used&&same(pos(f),cell));
 }
@@ -187,7 +195,8 @@ function terrainName(tile){
  if(tile.kind==='ice')return '薄冰 · 本拍限制移动';
  if(tile.kind==='water')return tile.ice_until?`冰封浅水 · ${Math.max(0,tile.ice_until-state.turn)} 拍后解冻 · 暂停导电`:'浅水 · 熄灭灼烧，相连水格可导电';
  if(tile.kind==='rubble')return '脆墙 · 需要破城震波拆除';
- return ['脆弱地板 · 首次踩入开裂','开裂地板 · 再踩会坠落','深渊 · 跌向下一层并受伤'][tile.stage];
+ if(tile.kind==='fragile')return tile.stage?'破洞 · 踏入会坠落并受伤':'脆弱地板 · 踩过后会留下破洞';
+ return '地面';
 }
 let perspectiveBoard=false;
 try{perspectiveBoard=localStorage.getItem('bobozan-view')==='3d'}catch{}
@@ -223,7 +232,7 @@ function renderBoard(showEffects=false){
  const w=width*60,h=height*60;
  $('board').setAttribute('viewBox',perspectiveBoard
   ? `${-h*.36-8} -52 ${w+h*.36+16} ${w*.16+h*.66+64}`
-  : `0 0 ${w} ${h}`);
+  : `-16 -16 ${w+32} ${h+32}`);
  $('board').classList.toggle('oblique',perspectiveBoard);
  $('view-toggle').setAttribute('aria-pressed',String(perspectiveBoard));
  $('view-toggle').textContent=perspectiveBoard?'斜俯视':'平面';
@@ -268,10 +277,15 @@ function renderBoard(showEffects=false){
  const projection=perspectiveBoard?'matrix(1 .16 -.36 .66 0 0) ':'';
  let solids='';
  const floorFeatures=featuresByCell();
- let svg=`<g transform="${projection}translate(${-ox*60},${-oy*60})">`;
+ let svg=`<defs><pattern id="board-fog" width="120" height="120" patternUnits="userSpaceOnUse" shape-rendering="crispEdges">
+  <path d="M0 0h120v120H0z" fill="var(--dungeon-fog)"/>
+  <path d="M12 27h8v3h-8zM74 62h9v3h-9zM42 92h5v4h-5zM103 14h3v3h-3z" fill="#2f3b4d" opacity=".42"/>
+  <path d="M5 72h10v3H5zM80 101h7v2h-7zM48 41h6v2h-6z" fill="#10131c" opacity=".72"/>
+ </pattern></defs><g transform="${projection}translate(${-ox*60},${-oy*60})">
+  <rect data-fog-layer x="${ox*60}" y="${oy*60}" width="${w}" height="${h}" fill="url(#board-fog)" stroke="#4a4350" stroke-width="2" pointer-events="none"/>`;
  for(let y=oy;y<oy+height;y++)for(let x=ox;x<ox+width;x++){
   const key=x+','+y,visible=seen.has(key);
-  if(!known.has(key)){svg+=`<rect x="${x*60}" y="${y*60}" width="60" height="60" fill="#111321"/>`;continue}
+  if(!known.has(key))continue;
   if(mappedKeys.has(key)){
    const wall=walls.has(key);
    const label=wall?'测绘 · 石墙':same([x,y],state.exit)?'测绘 · 阶梯':doors.has(key)?'测绘 · 石门':'测绘 · 通道';
@@ -294,7 +308,7 @@ function renderBoard(showEffects=false){
   const routeLabel=same([x,y],state.upStairs)?'返回上一层的阶梯':same([x,y],state.entrance)?'本层入口':shortcuts.has(key)?'隐蔽通路':'';
   const groundLabel=[routeLabel,doorLabel,onFire?'地火 · 下一拍 1 伤':'',supplies].filter(Boolean).join('，')||(tile?terrainName(tile):`地面 ${x},${y}`);
   const box=available.some(f=>f.kind==='supply_choice');
-  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，点击查看信息':box?(hero?'战术补给箱，点击打开':'战术补给箱，点击前往并打开'):hero?(supplies?'你的位置，'+supplies:'你的位置'):groundLabel;
+  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，右键查看信息':box?(hero?'战术补给箱，点击打开':'战术补给箱，点击前往并打开'):hero?'你的位置，'+groundLabel:groundLabel;
   const risk=danger.has(key)?'，下一拍危险':warnings.has(key)?'，有敌方预告':'';
   svg+=`<g ${wall?'':`data-cell="${key}" role="button" tabindex="-1" aria-label="${esc(label+risk)}"`} opacity="${visible?1:.38}">`;
   if(wall){
@@ -331,8 +345,7 @@ function renderBoard(showEffects=false){
    else if(tile.kind==='ice')svg+=`<rect x="${x*60+4}" y="${y*60+4}" width="52" height="52" fill="#81d8f26b" stroke="#c0f1ff"/>`;
    else if(tile.kind==='mirror')svg+=`<path d="M${x*60+12} ${y*60+(tile.slash==='/'?48:12)}L${x*60+48} ${y*60+(tile.slash==='/'?12:48)}" stroke="${tile.rotating?'#efc46a':'#92dce7'}" stroke-width="7"/><text x="${x*60+30}" y="${y*60+57}" text-anchor="middle" fill="#efc46a" font-size="11">${tile.rotating?'↻ 击中旋转':''}</text>`;
    else if(tile.kind==='rubble')svg+=`<rect x="${x*60+6}" y="${y*60+6}" width="48" height="48" fill="#725c51"/><path d="M${x*60+28} ${y*60+7}l-6 17 15 8-8 20" fill="none" stroke="#e0b78b" stroke-width="3"/>`;
-   else if(tile.stage===2)svg+=`<ellipse cx="${x*60+30}" cy="${y*60+32}" rx="27" ry="23" fill="#05080d" stroke="#b1766c"/>`;
-   else svg+=`<path d="M${x*60+10} ${y*60+12}l20 13-9 12 24 11m-15-23 18-12" fill="none" stroke="${tile.stage?'#fb8b70':'#b7ad8b'}" stroke-width="${tile.stage?4:2}"/><text x="${x*60+30}" y="${y*60+56}" text-anchor="middle" fill="#ffd3b5" font-size="10">${tile.stage?'再踩坠落':'脆弱'}</text>`;
+   else if(tile.kind==='fragile')svg+=art.fragileFloor(x,y,tile.stage>0);
   }
   if(smokeCells.has(key)||smokePreview.has(key))svg+=`<path d="M${x*60+4} ${y*60+4}h52v52h-52z"
    fill="${aimingItem==='frost_smoke'&&smokePreview.has(key)?'#9cecff':'#b3c2de'}" fill-opacity="${smokeCells.has(key)?'.32':'.18'}" stroke="#b3c2de"
@@ -386,12 +399,19 @@ function renderBoard(showEffects=false){
   svg+=art.statusEffects(state.effects,oy,ox,width,height);
  }
  $('board').innerHTML=svg+'</g>';
- let mini='';
+ let mini=`<rect width="${state.width*8}" height="${state.height*8}" fill="var(--dungeon-fog)" pointer-events="none"/>`;
  for(const [x,y] of charted){const key=x+','+y;mini+=`<rect ${walls.has(key)&&!inspecting?'':`data-cell="${key}"`} x="${x*8}" y="${y*8}" width="8" height="8" fill="${mappedKeys.has(key)?(walls.has(key)?'#282d3a':'#505e78'):walls.has(key)?'#41534c':seen.has(key)?'#98b48d':'#576f66'}"/>`}
- for(const tile of state.terrain)mini+=`<rect data-cell="${tile.x},${tile.y}" x="${tile.x*8}" y="${tile.y*8}" width="8" height="8" fill="${tile.ice_until?'#abdef0':({fragile:'#d38a73',high_grass:'#88a662',grass:'#667854',root_plant:'#b6cc78',sun_plant:'#efd483'}[tile.kind]||(tile.kind==='trap'?(tile.armed?'#dfaa77':'#727278'):'#b7d3de'))}"/>`;
+ let hasPit=false;
+ for(const tile of state.terrain){
+  const pit=tile.kind==='fragile'&&tile.stage>0;
+  hasPit||=pit;
+  const fill=pit?'#030407':tile.ice_until?'#abdef0':({fragile:'#b58d6f',high_grass:'#88a662',grass:'#667854',root_plant:'#b6cc78',sun_plant:'#efd483'}[tile.kind]||(tile.kind==='trap'?(tile.armed?'#dfaa77':'#727278'):'#b7d3de'));
+  mini+=`<rect data-cell="${tile.x},${tile.y}" x="${tile.x*8}" y="${tile.y*8}" width="8" height="8" fill="${fill}"${pit?' stroke="#99836e" stroke-width="1"':''}/>`;
+ }
+ $('map-pit-key').hidden=!hasPit;
  for(const features of floorFeatures.values()){
   const [f]=features;
-  mini+=`<rect data-cell="${f.x},${f.y}" x="${f.x*8+1}" y="${f.y*8+1}" width="6" height="6" fill="${features.every(item=>item.used)?'#6a7772':'#ddbd7c'}"/>`;
+  mini+=`<rect data-cell="${f.x},${f.y}" x="${f.x*8+1}" y="${f.y*8+1}" width="6" height="6" fill="${features.every(item=>item.used)?'#6a7772':LIGHT_INFO[f.kind]?.color??'#ddbd7c'}"/>`;
  }
  if(state.exit)mini+=`<rect data-cell="${state.exit.join(',')}" x="${state.exit[0]*8}" y="${state.exit[1]*8}" width="8" height="8" fill="#ddd6a4"/>`;
  for(const [x,y] of [state.entrance,...(state.openedShortcuts??[])].filter(Boolean)){
@@ -420,7 +440,7 @@ function renderBoard(showEffects=false){
   const [x,y]=miniTarget;
   mini+=`<circle cx="${x*8+4}" cy="${y*8+4}" r="5" fill="none" stroke="#edcd8b" stroke-width="2" stroke-dasharray="${travelTarget?'none':'2 2'}" pointer-events="none"/>`;
  }
- let viewBox=`0 0 ${state.width*8} ${state.height*8}`;
+ let viewBox=`-8 -8 ${state.width*8+16} ${state.height*8+16}`;
  if($('map-dialog').open&&charted.length){
   const xs=charted.map(([x])=>x), ys=charted.map(([,y])=>y);
   const left=Math.min(...xs)-1, top=Math.min(...ys)-1;
@@ -606,7 +626,13 @@ function renderTalentChoice(){
 
 function activeConditions(){
  const conditions=[];
- if(state.sanity<=state.sanityLow)conditions.push(['corrosion','◇',state.sanity?'理智偏低':'诅咒腐蚀',state.sanity?'未探索区域可能出现增援。拾取圣光可恢复理智。':'诅咒会随行动持续扣除生命。拾取圣光可恢复理智。']);
+ if(state.sanity<=state.sanityLow)conditions.push(['corrosion','◇',state.sanity?'理智偏低':'诅咒腐蚀',state.sanity?'未探索区域可能出现增援。击杀敌人或拾取圣光可恢复理智。':'诅咒会随行动持续扣除生命。击杀敌人或拾取圣光可恢复理智。']);
+ for(const [kind,light] of Object.entries(LIGHT_INFO)){
+  const turns=state.lightBlessings?.[kind];
+  if(!turns)continue;
+  const progress=kind==='light_radiant'?` · ${state.lightSteps}/${state.lightStepGoal} 步`:'';
+  conditions.push([kind,light.glyph,`${light.name} ${turns} 拍${progress}`,light.effect+'。']);
+ }
  if(state.counter)conditions.push(['counter','✦','反击 +'+state.waveStats.counterBonus,'成功挡伤后获得。移动或攒能不会消耗它，下一发波或重波会使用这次加成。']);
  if(state.gateShieldReady)conditions.push(['gate-shield','⬟','守门盾就绪','下一发波或重波的主束附带击退。发射后消耗，再次挡伤可重新触发。瞄准时用金色菱形标出可见的击退落点。']);
  if(state.poisoned)conditions.push(['poison','☣','中毒 · 1 伤','下一拍会受到 1 点毒伤。可在结算前使用疗愈药剂，也可用普通防抵挡。']);
@@ -684,6 +710,7 @@ function render(showEffects=false){
  $('room-status').textContent=state.result?(state.result==='victory'?'试炼完成':'冒险结束'):state.choices.length?'选择旅途馈赠':state.returning.length?'回旋波即将返回':state.pursuing?(state.enemies.find(e=>e.intent.action==='notice')?'敌人刚发现你':'敌人警觉'):'探索中';
  $('route').textContent=`${state.roomStates.filter(room=>room.discovered).length}/${state.roomStates.length} 区域`;
  renderConditions();
+ document.querySelector('[data-action="charge"] small').textContent=`能量 +${state.lightBlessings?.light_soul?2:1}`;
  document.querySelector('[data-action="wave"] small').textContent=`消耗 ${state.waveStats.waveCost??1} · 伤害 ${state.waveStats.damage}`;
  document.querySelector('[data-action="heavy"] small').textContent=`消耗 ${state.waveStats.heavyCost} · 伤害 ${state.waveStats.heavyDamage}`;
  document.querySelector('[data-action="guard"] small').textContent=`${state.mode==='armor'?'消耗 1 · ':''}挡 ${state.waveStats.guardLimit} 伤`;
@@ -692,7 +719,7 @@ function render(showEffects=false){
  $('sanity-bar').max=state.sanityMax;
  $('sanity-bar').value=state.sanity;
  $('sanity-status').classList.toggle('low-sanity',state.sanity<=state.sanityLow);
- $('sanity-status').title=state.sanity>state.sanityLow?'每行动一拍消耗 1 点理智，圣光可回复':state.sanity?'理智偏低，未探索区域可能出现增援':'理智耗尽，诅咒腐蚀生命';
+ $('sanity-status').title=state.sanity>state.sanityLow?'每拍消耗 1 点理智。击杀敌人、拾取圣光可回复。':state.sanity?'理智偏低，未探索区域可能出现增援':'理智耗尽，诅咒腐蚀生命';
  $('hp-bar').innerHTML=Array.from({length:state.maxHp??6},(_,i)=>`<i class="pip ${i<state.player.hp?'on':''}"></i>`).join('');
  $('energy-bar').innerHTML=Array.from({length:state.energyCap},(_,i)=>`<i class="pip ${i<state.player.energy?'on':''}"></i>`).join('');
  renderEnemyLists();
@@ -831,7 +858,7 @@ $('shot-preview').addEventListener('click',event=>{
  const button=event.target.closest('[data-preview-direction]');
  if(button&&aim&&canAct())direction(button.dataset.previewDirection);
 });
-function chooseAction(action){aimingItem=null;setInspecting(false);cancelTravel();if(!canAct())return;const b=document.querySelector(`[data-action="${action}"]`);if(b?.disabled)return;if(['wave','heavy','reflect'].includes(action)){aim=aim===action?null:action;toast(aim==='reflect'?'选择反射方向，确认后消耗 1 能量。':aim?'按方向键或点击射线空格出波；点击敌人查看信息。':'已取消瞄准。');refreshPreview();renderBoard();renderControls()}else send(action)}
+function chooseAction(action){aimingItem=null;setInspecting(false);cancelTravel();if(!canAct())return;const b=document.querySelector(`[data-action="${action}"]`);if(b?.disabled)return;if(['wave','heavy','reflect'].includes(action)){aim=aim===action?null:action;toast(aim==='reflect'?'选择反射方向，确认后消耗 1 能量。':aim?'按方向键，或左键点射线和敌人出波。右键查看。':'已取消瞄准。');refreshPreview();renderBoard();renderControls()}else send(action)}
 function direction(d){
  if(aimingItem){aimingItem=null;renderControls();renderBoard()}
  setInspecting(false);
@@ -1110,11 +1137,11 @@ function toggleInspection(){
  if(!inspecting){cancelTravel();aim=null;aimingItem=null;refreshPreview()}
  setInspecting(!inspecting);
 }
-function examineCell(target){
+function examineCell(target, preferEnemy=false){
  const enemy=state.enemies.find(e=>same(pos(e),target));
  const hazardDetails=cellHazards(target);
  setInspecting(false);
- if(enemy&&!hazardDetails.length){inspectEnemy(enemy);return}
+ if(enemy&&(preferEnemy||!hazardDetails.length)){inspectEnemy(enemy);return}
  const terrain=state.terrain.find(t=>same(pos(t),target));
  const door=state.doors.some(p=>same(p,target));
  const title=state.walls.some(p=>same(p,target))?'石墙':
@@ -1137,7 +1164,13 @@ function examineCell(target){
  if(same(target,state.exit)&&state.exitLockReason)lines.push(state.exitLockReason+'后解锁。');
  if((state.mapped??[]).some(p=>same(p,target)))lines.push('来自卷轴测绘，尚未亲眼确认。');
  for(const feature of state.features.filter(f=>same(pos(f),target))){
-  lines.push((feature.kind==='dry_spring'||emptyChest(feature)?'':feature.used?'已使用：':'可拾取或使用：')+featureName(feature));
+  if(feature.inspectItems?.length){
+   for(const item of feature.inspectItems)lines.push(item.name+' · '+item.description);
+  }else{
+   lines.push((feature.kind==='dry_spring'||emptyChest(feature)?'':feature.used?'已使用：':'可拾取或使用：')+featureName(feature));
+  }
+  const light=LIGHT_INFO[feature.kind];
+  if(light)lines.push(`${light.effect}，持续 ${light.turns} 拍。`);
   if(feature.kind==='supply_choice'&&!feature.used){
    lines.push('点击箱子走过去并打开。已站在箱上时，可点脚下或「打开补给箱」。');
    for(const item of state.supplyOptions??[])lines.push(item.name+' · '+item.description);
@@ -1170,7 +1203,7 @@ function cellHazards(target){
  if(!namedAttack&&!terrainSources&&contains(state.dangerCells))details.push('下一拍 · 此格在攻击范围内。');
  return details;
 }
-async function mapClick(target, landmark=false){
+async function mapClick(target, landmark=false, touch=false){
  if(!state)return;
  if(inspecting&&!landmark){examineCell(target);return}
  if(aimingItem&&!landmark){
@@ -1196,7 +1229,12 @@ async function mapClick(target, landmark=false){
  if(selection!==travelId)return;
  if(!state||busy||state.depth!==clickFloor){cancelTravel();return}
  const enemy=state.enemies.find(e=>e.x===x&&e.y===y);
- if(enemy&&!landmark){cancelTravel();inspectEnemy(enemy);return}
+ if(enemy&&!landmark&&!aim){
+  cancelTravel();
+  if(touch)inspectEnemy(enemy);
+  else if(canAct())toast('先选择波或重波，再左键确认方向。右键查看敌人。');
+  return;
+ }
  if(!canAct()){cancelTravel();return}
  const tile=state.terrain.find(t=>t.x===x&&t.y===y);
  if(!aim&&tile&&['mirror','rubble'].includes(tile.kind)){cancelTravel();toast(terrainName(tile)+(tile.rotating?' · 用波击中可旋转':''));return}
@@ -1224,6 +1262,7 @@ async function mapClick(target, landmark=false){
   const matching=Object.keys(dirs).filter(heading=>ray(heading).some(cell=>same(cell,target)));
   if(matching.length===1)d=matching[0];
   else if(matching.length>1)return toast('多条波经过这里，请在预览中选择发射方向。');
+  else if(enemy)return toast('该敌人当前不在射线上。',true);
   else if(dx===0&&dy!==0)d=dy<0?'up':'down';
   else if(dy===0&&dx!==0)d=dx<0?'left':'right';
   else return toast('请选择一条已标出的射线，或使用方向按钮。',true);
@@ -1250,7 +1289,7 @@ $('tactics').addEventListener('click',event=>{
 // even if the original SVG node has been replaced by the time the tap ends.
 for(const map of [$('board'),$('minimap')]){
  let press=null;
- const select=target=>map.id==='minimap'&&$('map-dialog').open?previewMapRoute(target):mapClick(target);
+ const select=(target,touch=false)=>map.id==='minimap'&&$('map-dialog').open?previewMapRoute(target):mapClick(target,false,touch);
  const targetAt=event=>event.target.closest('[data-cell]')?.dataset.cell.split(',').map(Number);
  map.addEventListener('pointerdown',event=>{
   if(!event.isPrimary||event.button!==0)return;
@@ -1265,12 +1304,21 @@ for(const map of [$('board'),$('minimap')]){
   if(press?.id!==event.pointerId)return;
   const {target,x,y}=press;
   press=null;
-  if(Math.hypot(event.clientX-x,event.clientY-y)<12)select(target);
+  if(Math.hypot(event.clientX-x,event.clientY-y)<12)select(target,event.pointerType==='touch');
  });
  map.addEventListener('click',event=>{
   if(event.detail!==0)return;
   const target=targetAt(event);
   if(target)select(target);
+ });
+ map.addEventListener('contextmenu',event=>{
+  const target=targetAt(event);
+  if(!target||!state)return;
+  event.preventDefault();
+  if(busy)return;
+  cancelTravel();
+  closeDialogs();
+  examineCell(target,true);
  });
 }
 for(const list of [$('landmarks'),$('journal-landmark-list')]){

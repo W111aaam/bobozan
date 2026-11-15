@@ -15,6 +15,9 @@ DEW_CAPACITY = 3
 HISTORY_LIMIT = 20
 SANITY_MAX = 450
 SANITY_LOW = 150
+KILL_SANITY = 20
+LIGHT_HEAL_STEPS = 50
+LIGHT_NAMES = {'light_wisp': '微光', 'light_soul': '圣光', 'light_radiant': '辉光'}
 FLOOR_FIELDS = ('floor_version', 'width', 'height', 'walls', 'doors', 'rooms_data', 'lock',
                 'lock_style', 'floor_theme', 'secret_doors', 'shortcut_doors', 'features', 'terrain',
                 'rare_room', 'exit', 'recall_cell', 'keys', 'locked', 'enemies', 'enemy_serial',
@@ -98,6 +101,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.floor_snapshots = {}
         self.sanity = SANITY_MAX
         self.corrosion = 0
+        self.light_blessings = {}
+        self.light_steps = 0
         self.fall_transition = None
         self.run_stats = dict(defeated=0, secrets=0, traps=0)
         self.init_growth(hero_class)
@@ -121,6 +126,11 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         game.floor_snapshots = getattr(game, 'floor_snapshots', {})
         game.sanity = getattr(game, 'sanity', SANITY_MAX)
         game.corrosion = getattr(game, 'corrosion', 0)
+        old_light_turns = game.__dict__.pop('light_turns', 0)
+        game.light_blessings = getattr(game, 'light_blessings', {'light_soul': old_light_turns} if old_light_turns else {})
+        game.light_steps = getattr(game, 'light_steps', 0)
+        if 'light_radiant' not in game.light_blessings:
+            game.light_steps = 0
         game.corruption_rooms = getattr(game, 'corruption_rooms', [])
         game.fall_transition = getattr(game, 'fall_transition', None)
         game.remove_empty_features()
@@ -353,20 +363,54 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             if not self.player['hp']:
                 self.defeat_cause = '诅咒腐蚀'
 
+    def restore_sanity(self, amount, source):
+        if not self.player['hp']:
+            return 0
+        amount = min(amount, SANITY_MAX - self.sanity)
+        if amount:
+            self.sanity += amount
+            self.corrosion = 0
+            self.record_status('sanity_gain', self.player, amount, source=source)
+        return amount
+
+    def reward_sanity_kills(self, dead, outgoing, impacts, pulled):
+        kills = sum((outgoing[enemy['id']] > 0 or enemy['id'] in impacts or enemy is pulled)
+                    and 'summoner' not in enemy and enemy['kind'] not in ('bonepuppet', 'broodling')
+                    and enemy['name'] != '分裂子群' for enemy in dead)
+        amount = self.restore_sanity(kills * KILL_SANITY, '击杀')
+        if amount:
+            self.note(f'击杀回复 {amount} 理智。')
+
     def collect_light(self):
-        if not self.player['hp'] or self.sanity >= SANITY_MAX:
+        if not self.player['hp']:
             return
         for feature in self.features:
             kind = feature['kind']
             if kind not in LIGHT_VALUES or feature['used'] or position(feature) != position(self.player):
                 continue
-            amount = min(LIGHT_VALUES[kind], SANITY_MAX - self.sanity)
-            self.sanity += amount
-            self.corrosion = 0
+            duration = LIGHT_VALUES[kind]
+            remaining = self.light_blessings.get(kind, 0)
+            if self.sanity == SANITY_MAX and remaining >= duration:
+                continue
+            name = LIGHT_NAMES[kind]
+            amount = self.restore_sanity(duration, name)
+            self.light_blessings[kind] = max(remaining, duration)
             feature['used'] = True
-            self.record_status('sanity_gain', self.player, amount, source='圣光')
-            self.note(f'拾取圣光，恢复 {amount} 理智。')
+            self.note(f'拾取{name} · 理智 +{amount}，效果剩余 {self.light_blessings[kind]} 拍。')
             return
+
+    def tick_light(self, walked=False):
+        if walked and self.player['hp'] and 'light_radiant' in self.light_blessings:
+            self.light_steps += 1
+            if self.light_steps == LIGHT_HEAL_STEPS:
+                self.light_steps = 0
+                if self.player['hp'] < self.max_hp:
+                    self.player['hp'] += 1
+                    self.record_status('healed', self.player, 1, source='辉光')
+                    self.note('辉光 · 行走 50 步，恢复 1 生命。')
+        self.light_blessings = {kind: turns - 1 for kind, turns in self.light_blessings.items() if turns > 1}
+        if 'light_radiant' not in self.light_blessings:
+            self.light_steps = 0
 
     def apply_corruption_population(self):
         if self.sanity > SANITY_LOW or len(self.corruption_rooms) >= 2 or not self.depth % 5 or self.depth == LAST_FLOOR:
@@ -506,11 +550,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     self.terrain_memory.pop(key, None)
 
     def charge_amount(self):
+        amount = 1 + int('light_soul' in self.light_blessings)
         if 'echo' not in self.upgrades:
-            return 1
+            return amount
         self.echo_charges += 1
         interval = 2 if 'bag' in self.upgrades else 3
-        return 1 + (self.echo_charges % interval == 0)
+        return amount + (self.echo_charges % interval == 0)
 
     def use_heart(self):
         region = chapter(self.depth)
@@ -1222,6 +1267,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     def finish_action(self):
         self.fall_transition = None
+        walked = self.__dict__.pop('_walked_this_turn', False)
         origin = self.__dict__.pop('_pending_fall', None)
         if origin is not None:
             depth = self.depth
@@ -1240,6 +1286,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             self.note(f'从第 {depth} 层坠落，受到 {damage} 点坠落伤害。')
             if not self.player['hp']:
                 self.defeat_cause = '坠入深渊'
+            self.tick_light(walked)
             self.tick_sanity()
             self.revive_if_possible()
             if not self.player['hp']:
@@ -1255,6 +1302,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                 enemy.pop('fear', None)
         self.smoke = max(0, self.smoke - 1)
         self.smoke_clouds = {key: turns-1 for key, turns in getattr(self, 'smoke_clouds', {}).items() if turns > 1}
+        self.tick_light(walked)
         self.collect_light()
         self.tick_sanity()
         self.apply_corruption_population()
@@ -1423,6 +1471,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             self.fall_transition = None
             self.effects, self.falls = [], []
             self.turn += 1
+            self.tick_light()
             self.tick_sanity()
             self.revive_if_possible()
             if self.player['hp'] == 0:
@@ -1656,6 +1705,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             upStairs=entrance if self.can_ascend() and entrance and tuple(entrance) in explored else None,
             fallTransition=deepcopy(self.fall_transition),
             sanity=self.sanity, sanityMax=SANITY_MAX, sanityLow=SANITY_LOW,
+            lightBlessings=self.light_blessings.copy(), lightSteps=self.light_steps, lightStepGoal=LIGHT_HEAL_STEPS,
             openedShortcuts=opened_shortcuts,
             dew=self.dew, dewCapacity=DEW_CAPACITY,
             history=deepcopy(self.history),
@@ -1715,6 +1765,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             supplyOptions=self.supply_options() if any(f['kind'] == 'supply_choice' and not f['used']
                                                        and f['id'] in known_features for f in self.features) else [],
             features=[dict(deepcopy(f), **({'itemCount': item_count} if (item_count := len(self.ground_items(f))) > 1 else {}),
+                           inspectItems=[dict(name=ITEMS[item][0], description=ITEMS[item][1])
+                                         for item in self.ground_items(f)] if not f['used'] else [],
                            **({'itemName': ITEMS[f['item']][0]} if f['kind']=='dropped_item'
                               else {'itemName': ITEMS[f['remaining_items'][0]][0]}
                               if f.get('remaining_items') else {}))

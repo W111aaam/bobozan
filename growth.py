@@ -138,11 +138,12 @@ class Growth:
         return int(self.weapon_level >= 2) + int('reach' in self.talents) + int(
             self.weapon == 'fan' and 'through' in self.talents)
 
-    def wave_damage_before_defense(self, action):
+    def wave_damage_before_defense(self, action, *, player_bonus=True):
         return ((2 if action == 'heavy' else 1) + int(self.hero_rank >= 3) + self.counter_bonus
                 + int(self.mode == 'power') + int(self.weapon_level >= 1)
                 + int(self.weapon_level >= 3)
-                + int('focus' in self.talents and self.player['energy'] == self.cap))
+                + int('focus' in self.talents and self.player['energy'] == self.cap)
+                + int(player_bonus and 'light_wisp' in self.light_blessings))
 
     def action_cost(self, action):
         if action == 'heavy':

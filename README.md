@@ -34,10 +34,10 @@ python3 server.py --port 8767
 | 自动行走 | 点击地图或小地图的已探索地面 | 途中可点另一处地面改道。遇敌、受伤或触发事件时停下并保留目标。手动走位后可点「继续前往」；局面仍危险时点「继续一步」，每次重新计算一格安全路线 |
 | 停止行走 / 取消瞄准 | Esc / 停止按钮 | 停止后续步骤，已提交的一步仍结算 |
 | 攒 | 1 / 攒按钮 | 增加 1 能量 |
-| 波 | 2 / 波按钮，再选方向 | 消耗 1 能量，射程 4 格、伤害 1 |
+| 波 | 2 / 波按钮，再按方向键或左键点射线上的敌人 | 消耗 1 能量，射程 4 格、伤害 1 |
 | 防 | 3 / 防按钮 | 抵挡本拍最多 1 点总伤害；实际挡伤后下一次波 +1 |
 | 重波 | 获得强化后按 4，再选方向 | 消耗 3 能量，伤害 2 |
-| 敌人信息 | 点击可见敌人 | 查看当前血量、攻击力、防御力和攻击方式，不耗时 |
+| 查看 | 右键点地图上的物品或敌人，也可按 I 进入查看模式 | 查看物品说明或敌人的生命、攻防与攻击方式，不耗时 |
 | 完成本层 | 击败守关者后走到楼梯，再次点击楼梯或完成按钮 | 每区第 4 层须击败封锁阶梯的守卫，守关层须清场，第 26 层在祭坛结算冒险 |
 
 初始 5 生命、0 能量，上限 3。每进一个新区域生命上限 +1，当前生命不变。反击不叠加，移动/攒保留，发射即消耗（含打空）。普通波遇墙或首个角色停止。敌人意图提前锁定，红格显示下拍攻击范围；移动先结算、伤害同时生效，双方同时归零算失败。无效操作不消耗行动，没有实时倒计时。
@@ -61,7 +61,7 @@ python3 server.py --port 8767
 
 部分普通层有暗门。亲眼看到金色刻痕后，本层日志会记下位置。点击日志、主地图或小地图上的刻痕会导航到可搜查的位置。按 `X` 或点「搜查」消耗一拍揭开暗门，随后可进去拾取刻印碎片。设计参考 [原作的地牢日志](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/journal/Notes.java#L138)和[主动搜查](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/hero/Hero.java#L2490)。
 
-普通层布置刺针、夹足、警报和坠落陷阱。自动寻路会绕开已布置的未触发机关和裂地。点选陷阱或手动踩入会直接触发，按 X 搜查仍可揭露两格内的隐藏机关。警报将触发位置广播给整层敌人。踩中坠落机关或塌地会掉到下一层的安全普通格，受到自身最大生命 30%–50% 的伤害，按整数结算。参考 [原作机关触发](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/Trap.java)、[全层警报](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/AlarmTrap.java)和[坠落过渡](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/features/Chasm.java)。
+普通层布置刺针、夹足、警报和坠落陷阱。自动寻路会绕开已布置的未触发机关和裂地。点选陷阱或手动踩入会直接触发，按 X 搜查仍可揭露两格内的隐藏机关。警报将触发位置广播给整层敌人。布满裂纹的脆弱地板在首次踩过后会变成方形破洞。踩中坠落机关或踏入已打开的破洞会掉到下一层的安全普通格，受到自身最大生命 30%–50% 的伤害，按整数结算。参考 [原作机关触发](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/Trap.java)、[全层警报](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/AlarmTrap.java)和[坠落过渡](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/features/Chasm.java)。
 
 地图右上角可缩放，桌面也可在地图上滚动；点击倍率恢复默认大小。参考 [原作的地图缩放](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/scenes/CellSelector.java)。
 
@@ -112,13 +112,13 @@ python3 server.py --port 8767
 
 下水道的普通敌人多为 3–4 生命，重击型敌人的指定招式造成 2 伤。五位守关者分别有 9、12、15、18、21 生命。到矮人都市后，部分守关招式进一步增强。格挡初始可吸收 1 伤并准备一次反击。短距强波消耗 2 能量，普通波消耗 1 能量。
 
-区域后半段的疾钳蟹、护卫怪、分裂群、折跃石像和灼瞳额外增加 1 生命，第 24 层的裂步魔横扫为 2 伤。新生成的普通敌人按怪种掉落补给，基础概率为 18%–35%，每层最多两份随机掉落，首份掉落后后续概率减半并向下取整。汲血蝠的疗愈药剂另限每区一瓶。武器石像、拟态宝箱和拾能贼的专属掉落单独结算。召唤物和分裂子群不参与随机掉落，敌人坠崖时不会留下物品。点击敌人可查看当前掉落概率。参考 [原作怪物掉落](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Mob.java#L1035)和[蝙蝠药剂](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Bat.java)。
+区域后半段的疾钳蟹、护卫怪、分裂群、折跃石像和灼瞳额外增加 1 生命，第 24 层的裂步魔横扫为 2 伤。新生成的普通敌人按怪种掉落补给，基础概率为 18%–35%，每层最多两份随机掉落，首份掉落后后续概率减半并向下取整。汲血蝠的疗愈药剂另限每区一瓶。武器石像、拟态宝箱和拾能贼的专属掉落单独结算。召唤物和分裂子群不参与随机掉落，敌人坠崖时不会留下物品。右键点击敌人可查看当前掉落概率。参考 [原作怪物掉落](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Mob.java#L1035)和[蝙蝠药剂](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Bat.java)。
 
 第 5、20 层首领的震荡先以金色虚线预告，下一拍攻击原位置，之后休整一拍。半血后从横排变为更强的十字震荡，通常需要在蓄力时开始撤离。墙和关闭的门可挡住震荡。参考 [Goo 的蓄力与半血阶段](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Goo.java)。
 
 第 1、7、12、17、22 层各有一瓶固定疗愈药剂，回复 2 生命并解毒。第 2、9、14、19、24 层及守关层有一次性泉水，各回复 1 生命。额外疗愈可从露珠、阳草和配方等途径获得。护心每个区域在受伤时生效一次。安全区域仍可蓄满能量再接战。 地图只生成可用的泉水和有内容的宝箱。使用过的泉水变为干石池，空箱保留打开的箱盖。
 
-理智上限 450，每行动一拍降低 1 点。降到 150 及以下时，本层至多在两个未探索战斗或探索房间各增加一只敌人。理智耗尽立即扣 1 生命，之后按最大生命积累腐蚀，累计 120 点再扣 1 生命。微光、圣光、辉光拾取即分别恢复 65、105、155 理智，普通层至少有一份圣光。沟渠鱼偶尔掉落微光，圣光不占背包槽。参考 [原作饱食度](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/buffs/Hunger.java)及[普通层资源生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java#L355)。
+理智上限 450，每行动一拍降低 1 点。降到 150 及以下时，本层至多在两个未探索战斗或探索房间各增加一只敌人。理智耗尽立即扣 1 生命，之后按最大生命积累腐蚀，累计 120 点再扣 1 生命。击杀敌人每只恢复 20 理智，召唤物和分裂子群除外。微光回复 65 理智，波与重波伤害 +1，持续 65 拍。圣光回复 105 理智，每次攒额外获得 1 能量，持续 105 拍。辉光回复 155 理智，每实际走满 50 步回复 1 生命，持续 155 拍。三种效果分别计时，重复拾取同种光会刷新其时间，辉光步数保留至效果结束。普通层至少有一份圣光。沟渠鱼偶尔掉落微光，圣光不占背包槽。参考 [原作饱食度](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/buffs/Hunger.java)及[普通层资源生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java#L355)。
 
 ## 职业与成长
 

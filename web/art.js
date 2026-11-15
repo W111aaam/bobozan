@@ -328,9 +328,9 @@ const art = (() => {
   open_chest:['.11111111.','.14533451.','.14533351.','.12222221.','1444444441','1411111141','1444444441','1255525521','1222222221','.11111111.'],
   shrine:['..........','....44....','...4344...','...4334...','..111111..','.14333341.','.14444441.','..111111..','..........'],
   dry_spring:['..........','..144441..','..142241..','.14222241.','1444444441','1433333341','.13444331.','...1441...','..111111..','..........'],
-  light_wisp:['....1.....','...141....','...1431...','..14341...','..134341..','...4341...','....41....','..........','..........','..........'],
-  light_soul:['..........','....11....','...1441...','..143341..','.14344341.','.14244241.','..143341..','...1221...','....11....','..........'],
-  light_radiant:['....44....','..4.44.4..','...1111...','.41444414.','4414334144','4414334144','.41444414.','...1111...','..4.44.4..','....44....'],
+  light_wisp:['.....1....','....131...','...1341...','..13421...','..1441....','..134321..','...1331...','....11..3.','..3.......','..........'],
+  light_soul:['....11....','...1441...','...1431...','.11344311.','1444444441','.11344311.','...1431...','...1441...','....11....','..........'],
+  light_radiant:['3...44...3','.3..44..3.','...1111...','..143341..','4413443144','4413443144','..143341..','...1111...','.3..44..3.','3...44...3'],
   key:['..........','...1111...','..144441..','..141141..','...1441...','....41....','....444...','....41....','..........'],
   kit:['..........','...1111...','...1441...','..133331..','..134431..','..134431..','..133331..','...1111...','..........'],
   lure_cache:['......55..','...61...5.','...661....','...141..5.','..14321...','..14321...','.1443321..','.1332221..','..11211...','....1.....'],
@@ -351,8 +351,8 @@ const art = (() => {
   high_grass:[ink,'#2d5147','#699356','#b4ce75',eye],
   grass:[ink,'#3d5a41','#73915b','#9ba96b',eye],dew:[ink,'#387a8d','#87d7ef','#dcfcff',eye],
   shrine:[ink,'#49657c','#75bed1','#b5f4ee',eye],dry_spring:[ink,'#49403e','#88776a','#bbaa8b',eye],
-  light_wisp:[ink,'#826344','#e5b85f','#ffefae'],light_soul:[ink,'#806344','#ecd681','#fff6cf'],
-  light_radiant:[ink,'#8d5b3e','#f7bc6a','#fff0ac'],up_stairs:[ink,'#5f684f','#8f9d68','#c7dfa4'],kit:[ink,'#81425a','#ce6480','#ffc7bd',eye],
+  light_wisp:[ink,'#497c9d','#8fe5eb','#e2ffff'],light_soul:[ink,'#96703e','#edc665','#fff3b4'],
+  light_radiant:[ink,'#925275','#f297b7','#ffe0dd'],up_stairs:[ink,'#5f684f','#8f9d68','#c7dfa4'],kit:[ink,'#81425a','#ce6480','#ffc7bd',eye],
   wonder:[ink,'#685082','#bd8bef','#f7d0ff',eye],lure_cache:[ink,'#907044','#d19b51','#ffe0a0','#f6c878','#c46a64']};
  const inventorySprites={
   heal:['kit'],lure:['lure_cache'],ankh:['ankh',[ink,'#805e42','#bd955f','#ffe0a0']],
@@ -564,6 +564,21 @@ const art = (() => {
     <path d="${shade.north?'M0 0h60v9H0z':''}${shade.west?'M0 0h5v60H0z':''}${shade.east?'M55 0h5v60h-5z':''}" fill="#10121b" opacity=".32"/>
    </g>`;
  }
+ function fragileFloor(x,y,open){
+  if(open)return `<g data-terrain-art="pit" transform="translate(${x*60},${y*60})" pointer-events="none" shape-rendering="crispEdges">
+   <path d="M3 3h54v54H3z" fill="#20202b"/>
+   <path d="M5 7h50v47H5z" fill="#030407"/>
+   <path d="M5 7h50v5H44v3H29v-2H17v-2H5z" fill="#36323a"/>
+   <path d="M6 12h4v13H8v12H6zm47 0h2v24h-2z" fill="#181821"/>
+   <path d="M3 3h54v2H3zm0 52h54v2H3z" fill="#9a8874" opacity=".69"/>
+  </g>`;
+  const cracks='M2 14h9v5h10v7h7v9h8v8h9v8h13M28 35v8H18v9h-6v6M21 26h-9v8H2m26-8h9v-8h7V9h8V2m-8 16h9v7h5M17 4v6h6v8m13 25v9h-5v6m14-7h8v-9h5';
+  return `<g data-terrain-art="cracked" transform="translate(${x*60},${y*60})" pointer-events="none" fill="none" shape-rendering="crispEdges">
+   <path d="${cracks}" stroke="#c4af91" stroke-width="2" opacity=".6" transform="translate(1 1)"/>
+   <path d="${cracks}" stroke="#201b24" stroke-width="2"/>
+   <path d="M7 8h6v2H7zM35 8h4v3h-4zM34 29h4v2h-4zM51 32h4v3h-4zM7 43h4v3H7zM21 55h3v2h-3z" fill="#d7b490" opacity=".48"/>
+  </g>`;
+ }
  function statusLabel({kind,amount}){
   return {
    damage:'−'+amount, blocked:'挡 '+amount, reflected:'反弹 '+amount,
@@ -641,5 +656,5 @@ const art = (() => {
   }
   return fx.cells.map(([x,y])=>`<g transform="translate(${x*60+30},${y*60+30})" pointer-events="none"><g class="fx pulse-fx" fill="none" stroke="${tint}" stroke-width="4"><path d="M-21 -12l9-9h24l9 9v24l-9 9h-24l-9-9z"/><path d="M-7 0h14m-7-7v14"/></g></g>`).join('');
  }
- return {actor,portrait,enemyPortrait,uiIcon,buttonIcon,prop,itemIcon,ground,stoneWall,effects,statusLabel,statusEffects,doorway};
+ return {actor,portrait,enemyPortrait,uiIcon,buttonIcon,prop,itemIcon,ground,fragileFloor,stoneWall,effects,statusLabel,statusEffects,doorway};
 })();

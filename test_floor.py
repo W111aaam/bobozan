@@ -80,7 +80,7 @@ class FloorTests(unittest.TestCase):
         self.assertIn(g.rooms_data[g.room]['kind'], ('entry', 'standard', 'combat', 'branch'))
         self.assertEqual(g.state()['fallTransition']['landing'], list(target))
 
-    def test_corrosion_ticks_and_light_is_the_only_sanity_refill(self):
+    def test_corrosion_ticks_and_light_refills_sanity(self):
         g = FloorDungeon(13)
         g.sanity = 151
         g.enemies = []
@@ -102,6 +102,7 @@ class FloorTests(unittest.TestCase):
         g.features.append(dict(id='test-light', kind='light_wisp', x=x, y=y, used=False))
         go(g, 'guard')
         self.assertEqual((g.sanity, g.player['hp'], g.corrosion), (64, 3, 0))
+        self.assertEqual(g.state()['lightBlessings'], {'light_wisp': 65})
         self.assertNotIn('test-light', [f['id'] for f in g.state()['features']])
 
     def test_ordinary_floors_generate_real_loot_and_do_not_spawn_empty_features(self):
@@ -294,14 +295,14 @@ class FloorTests(unittest.TestCase):
         g.features.append(drop)
         g.update_visibility()
         self.assertIn([x, y], g.explored)
-        self.assertNotIn(drop, g.state()['features'])
+        self.assertNotIn(drop['id'], [f['id'] for f in g.state()['features']])
         g = FloorDungeon.restore(g.dump())
-        self.assertNotIn(drop, g.state()['features'])
+        self.assertNotIn(drop['id'], [f['id'] for f in g.state()['features']])
 
         place(g, (x, y))
         place(g, start)
         g = FloorDungeon.restore(g.dump())
-        self.assertIn(drop, g.state()['features'])
+        self.assertIn(drop['id'], [f['id'] for f in g.state()['features']])
         self.assertNotIn([x, y], g.visible)
 
         g.depth = 2
@@ -316,7 +317,7 @@ class FloorTests(unittest.TestCase):
         place(g, start)
         saved = g.dump()
         del saved['discovered_features']
-        self.assertIn(kit, FloorDungeon.restore(saved).state()['features'])
+        self.assertIn(kit['id'], [f['id'] for f in FloorDungeon.restore(saved).state()['features']])
 
     def test_path_only_known_ground_and_uses_one_safe_step_in_combat(self):
         g = FloorDungeon(0)
