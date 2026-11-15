@@ -49,6 +49,24 @@ class ExpeditionMechanicsTests(unittest.TestCase):
         go(game, 'wave', 'right')
         self.assertEqual((near['hp'], flank['hp']), (0, 2))
 
+    def test_combat_statuses_use_actual_health_changes_and_hide_unseen_targets(self):
+        game = self.arena()
+        game.player['hp'] = 3
+        game.upgrades = ['heart']
+        self.enemy(game, 4, 5, intent=dict(action='melee', cells=[[3, 5]], damage=2))
+        go(game, 'guard')
+        statuses = [(fx['kind'], fx['amount'], fx.get('source'))
+                    for fx in game.state()['effects'] if fx.get('target') == '你']
+        self.assertEqual(statuses, [('healed', 1, '护心'), ('blocked', 1, None), ('damage', 1, None)])
+        self.assertEqual(game.player['hp'], 3)
+
+        remote = self.enemy(game, 14, 5, name='远处敌人')
+        game.record_status('damage', remote, 1)
+        effect = game.state()['effects'][-1]
+        self.assertEqual(effect['cells'], [])
+        self.assertNotIn('target', effect)
+        self.assertNotIn('targetId', effect)
+
     def test_return_uses_original_path_after_move_and_reload(self):
         game = self.arena()
         game.weapon = 'return'
@@ -98,8 +116,9 @@ class ExpeditionMechanicsTests(unittest.TestCase):
         self.assertFalse(game.enemies)
         self.assertEqual(game.state()['falls'][0]['cell'], [6, 17])
         go(game, 'move', 'right')
-        self.assertEqual(game.result, 'defeat')
-        self.assertEqual(game.state()['falls'][0]['id'], 'hero')
+        self.assertIsNone(game.result)
+        self.assertEqual((game.depth, game.player['hp']), (2, 3))
+        self.assertEqual(game.state()['fallTransition']['fromCell'], [6, 17])
 
     def test_lance_and_guardian_intercept(self):
         game = self.arena()
@@ -192,7 +211,7 @@ class ExpeditionMechanicsTests(unittest.TestCase):
         game = FloorDungeon(3)
         self.assertTrue(game.rare_room)
         target = position(feature(game, 'wonder'))
-        path = route(game, position(feature(game, 'chest')))
+        path = route(game, game.rooms_data[3]['anchor'])
         self.assertTrue(path)
         game.locked = False
         game.enemies = []

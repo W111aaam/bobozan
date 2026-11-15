@@ -6,7 +6,7 @@ from enemy_design import REINFORCEMENTS, SIDE_ENCOUNTERS, regional_roster
 LAST_FLOOR = 26
 REGIONS = ('下水道', '监狱', '洞穴', '矮人都市', '恶魔大厅')
 ROOM_LABELS = {
-    'entry': '入口', 'combat': '战斗区域', 'shrine': '泉水区域',
+    'entry': '入口', 'combat': '战斗区域', 'shrine': '侧厅',
     'treasure': '补给区域', 'boss': '守关区域', 'branch': '支路',
     'store': '战术库房', 'garden': '封闭花圃', 'alarm_store': '警戒库房', 'dart_vault': '刺针库房',
     'exit': '下层阶梯', 'relic': '终点祭坛', 'standard': '探索区域',
@@ -21,6 +21,7 @@ def chapter(depth):
 RELIC_FLOORS = (3, 8, 13, 18, 23)
 HEAL_FLOORS = (1, 7, 12, 17, 22)
 SPRING_FLOORS = (2, 9, 14, 19, 24)
+LIGHT_VALUES = {'light_wisp': 65, 'light_soul': 105, 'light_radiant': 155}
 
 
 def generate_layout(seed, depth):
@@ -75,13 +76,18 @@ def generate_layout(seed, depth):
         west, north, east, south = [rng.randint(4, 5) for _ in range(4)]
         kind = roles[room_id]
         shape = 'rectangle'
-        if kind in ('combat', 'standard'):
-            shape = shape_rng.choice(('rectangle', 'hall', 'chamfered'))
+        if kind in ('combat', 'standard', 'branch'):
+            west, north, east, south = [shape_rng.randint(4, 5) for _ in range(4)]
+            shape = shape_rng.choice(('compact', 'hall', 'chamfered', 'cross', 'alcove'))
+            if shape == 'compact':
+                west = east = north = south = 4
             if shape == 'hall':
                 if shape_rng.randrange(2):
-                    west = east = 6
+                    west = east = 5
+                    north = south = 4
                 else:
-                    north = south = 6
+                    north = south = 5
+                    west = east = 4
         left, top, right, bottom = x - west, y - north, x + east, y + south
         rooms[room_id] = dict(id=room_id, name=ROOM_LABELS[kind], kind=kind,
                               bounds=[left, top, right, bottom], anchor=[x, y], shape=shape,
@@ -94,6 +100,10 @@ def generate_layout(seed, depth):
                     edge_y = min(b-top, bottom-b)
                     if edge_x + edge_y <= 3:
                         continue
+                if shape == 'cross' and abs(a - x) >= 2 and abs(b - y) >= 2:
+                    continue
+                if shape == 'alcove' and a > x + 1 and b > y + 1:
+                    continue
                 tiles.add((a, b))
 
     def boundary(room_id, dx, dy):
@@ -136,17 +146,19 @@ def generate_layout(seed, depth):
     # Treasure is a branch endpoint, so at least one exterior face is free.
     lock, (dx, dy) = outward_branch(3)
     cache = (lock[0] + 3 * dx, lock[1] + 3 * dy)
-    chest_kind = 'chest' if depth in RELIC_FLOORS else 'materials'
+    chest_kind = 'chest' if depth in RELIC_FLOORS else None
     if depth % 5 == (2 if (seed + region) % 2 == 0 else 4):
         chest_kind = 'supply_choice'
     features = [
         dict(id=ident, kind=kind, x=x, y=y, used=False)
         for ident, kind, (x, y) in (
-            ('spring', 'shrine' if depth in SPRING_FLOORS else 'dry_spring', centers[2]), ('key', 'key', (centers[2][0] + 1, centers[2][1])),
-            ('chest', chest_kind, centers[3]), ('kit', 'kit' if depth in HEAL_FLOORS else 'lure_cache', (centers[3][0] + 1, centers[3][1])),
+            ('spring', 'shrine' if depth in SPRING_FLOORS else None, centers[2]), ('key', 'key', (centers[2][0] + 1, centers[2][1])),
+            ('chest', chest_kind, centers[3]), ('kit', 'kit' if depth in HEAL_FLOORS else None, (centers[3][0] + 1, centers[3][1])),
             ('cache', 'cache', cache),
         )
+        if kind is not None
     ]
+    next(f for f in features if f['id'] == 'cache')['remaining_items'] = ['smoke' if depth % 2 else 'lure']
     if depth == 2:
         x, y = centers[2]
         features.append(dict(id='seed-supply', kind='grass_seed', x=x-1, y=y, used=False))
@@ -162,10 +174,15 @@ def generate_layout(seed, depth):
     if depth % 5 == 4:
         x, y = centers[2]
         features.append(dict(id='recall', kind='recall', x=x, y=y+1, used=False))
-    for room_id, kind in enumerate(roles):
-        if kind == 'branch':
-            x, y = centers[room_id]
-            features.append(dict(id=f'supply-{room_id}', kind='lure_cache', x=x, y=y, used=False))
+    # One light ration along the loop, with occasional richer reserves in side rooms.
+    light_rng = Random(seed + depth * 23719)
+    light_room = light_rng.choice([ident for ident in ring if roles[ident] in ('combat', 'standard')])
+    lx, ly = centers[light_room]
+    features.append(dict(id='light', kind='light_soul', x=lx, y=ly, used=False))
+    if depth % 5 == 4:
+        lx, ly = centers[2]
+        features.append(dict(id='extra-light', kind=light_rng.choice(('light_wisp', 'light_radiant')),
+                             x=lx, y=ly, used=False))
     terrain = []
     rare_room = Random(seed + depth * 7309).randrange(10) == 0
     annex = 'store'
@@ -181,10 +198,12 @@ def generate_layout(seed, depth):
                         dict(x=x+dy, y=y-dx, kind='high_grass')])
     elif annex == 'alarm_store':
         next(f for f in features if f['id'] == 'cache')['kind'] = 'echo_smoke'
+        next(f for f in features if f['id'] == 'cache').pop('remaining_items')
         terrain.append(dict(x=lock[0]+dx, y=lock[1]+dy, kind='trap',
                             mechanism='alarm', armed=True))
     elif annex == 'dart_vault':
         next(f for f in features if f['id'] == 'cache')['kind'] = 'rune_shard'
+        next(f for f in features if f['id'] == 'cache').pop('remaining_items')
         for side in range(-2, 3):
             x = lock[0] + 2 * dx - side * dy
             y = lock[1] + 2 * dy + side * dx
@@ -194,6 +213,12 @@ def generate_layout(seed, depth):
         features.append(dict(id='wonder', kind='wonder', x=x + dx, y=y + dy, used=False))
         terrain.extend([dict(x=x - dy, y=y + dx, kind='mirror', slash='/', rotating=True),
                         dict(x=x + dy, y=y - dx, kind='fragile', stage=0)])
+    elif annex == 'store':
+        # Two parallel mirrors at the sides of the cache leave the entry lane open.
+        x, y = cache
+        slash = chr(92) if dx else '/'
+        terrain.extend(dict(x=x - dy * side, y=y + dx * side, kind='mirror', slash=slash, rotating=False)
+                       for side in (-1, 1))
 
     # Retain this wing's direction before room generation reuses dx and dy.
     gate_x, gate_y = lock
@@ -207,7 +232,7 @@ def generate_layout(seed, depth):
     reserved = {tuple(exit_cell), *centers.values()}
     reserved.update((f['x'], f['y']) for f in features)
     for doorway, (dx, dy) in (entry for room in entries.values() for entry in room):
-        for forward in range(1, 4):
+        for forward in range(1, 3):
             for side in (-1, 0, 1):
                 reserved.add((doorway[0] - dx * forward - dy * side,
                               doorway[1] - dy * forward + dx * side))
@@ -231,7 +256,10 @@ def generate_layout(seed, depth):
     decorations.extend((i, 'mirror' if (i + region) % 3 == 0 else 'fragile')
                        for i, kind in enumerate(roles) if kind == 'standard')
     for room_id, kind in decorations:
-        x, y = rng.choice(interior_candidates(room_id))
+        candidates = interior_candidates(room_id)
+        if not candidates:
+            continue
+        x, y = rng.choice(candidates)
         tile = dict(x=x, y=y, kind=kind)
         if kind == 'mirror':
             tile.update(slash=rng.choice(('/', chr(92))), rotating=room_id == 1)
@@ -248,11 +276,16 @@ def generate_layout(seed, depth):
         candidates = set(interior_candidates(room_id))
         if not candidates:
             continue
-        x, y = grass_rng.choice(sorted(candidates))
-        for a, b in ((x, y), (x + 1, y), (x, y + 1)):
-            if (a, b) in candidates:
-                terrain.append(dict(x=a, y=b, kind='high_grass'))
-                reserved.add((a, b))
+        for _ in range(2 if kind in ('combat', 'standard') else 1):
+            if not candidates:
+                break
+            x, y = grass_rng.choice(sorted(candidates))
+            patch = {(x+a, y+b) for a in (-1, 0, 1) for b in (-1, 0, 1)
+                     if (a == b == 0 or grass_rng.random() < 0.64)} & candidates
+            for a, b in sorted(patch):
+                terrain.append(dict(x=a, y=b, kind='high_grass' if grass_rng.random() < .82 else 'grass'))
+            reserved.update(patch)
+            candidates.difference_update(patch)
 
     # Optional encounters get their own room and random stream.
     kind = SIDE_ENCOUNTERS[region][(depth - 1) % 5]
@@ -274,18 +307,23 @@ def generate_layout(seed, depth):
     enemies.append((room_id, kind, x, y))
     rooms[room_id]['cleared'] = False
 
-    if depth >= 3:
+    if depth >= 1:
         trap_rng = Random(seed + depth * 61169)
         reserved.add((x, y))
         occupied_terrain = {(t['x'], t['y']) for t in terrain}
-        trap_cells = [cell for cell in interior_candidates(room_id) if cell not in occupied_terrain]
-        if trap_cells:
+        trap_rooms = [room_id, *[i for i, role in enumerate(roles)
+                                  if role in ('combat', 'standard') and i != room_id]]
+        for index, ident in enumerate(trap_rooms):
+            trap_cells = [cell for cell in interior_candidates(ident) if cell not in occupied_terrain]
+            if not trap_cells:
+                continue
             tx, ty = trap_rng.choice(trap_cells)
-            mechanism = 'alarm' if depth % 2 else 'dart'
-            if depth in (12, 17, 22):
+            mechanism = ('alarm' if depth % 2 else 'dart') if index == 0 else trap_rng.choice(('dart', 'grip', 'alarm', 'fall'))
+            if index == 0 and depth in (12, 17, 22):
                 mechanism = 'grip'
-            terrain.append(dict(x=tx, y=ty, kind='trap', mechanism=mechanism,
-                                armed=True, hidden=depth >= 7 and depth % 5 in (2, 4)))
+            terrain.append(dict(x=tx, y=ty, kind='trap', mechanism=mechanism, armed=True,
+                                hidden=depth >= 3 and trap_rng.randrange(3) != 0))
+            occupied_terrain.add((tx, ty))
 
     if kind == 'elementcore':
         occupied = {(tile['x'], tile['y']) for tile in terrain + features}

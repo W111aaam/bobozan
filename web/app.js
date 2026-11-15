@@ -1,9 +1,14 @@
 'use strict';
 const $ = id => document.getElementById(id);
+document.querySelectorAll('[data-ui-icon]').forEach(icon=>{
+ const name=icon.dataset.uiIcon;
+ icon.innerHTML=icon.classList.contains('action-glyph')?art.buttonIcon(name):art.uiIcon(name);
+});
 const dirs = {up:[0,-1],right:[1,0],down:[0,1],left:[-1,0]};
 const arrows = {up:'↑',right:'→',down:'↓',left:'←'};
-let state=null, busy=true, aim=null, displayedResult=null, fxTimer, pendingFall=null;
+let state=null, busy=true, aim=null, displayedResult=null, fxTimer;
 let aimDetails=null, inspecting=false, aimingItem=null, lureHover=null, lureSelection=null, plantingSeed=null;
+let mapSelection=null;
 const CAMERA_SCALES=[0.8,1,1.25,1.5];
 let zoomIndex=1;
 function changeZoom(index){
@@ -16,7 +21,7 @@ const esc = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 const pos = entity => [entity.x,entity.y];
 const same = (a,b) => !!a&&!!b&&a[0]===b[0]&&a[1]===b[1];
 function toast(text,error=false){$('message').textContent=text;$('message').classList.toggle('error',error)}
-async function api(path,data){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8000);try{const res=await fetch('/api/'+path,{signal:controller.signal,...(data===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})});const body=await res.json();if(!res.ok)throw Error(body.error||'请求失败');return body}finally{clearTimeout(timer)}}
+async function api(path,data){if(window.bobozanLocalApi)return window.bobozanLocalApi(path,data);const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8000);try{const res=await fetch('/api/'+path,{signal:controller.signal,...(data===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})});const body=await res.json();if(!res.ok)throw Error(body.error||'请求失败');return body}finally{clearTimeout(timer)}}
 function safeToFill(){
  return canAct()&&!state.pursuing&&!state.returning.length&&!state.poisoned&&
   !state.fireCells?.some(cell=>same(cell,pos(state.player)))&&
@@ -33,26 +38,43 @@ function renderControls(){
  document.querySelectorAll('[data-direction]').forEach(b=>b.disabled=!canAct());
  $('exit').hidden=!state||!same(pos(state.player),state.exit);
  $('exit').disabled=!canAct()||!state.exitUnlocked||!same(pos(state.player),state.exit);
+ $('ascend').hidden=!state||!same(pos(state.player),state.upStairs);
+ $('ascend').disabled=!canAct()||$('ascend').hidden;
  if(state){
   $('exit').textContent=state.floorKind==='relic'?'触碰祭坛 ↗':'下楼 ↗';
   $('skip-talents').disabled=busy;
   $('confirm-talents').disabled=busy||!state.talentChoice||
    document.querySelectorAll('#talent-options input:checked').length!==state.talentChoice.limit;
   document.querySelectorAll('[data-growth]').forEach(button=>{
-   button.disabled=!canAct()||!state.growth.safe||button.dataset.available!=='true';
+   button.disabled=busy;
   });
+  const growth=state.growth;
+  const upgrade=pendingGrowth?.action==='forge'?growth.forge:growth.runes.find(r=>r.id===pendingGrowth?.key);
+  $('confirm-growth').disabled=!canAct()||!growth.safe||!upgrade||!!upgrade.blocked;
   document.querySelectorAll('[data-recipe]').forEach(button=>{
    button.disabled=!canAct()||button.dataset.available!=='true';
   });
   document.querySelectorAll('#ground-items [data-pickup]').forEach(b=>b.disabled=!canAct()||!state.packableItems.includes(b.dataset.groundItem));
  $('ground-pick-all').disabled=!canAct()||!state.groundItems?.some(f=>f.items.some(item=>state.packableItems.includes(item.id)));
   document.querySelectorAll('#tactics button, #loadout button, #bag-item-detail button').forEach(b=>b.disabled=!canAct()||b.getAttribute('aria-pressed')==='true');
+  const anchorButton=$('tactics').querySelector('[data-anchor-chain]');
+  if(anchorButton)anchorButton.disabled=!canAct()||!state.anchorChain.charges||!Object.keys(state.anchorChain.targets).length;
+  const storedChargeButton=$('tactics').querySelector('[data-stored-charge]');
+  if(storedChargeButton){
+   const full=state.player.energy>=state.energyCap;
+   storedChargeButton.disabled=!canAct()||!state.storedCharge||full;
+   storedChargeButton.title=!state.storedCharge?'下到新楼层补充充能':full?'能量已满，保留充能':'消耗一拍，补满能量';
+  }
  }
  $('restart').disabled=busy||!state;
+ $('toggle-map').disabled=busy||!state;
+ $('map-route-go').disabled=!canAct()||!(mapSelection?.path?.length||mapSelection?.interaction)
+  ||mapSelection.version!==state.version;
  $('cancel-aim').hidden=!aim&&!aimingItem;
  $('throw-lure').hidden=!aimingItem||!lureSelection;
  $('throw-lure').disabled=!canAct();
- $('throw-lure').textContent=aimingItem==='plant'?'播种 · 1 拍':'投掷 · 1 拍';
+ const anchorTarget=aimingItem==='anchor_chain'&&state.anchorChain.targets[lureSelection?.join(',')];
+ $('throw-lure').textContent=aimingItem==='plant'?'播种 · 1 拍':aimingItem==='anchor_chain'?(anchorTarget?.pullEnemy?'拉近敌人 · 1 拍':'拉向空地 · 1 拍'):'投掷 · 1 拍';
  $('fill-energy').textContent=fillingEnergy?'停止攒能':'攒满';
  $('drink-dew').disabled=!canAct()||!state.dew||state.player.hp>=(state.maxHp??6);
  $('fill-energy').disabled=!fillingEnergy&&!safeToFill();
@@ -60,20 +82,34 @@ function renderControls(){
  $('resume-travel').textContent=state&&travelNeedsCaution()?'继续一步':'继续前往';
  $('inspect-cell').disabled=!state||busy;
  $('inspect-cell').setAttribute('aria-pressed',String(inspecting));
- $('map-toast').textContent=inspecting?'点击地格查看 · 不消耗行动':aimingItem==='plant'?'选择播种位置 · 四格内空地':aimingItem?(lureSelection?(aimingItem==='frost_smoke'?'蓝圈标记可能受冻的敌人 · 范围内浅水结冰':'确认投掷，或点选其他落点'):'选择投掷落点 · 四格内空地'):aim?'选择发射方向 · 箭头键 / 点击射线':'';
+ $('map-toast').textContent=inspecting?'点击地格查看 · 不消耗行动':aimingItem==='anchor_chain'?(lureSelection?'确认拉动 · 方框为落点':'选择高亮的敌人或空地'):aimingItem==='plant'?'选择播种位置 · 四格内空地':aimingItem?(lureSelection?(aimingItem==='frost_smoke'?'蓝圈标记可能受冻的敌人 · 范围内浅水结冰':'确认投掷，或点选其他落点'):'选择四格内的高亮地格 · 障碍近侧落地'):aim?'选择发射方向 · 箭头键 / 点击射线':'';
  $('map-toast').classList.toggle('visible',inspecting||!!aim||!!aimingItem);
  $('skip-reward').disabled=busy;
- document.querySelectorAll('#rewards button').forEach(b=>b.disabled=busy||b.dataset.blocked==='true');
+ $('organize-for-supply').disabled=busy;
+ $('rewards').disabled=busy;
+ $('confirm-reward').disabled=busy||!$('rewards').querySelector('input:checked');
+ $('return-to-supply').hidden=!state||!unopenedSupplyAt(pos(state.player));
+ $('return-to-supply').disabled=!canAct();
  document.querySelectorAll('#retry,#new-seed,#confirm-restart').forEach(b=>b.disabled=busy);
 }
 function ray(direction){
  if(aim==='reflect')return aimDetails?.[direction]?.cells??[];
  return aimDetails?.[direction]?.cells??state.aimPaths?.[direction]??[];
 }
-const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice:'战术补给箱',shrine:'疗愈泉水',dry_spring:'干涸泉水',key:'钥匙',kit:'药剂',cache:'战术补给',
+const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice:'战术补给箱',shrine:'疗愈泉水',dry_spring:'干涸泉水',light_wisp:'微光 · 65 理智',light_soul:'圣光 · 105 理智',light_radiant:'辉光 · 155 理智',key:'钥匙',kit:'药剂',cache:'战术补给',
  lure_cache:'诱饵',smoke:'烟雾弹',wonder:'镜间奇遇',dew:'露珠',grass_seed:'响草种子',sun_seed:'阳草种子',chart:'测绘卷轴',recall:'回程卷轴',ankh:'护命符',terror:'惊退卷轴',
  echo_smoke:'响雾弹',stolen_energy:'被偷走的能量',rune_shard:'刻印碎片'};
-function featureName(f){return f.itemName||FEATURE_NAMES[f.kind]}
+function emptyChest(feature){
+ return feature.kind==='materials'||(feature.used&&(
+  ['chest','cache','supply_choice'].includes(feature.kind)
+  // A partly looted supply box can be saved as a lure cache with remaining items.
+  ||(feature.kind==='lure_cache'&&feature.remaining_items?.length)
+ ));
+}
+function featureName(f){return emptyChest(f)?'空箱子':f.kind==='shrine'&&f.used?'已耗尽的泉水':f.itemName||FEATURE_NAMES[f.kind]}
+function unopenedSupplyAt(cell){
+ return state.features.some(f=>f.kind==='supply_choice'&&!f.used&&same(pos(f),cell));
+}
 function countFeatures(features){return features.reduce((count,f)=>count+Math.max(1,f.itemCount??1),0)}
 function featuresByCell(){
  const cells=new Map();
@@ -87,15 +123,18 @@ function featuresByCell(){
 const LOCK_STYLES={
  store:{name:'战术库房',detail:'门上刻有补给箱，里面可能有战术道具。',glyph:'◆',color:'#e4ba70'},
  garden:{name:'封闭花圃',detail:'门上刻有藤叶，里面有可恢复生命的阳草。',glyph:'✦',color:'#b7db83'},
- alarm_store:{name:'警戒库房',detail:'门上刻有警铃。入口有警报，附近有守卫。',glyph:'!',color:'#eea27f'},
+ alarm_store:{name:'警戒库房',detail:'门上刻有警铃。入口的警报会通知整层敌人。',glyph:'!',color:'#eea27f'},
  dart_vault:{name:'刺针库房',detail:'一排刺针挡住去路，里面有刻印碎片。可站在近侧用波或诱饵先触发一格，再从那格过。',glyph:'×',color:'#f0a483'}
 };
-const RUNE_DETAILS={shatter:'破甲（无视普通防御）',echo:'回音（下拍沿原路返回）',frost:'凝滞（受伤后限制移动一拍）'};
+const RUNE_DETAILS={shatter:'破甲（无视普通防御）',echo:'回音（下拍沿原路返回）',
+ frost:'凝滞（受伤后限制移动一拍）'};
 function lockStyle(){return LOCK_STYLES[state.lockStyle]}
 function renderLandmarks(){
  const destinations=[];
  if(state.exit)destinations.push({cell:state.exit,name:state.floorKind==='relic'?'终点祭坛':'下层阶梯',
   hint:state.exitLockReason??'',icon:'↘'});
+ if(state.entrance)destinations.push({cell:state.entrance,name:state.upStairs?'返回上一层':'本层入口',hint:'回程卷轴落点',icon:'↖'});
+ for(const cell of state.openedShortcuts??[])destinations.push({cell,name:'隐蔽通路',hint:'已揭开的双向捷径',icon:'↔'});
  for(const room of state.roomStates){
   if(room.blocksExit&&room.anchor)destinations.push({cell:room.anchor,name:'阶梯守卫',hint:'清理战斗区后解锁',icon:'⚔'});
  }
@@ -128,7 +167,7 @@ function renderLandmarks(){
  }
  $('landmark-count').textContent=destinations.length?'· '+destinations.length:'';
  const rows=destinations.map(({cell,name,hint,icon,blocked})=>
-  `<button type="button" data-landmark="${cell.join(',')}" ${blocked?'disabled':''}
+  `<button type="button" data-landmark="${cell.join(',')}" data-landmark-name="${esc(name)}" ${blocked?'disabled':''}
    aria-label="${blocked?'':'前往'}${esc(name)}${hint?'，'+esc(hint):''}"><span aria-hidden="true">${icon}</span>
   ${esc(name)}${hint?`<small>${esc(hint)}</small>`:''}</button>`).join('')||'<p class="muted">还没有发现路标。</p>';
  for(const list of [$('landmarks'),$('journal-landmark-list')])list.innerHTML=rows;
@@ -143,12 +182,12 @@ function terrainName(tile){
  if(tile.kind==='root_plant')return '缠根 · 敌人踩上后下一拍无法移动';
  if(tile.kind==='trap'){
   if(!tile.armed)return '已触发的陷阱';
-  return {alarm:'警报陷阱 · 会吸引附近敌人',dart:'刺针陷阱 · 踩中受伤',grip:'夹足陷阱 · 下拍无法移动'}[tile.mechanism];
+  return {alarm:'警报陷阱 · 通知整层敌人',dart:'刺针陷阱 · 踩中受伤',grip:'夹足陷阱 · 下拍无法移动',fall:'坠落陷阱 · 跌向下一层并受伤'}[tile.mechanism];
  }
  if(tile.kind==='ice')return '薄冰 · 本拍限制移动';
  if(tile.kind==='water')return tile.ice_until?`冰封浅水 · ${Math.max(0,tile.ice_until-state.turn)} 拍后解冻 · 暂停导电`:'浅水 · 熄灭灼烧，相连水格可导电';
  if(tile.kind==='rubble')return '脆墙 · 需要破城震波拆除';
- return ['脆弱地板 · 首次踩入开裂','开裂地板 · 再次踩入必死','深渊 · 踩入必死'][tile.stage];
+ return ['脆弱地板 · 首次踩入开裂','开裂地板 · 再踩会坠落','深渊 · 跌向下一层并受伤'][tile.stage];
 }
 let perspectiveBoard=false;
 try{perspectiveBoard=localStorage.getItem('bobozan-view')==='3d'}catch{}
@@ -168,8 +207,8 @@ function raisedWall(x,y,color,low){
 function renderBoard(showEffects=false){
  if(!state)return;
  const palettes={
-  '下水道':['#39484a','#66706b'], '监狱':['#3d4154','#696b89'], '洞穴':['#493c37','#766353'],
-  '矮人都市':['#494535','#7c7551'], '恶魔大厅':['#512f3c','#865361'], '终点':['#3d435b','#686d8c']
+  '下水道':['#384b53','#788382'], '监狱':['#414766','#787e9c'], '洞穴':['#51463e','#8b735e'],
+  '矮人都市':['#4e503d','#8d835d'], '恶魔大厅':['#563641','#956171'], '终点':['#414b65','#7b86a3']
  };
  const [floorColor,wallColor]=palettes[state.region]||palettes['下水道'];
  const compact=matchMedia('(max-width: 680px)').matches;
@@ -204,9 +243,15 @@ function renderBoard(showEffects=false){
   return true;
  };
  const secretClues=new Set((state.secretClues??state.searchHints??[]).map(c=>c.join(',')));
- const warnings=state.enemies.flatMap(e=>e.intent.warning??[]);
+ const shortcuts=new Set((state.openedShortcuts??[]).map(c=>c.join(',')));
+ const warnings=new Set(state.enemies.flatMap(e=>(e.intent.warning??[]).map(cell=>cell.join(','))));
  const lureCells=new Set(aimingItem?throwTargets().map(c=>c.join(',')):[]);
- const previewKey=lureHover??lureSelection?.join(',');
+ const aimKey=lureHover??lureSelection?.join(',');
+ const redirects=aimingItem&&aimingItem!=='plant'&&aimingItem!=='anchor_chain'?(state.throwRedirects??{}):{};
+ const anchorPreview=aimingItem==='anchor_chain'?state.anchorChain?.targets[aimKey]:null;
+ const anchorPath=new Set((anchorPreview?.path??[]).map(cell=>cell.join(',')));
+ const redirected=redirects[aimKey];
+ const previewKey=redirected?.join(',')??aimKey;
  const lurePreview=['lure','grass_seed','echo_smoke'].includes(aimingItem)&&state.lurePreviews?.[previewKey];
  const smokePreview=new Set((state.smokeItems?.includes(aimingItem)?state.smokePreviews?.[previewKey]??[]:[]).map(c=>c.join(',')));
  const smokeCells=new Set((state.smokeCells??[]).map(c=>pos(c).join(',')));
@@ -216,14 +261,17 @@ function renderBoard(showEffects=false){
 
  const chargedWater=new Set(state.enemies.flatMap(e=>(e.intent.water??[]).map(cell=>cell.join(','))));
  const fireCells=new Set((state.fireCells??[]).map(cell=>cell.join(',')));
- const danger=[...(state.dangerCells??state.enemies.flatMap(e=>e.intent.cells)),...state.returning.filter(w=>w.owner==='enemy').flatMap(w=>w.cells)],aimed=aim?Object.keys(dirs).flatMap(d=>ray(d)):[];
+ const danger=new Set([...(state.dangerCells??state.enemies.flatMap(e=>e.intent.cells)),...state.returning.filter(w=>w.owner==='enemy').flatMap(w=>w.cells)].map(cell=>cell.join(',')));
+ const aimed=aim?Object.keys(dirs).flatMap(d=>ray(d)):[];
+ const knockbackCells=new Set(aim?Object.values(aimDetails??{}).flatMap(result=>
+  (result.knockback??[]).map(cell=>cell.join(','))):[]);
  const projection=perspectiveBoard?'matrix(1 .16 -.36 .66 0 0) ':'';
  let solids='';
  const floorFeatures=featuresByCell();
  let svg=`<g transform="${projection}translate(${-ox*60},${-oy*60})">`;
  for(let y=oy;y<oy+height;y++)for(let x=ox;x<ox+width;x++){
   const key=x+','+y,visible=seen.has(key);
-  if(!known.has(key)){svg+=`<rect x="${x*60}" y="${y*60}" width="60" height="60" fill="#141522"/>`;continue}
+  if(!known.has(key)){svg+=`<rect x="${x*60}" y="${y*60}" width="60" height="60" fill="#111321"/>`;continue}
   if(mappedKeys.has(key)){
    const wall=walls.has(key);
    const label=wall?'测绘 · 石墙':same([x,y],state.exit)?'测绘 · 阶梯':doors.has(key)?'测绘 · 石门':'测绘 · 通道';
@@ -240,14 +288,17 @@ function renderBoard(showEffects=false){
   const available=features.filter(f=>!f.used);
   const feature=available[0]??features[0];
   const count=countFeatures(available);
-  const supplies=count>1?`${count} 项地面物品`:feature?(feature.used?'已使用的':'')+featureName(feature):'';
+  const supplies=count>1?`${count} 项地面物品`:feature?(feature.used&&!emptyChest(feature)?'已使用的':'')+featureName(feature):'';
   const doorLabel=doorway?(openDoor?'打开的门':'关闭的门 · 踏入开启'):'';
   const onFire=fireCells.has(key);
-  const groundLabel=[doorLabel,onFire?'地火 · 下一拍 1 伤':'',supplies].filter(Boolean).join('，')||(tile?terrainName(tile):`地面 ${x},${y}`);
-  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，点击查看信息':hero?(supplies?'你的位置，'+supplies:'你的位置'):groundLabel;
-  svg+=`<g ${wall?'':`data-cell="${key}" role="button" tabindex="-1" aria-label="${esc(label)}"`} opacity="${visible?1:.38}">`;
+  const routeLabel=same([x,y],state.upStairs)?'返回上一层的阶梯':same([x,y],state.entrance)?'本层入口':shortcuts.has(key)?'隐蔽通路':'';
+  const groundLabel=[routeLabel,doorLabel,onFire?'地火 · 下一拍 1 伤':'',supplies].filter(Boolean).join('，')||(tile?terrainName(tile):`地面 ${x},${y}`);
+  const box=available.some(f=>f.kind==='supply_choice');
+  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，点击查看信息':box?(hero?'战术补给箱，点击打开':'战术补给箱，点击前往并打开'):hero?(supplies?'你的位置，'+supplies:'你的位置'):groundLabel;
+  const risk=danger.has(key)?'，下一拍危险':warnings.has(key)?'，有敌方预告':'';
+  svg+=`<g ${wall?'':`data-cell="${key}" role="button" tabindex="-1" aria-label="${esc(label+risk)}"`} opacity="${visible?1:.38}">`;
   if(wall){
-   if(inspecting||secretClues.has(key))svg+=`<rect data-cell="${key}" x="${x*60}" y="${y*60}" width="60" height="60" fill="transparent" role="button" aria-label="${secretClues.has(key)?'墙上的刻痕':'石墙'}"/>`;
+   if(inspecting||secretClues.has(key)||redirects[key])svg+=`<rect data-cell="${key}" x="${x*60}" y="${y*60}" width="60" height="60" fill="transparent" role="button" aria-label="${redirects[key]?'石墙，投掷会落在近侧':secretClues.has(key)?'墙上的刻痕':'石墙'}"/>`;
    if(perspectiveBoard&&visible){
     const nearFloor=[[x-1,y],[x+1,y],[x,y+1],[x,y-1]].some(([a,b])=>{
      const adjacent=a+','+b;
@@ -258,6 +309,7 @@ function renderBoard(showEffects=false){
    svg+=art.stoneWall(x,y,wallColor,{north:isFloor(x,y-1,x,y),east:isFloor(x+1,y,x,y),
     south:isFloor(x,y+1,x,y),west:isFloor(x-1,y,x,y)});
    if(secretClues.has(key))svg+=`<path d="M${x*60+25} ${y*60+11}h3v4h4v-4h3" stroke="#e1c27d" stroke-width="2" fill="none" pointer-events="none"/>`;
+   if(redirects[key])svg+=`<rect x="${x*60+5}" y="${y*60+5}" width="50" height="50" fill="none" stroke="#ebd890" stroke-dasharray="3 4" pointer-events="none"/>`;
    svg+='</g>';
    continue;
   }
@@ -275,34 +327,40 @@ function renderBoard(showEffects=false){
    else if(tile.kind==='web')svg+=`<path d="M${x*60+9} ${y*60+9}l42 42m0-42L${x*60+9} ${y*60+51}m0-21h42m-21-21v42" stroke="#dec9ea" stroke-width="2" opacity=".75"/>`;
    else if(tile.kind==='sun_plant')svg+=`<circle cx="${x*60+30}" cy="${y*60+30}" r="12" fill="#efd483" stroke="#765537" pointer-events="none"/>`;
    else if(tile.kind==='root_plant')svg+=`<path d="M${x*60+30} ${y*60+38}v-18m0 14l-12-9m12 5l12-10m-12 18l-15 6m15-6l13 6" fill="none" stroke="#b6cc78" stroke-width="4" pointer-events="none"/>`;
-   else if(tile.kind==='trap')svg+=`<rect x="${x*60+16}" y="${y*60+16}" width="28" height="28" rx="3" fill="#24222d" stroke="${tile.armed?'#dea674':'#727278'}" stroke-width="3"/><text x="${x*60+30}" y="${y*60+36}" text-anchor="middle" fill="${tile.armed?'#ffd298':'#98949c'}" font-size="16">${tile.armed?(({alarm:'!',dart:'×',grip:'⟐'}[tile.mechanism]??'×')):'·'}</text>`;
+   else if(tile.kind==='trap')svg+=`<rect x="${x*60+16}" y="${y*60+16}" width="28" height="28" rx="3" fill="#24222d" stroke="${tile.armed?'#dea674':'#727278'}" stroke-width="3"/><text x="${x*60+30}" y="${y*60+36}" text-anchor="middle" fill="${tile.armed?'#ffd298':'#98949c'}" font-size="16">${tile.armed?(({alarm:'!',dart:'×',grip:'⟐',fall:'↓'}[tile.mechanism]??'×')):'·'}</text>`;
    else if(tile.kind==='ice')svg+=`<rect x="${x*60+4}" y="${y*60+4}" width="52" height="52" fill="#81d8f26b" stroke="#c0f1ff"/>`;
    else if(tile.kind==='mirror')svg+=`<path d="M${x*60+12} ${y*60+(tile.slash==='/'?48:12)}L${x*60+48} ${y*60+(tile.slash==='/'?12:48)}" stroke="${tile.rotating?'#efc46a':'#92dce7'}" stroke-width="7"/><text x="${x*60+30}" y="${y*60+57}" text-anchor="middle" fill="#efc46a" font-size="11">${tile.rotating?'↻ 击中旋转':''}</text>`;
    else if(tile.kind==='rubble')svg+=`<rect x="${x*60+6}" y="${y*60+6}" width="48" height="48" fill="#725c51"/><path d="M${x*60+28} ${y*60+7}l-6 17 15 8-8 20" fill="none" stroke="#e0b78b" stroke-width="3"/>`;
    else if(tile.stage===2)svg+=`<ellipse cx="${x*60+30}" cy="${y*60+32}" rx="27" ry="23" fill="#05080d" stroke="#b1766c"/>`;
-   else svg+=`<path d="M${x*60+10} ${y*60+12}l20 13-9 12 24 11m-15-23 18-12" fill="none" stroke="${tile.stage?'#fb8b70':'#b7ad8b'}" stroke-width="${tile.stage?4:2}"/><text x="${x*60+30}" y="${y*60+56}" text-anchor="middle" fill="#ffd3b5" font-size="10">${tile.stage?'再踩即死':'脆弱'}</text>`;
+   else svg+=`<path d="M${x*60+10} ${y*60+12}l20 13-9 12 24 11m-15-23 18-12" fill="none" stroke="${tile.stage?'#fb8b70':'#b7ad8b'}" stroke-width="${tile.stage?4:2}"/><text x="${x*60+30}" y="${y*60+56}" text-anchor="middle" fill="#ffd3b5" font-size="10">${tile.stage?'再踩坠落':'脆弱'}</text>`;
   }
   if(smokeCells.has(key)||smokePreview.has(key))svg+=`<path d="M${x*60+4} ${y*60+4}h52v52h-52z"
    fill="${aimingItem==='frost_smoke'&&smokePreview.has(key)?'#9cecff':'#b3c2de'}" fill-opacity="${smokeCells.has(key)?'.32':'.18'}" stroke="#b3c2de"
    stroke-dasharray="4 5" pointer-events="none"/>`;
   if(soundCells.has(key))svg+=`<rect x="${x*60+4}" y="${y*60+4}" width="52" height="52" fill="#dac88936" pointer-events="none"/>`;
-  if(lureCells.has(key))svg+=`<circle cx="${x*60+30}" cy="${y*60+30}" r="15" fill="${same(lureSelection,[x,y])?'#ebd89090':'#d8d78430'}" stroke="#ebd890" stroke-dasharray="3 4" pointer-events="none"/>`;
-  if(warnings.some(c=>same(c,[x,y])))svg+=`<rect x="${x*60+7}" y="${y*60+7}" width="46" height="46" fill="#d8a45524" stroke="#edba71" stroke-width="2" stroke-dasharray="5 4" pointer-events="none"/>`;
-  if(danger.some(c=>same(c,[x,y])))svg+=`<rect x="${x*60+4}" y="${y*60+4}" width="52" height="52" fill="#b45b4855" stroke="#e9a082"/><text x="${x*60+30}" y="${y*60+52}" text-anchor="middle" fill="#edaa8d" font-size="12">!</text>`;
+  if(lureCells.has(key)||redirects[key])svg+=`<circle cx="${x*60+30}" cy="${y*60+30}" r="15" fill="${previewKey===key?'#ebd89090':'#d8d78430'}" stroke="#ebd890" stroke-dasharray="3 4" pointer-events="none"/>`;
+  if(anchorPath.has(key))svg+=`<rect x="${x*60+8}" y="${y*60+8}" width="44" height="44" fill="#80dac326" pointer-events="none"/>`;
+  if(anchorPreview&&same(anchorPreview.landing,[x,y]))svg+=`<rect data-anchor-landing x="${x*60+8}" y="${y*60+8}" width="44" height="44" fill="none" stroke="#9ef3d9" stroke-width="3" pointer-events="none"/>`;
+  if(warnings.has(key))svg+=`<g pointer-events="none"><rect x="${x*60+7}" y="${y*60+7}" width="46" height="46" fill="#d8a45524" stroke="#edba71" stroke-width="2" stroke-dasharray="5 4"/><text x="${x*60+48}" y="${y*60+20}" text-anchor="middle" fill="#f4ce8e" font-size="14">⌛</text></g>`;
+  if(danger.has(key))svg+=`<g pointer-events="none"><rect x="${x*60+4}" y="${y*60+4}" width="52" height="52" fill="#b45b4855" stroke="#e9a082"/><text x="${x*60+30}" y="${y*60+52}" text-anchor="middle" fill="#edaa8d" font-size="12">!</text></g>`;
   if(onFire)svg+=`<path data-ground-fire d="M${x*60+20} ${y*60+37}q-5-8 4-17 0 7 4 7 4-5 2-12 11 8 10 19-3 10-12 9-6 0-8-6z" fill="#ed804b" stroke="#ffd384" stroke-width="2" pointer-events="none"/>`;
   if(aimingItem==='frost_smoke'&&smokePreview.has(key)&&tile?.kind==='water')
    svg+=`<text data-freeze-water x="${x*60+30}" y="${y*60+39}" text-anchor="middle" fill="#d7f5ff" font-size="24">❄</text>`;
   if(chargedWater.has(key))svg+=`<path data-electric-water d="M${x*60+31} ${y*60+13}l-9 17h12l-6 15 15-20H32l6-12z" fill="#b2eaff" pointer-events="none"/>`;
   if(aimed.some(c=>same(c,[x,y])))svg+=`<rect x="${x*60+5}" y="${y*60+5}" width="50" height="50" fill="#c7e7a822" stroke="#c7e7a8" stroke-dasharray="4 4"/>`;
   if(feature&&tile?.kind!=='rubble'){
-   svg+=art.prop(feature.kind,x,y,feature.used);
+   svg+=art.prop(emptyChest(feature)?'materials':feature.kind,x,y,feature.used,feature.item);
    if(count>1){
     const cx=x*60+47,cy=y*60+12;
     svg+=`<g pointer-events="none"><circle cx="${cx}" cy="${cy}" r="9" fill="#25252e" stroke="#ddbd7c"/><text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#ffe7af" font-size="11">${count}</text></g>`;
    }
   }
   if(aim&&Object.values(aimDetails||{}).some(result=>same(result.landing,[x,y])))svg+=`<circle cx="${x*60+30}" cy="${y*60+30}" r="14" fill="none" stroke="#8bd9e1" stroke-width="3" pointer-events="none"/>`;
+  if(knockbackCells.has(key))svg+=`<path data-knockback-preview d="M${x*60+30} ${y*60+10}l20 20-20 20-20-20z"
+   fill="#f0c48522" stroke="#f0c485" stroke-width="2" stroke-dasharray="5 3" pointer-events="none"/>`;
   if(same([x,y],state.exit))svg+=art.prop(state.floorKind==='relic'?'wonder':'stairs',x,y,!state.exitUnlocked);
+  if(same([x,y],state.upStairs))svg+=art.prop('up_stairs',x,y);
+  if(routeLabel)svg+=`<text x="${x*60+11}" y="${y*60+16}" fill="#a8dedb" font-size="15" font-weight="bold" text-anchor="middle" pointer-events="none">${shortcuts.has(key)?'↔':'↖'}</text>`;
   svg+='</g>';
  }
  svg+=solids;
@@ -321,7 +379,12 @@ function renderBoard(showEffects=false){
  if(!state.falls.some(f=>f.id==='hero'))svg+=art.actor(state.player.x,state.player.y,'hero',0,state.heroColor);
  for(const wave of state.returning)for(const cell of wave.cells)svg+=`<circle cx="${cell[0]*60+30}" cy="${cell[1]*60+30}" r="21" fill="none" stroke="${wave.owner==='hero'?'#9edbd4':'#eb978a'}" stroke-dasharray="4 6" pointer-events="none"/>`;
  if(showEffects)for(const fall of state.falls)svg+=`<g class="falling" style="transform-origin:${fall.cell[0]*60+30}px ${fall.cell[1]*60+30}px">${art.actor(...fall.cell,fall.kind,fall.id==='hero'?0:fall.id,state.heroColor)}</g>`;
- if(showEffects)for(const fx of state.effects.filter(f=>f.kind!=='fall'))svg+=art.effects(fx,state.heroColor);
+ if(showEffects){
+  for(const fx of state.effects){
+   if(!art.statusLabel(fx)||['revive','energy_gain','sanity_gain'].includes(fx.kind))svg+=art.effects(fx,state.heroColor);
+  }
+  svg+=art.statusEffects(state.effects,oy,ox,width,height);
+ }
  $('board').innerHTML=svg+'</g>';
  let mini='';
  for(const [x,y] of charted){const key=x+','+y;mini+=`<rect ${walls.has(key)&&!inspecting?'':`data-cell="${key}"`} x="${x*8}" y="${y*8}" width="8" height="8" fill="${mappedKeys.has(key)?(walls.has(key)?'#282d3a':'#505e78'):walls.has(key)?'#41534c':seen.has(key)?'#98b48d':'#576f66'}"/>`}
@@ -331,28 +394,42 @@ function renderBoard(showEffects=false){
   mini+=`<rect data-cell="${f.x},${f.y}" x="${f.x*8+1}" y="${f.y*8+1}" width="6" height="6" fill="${features.every(item=>item.used)?'#6a7772':'#ddbd7c'}"/>`;
  }
  if(state.exit)mini+=`<rect data-cell="${state.exit.join(',')}" x="${state.exit[0]*8}" y="${state.exit[1]*8}" width="8" height="8" fill="#ddd6a4"/>`;
+ for(const [x,y] of [state.entrance,...(state.openedShortcuts??[])].filter(Boolean)){
+  mini+=`<rect data-cell="${x},${y}" x="${x*8+1}" y="${y*8+1}" width="6" height="6" fill="#87c7c5"/>`;
+ }
  for(const e of state.enemies)mini+=`<rect data-cell="${e.x},${e.y}" x="${e.x*8+1}" y="${e.y*8+1}" width="6" height="6" fill="#e09a7b"/>`;
  mini+=`<rect x="${state.player.x*8}" y="${state.player.y*8}" width="8" height="8" fill="#edffc4" stroke="#172128" pointer-events="none"/>`;
  if(state.lock)mini+=`<rect data-cell="${state.lock.join(',')}" x="${state.lock[0]*8}" y="${state.lock[1]*8}" width="8" height="8" fill="#aa754c"/>`;
  for(const cell of state.secretClues??[])mini+=`<rect data-cell="${cell.join(',')}" x="${cell[0]*8+1}" y="${cell[1]*8+1}" width="6" height="6" fill="#e1c27d"/>`;
 
- if(travelPath.length){
+ const planned=$('map-dialog').open&&mapSelection?.version===state.version?mapSelection:null;
+ const miniPath=planned?.path??travelPath;
+ $('map-path-key').hidden=!miniPath.length;
+ if(miniPath.length){
   let [x,y]=pos(state.player);
   let line=`M${x*8+4} ${y*8+4}`;
-  for(const step of travelPath){
+  for(const step of miniPath){
    const [dx,dy]=dirs[step];x+=dx;y+=dy;
    line+=`L${x*8+4} ${y*8+4}`;
   }
   mini+=`<path d="${line}" fill="none" stroke="#edcd8b" stroke-width="1.4"
    stroke-dasharray="2 2" pointer-events="none"/>`;
  }
- if(travelTarget||pausedTravel){
-  const [x,y]=travelTarget||pausedTravel;
+ const miniTarget=planned?.target??travelTarget??pausedTravel;
+ if(miniTarget){
+  const [x,y]=miniTarget;
   mini+=`<circle cx="${x*8+4}" cy="${y*8+4}" r="5" fill="none" stroke="#edcd8b" stroke-width="2" stroke-dasharray="${travelTarget?'none':'2 2'}" pointer-events="none"/>`;
  }
- $('minimap').setAttribute('viewBox', `0 0 ${state.width*8} ${state.height*8}`);
+ let viewBox=`0 0 ${state.width*8} ${state.height*8}`;
+ if($('map-dialog').open&&charted.length){
+  const xs=charted.map(([x])=>x), ys=charted.map(([,y])=>y);
+  const left=Math.min(...xs)-1, top=Math.min(...ys)-1;
+  viewBox=`${left*8} ${top*8} ${(Math.max(...xs)-left+2)*8} ${(Math.max(...ys)-top+2)*8}`;
+ }
+ $('minimap').setAttribute('viewBox',viewBox);
  $('minimap').innerHTML=mini;
 }
+let pendingGrowth=null;
 function renderGrowth(){
  const g=state.growth, stats=state.waveStats;
  const weapon=state.weapons.find(w=>w.id===state.weapon);
@@ -361,29 +438,56 @@ function renderGrowth(){
  const option=(key,item,selected)=>`<button data-${key}="${item.id}" aria-pressed="${selected}"><b>${esc(item.name)}</b><small>${esc(item.description)}</small></button>`;
  $('loadout').innerHTML=(hero?'':state.weapons.map(w=>option('equip',w,w.id===state.weapon)).join(''))
   +state.modes.map(m=>option('tune',m,m.id===state.mode)).join('');
- const growthButton=(action,key,available,title,description)=>`<button data-growth="${action}" data-key="${key}" data-available="${available}"><b>${esc(title)}</b><small>${esc(description)}</small></button>`;
- const next=['波伤害 +1','基础射程 +1','波伤害再 +1'][g.level];
+ const growthButton=(action,key,title,description)=>`<button type="button" data-growth="${action}" data-key="${esc(key)}"
+  aria-haspopup="dialog"><b>${esc(title)}</b><small>${esc(description)}</small></button>`;
+ const forge=g.forge;
+ const forgeTitle=g.level===forge.level?'已达 +'+g.level:'+'+g.level+' → +'+forge.level;
  $('growth-weapon').innerHTML=`<p class="weapon-stats">波 ${stats.damage} 伤 · 射程 ${stats.range} · ${stats.pierce===99?'扇面命中':'至多命中 '+stats.pierce+' 个'}</p>
  <h3>锻造 <small>${g.cores} 核心</small></h3>
- ${growthButton('forge','',g.cores>0&&g.level<3,next?'强化至 +'+(g.level+1):'已达 +3',next||'已完成武器锻造')}
+ ${growthButton('forge','',forgeTitle,forge.blocked||forge.stats.map(stat=>stat.label).join('、'))}
  <h3>刻印 <small>${g.shards} 碎片</small></h3>
- <div class="growth-grid">${g.runes.map(r=>growthButton('etch',r.id,g.shards>0&&r.compatible&&r.id!==g.rune,
-  r.name+(r.id===g.rune?' · 已装备':''),r.compatible?r.description:'当前波形无法使用')).join('')}</div>`;
+ <div class="growth-grid">${g.runes.map(r=>growthButton('etch',r.id,r.name,
+  r.blocked||r.description)).join('')}</div>`;
  $('character-avatar').innerHTML=art.portrait(state.heroColor);
  $('hud-avatar').innerHTML=art.portrait(state.heroColor);
  $('character-vitals').textContent=`生命 ${state.player.hp}/${state.maxHp??6} · 能量 ${state.player.energy}/${state.energyCap}`;
  const learned=g.talents.filter(t=>t.learned);
  $('talent-list').innerHTML=learned.length?learned.map(t=>`<div class="upgrade"><b>${esc(t.name)}</b><p>${esc(t.description)}</p></div>`).join(''):'<p class="empty">尚未学习天赋。</p>';
- $('growth-status').textContent=g.safe?'锻造和刻印作用于当前发射器。更换改装消耗一拍。':'安全时可锻造或刻印。';
+ $('growth-status').textContent=g.safe?'切换改装模式消耗一拍。':'请先脱战并等待回程波结算，再锻造或刻印。';
+ if($('growth-dialog').open&&pendingGrowth)renderGrowthPreview();
 }
 
-const ITEM_GLYPHS={heal:'✚',smoke:'≋',echo_smoke:'≋',frost_smoke:'❄',lure:'◇',grass_seed:'✧',sun_seed:'✹',chart:'▤',recall:'↶',ankh:'✦',terror:'⇠'};
+function renderGrowthPreview(){
+ const {action,key}=pendingGrowth;
+ const g=state.growth, forge=action==='forge';
+ const option=forge?g.forge:g.runes.find(r=>r.id===key);
+ const current=g.runes.find(r=>r.id===g.rune);
+ const weapon=state.weapons.find(w=>w.id===state.weapon);
+ $('growth-title').textContent=forge?(option.stats.length?`锻造至 +${option.level}`:'锻造'):`刻印 · ${option.name}`;
+ const cost=forge?`消耗 1 枚锻造核心（持有 ${g.cores}）`:`消耗 1 枚刻印碎片（持有 ${g.shards}）`;
+ $('growth-cost').textContent=`${weapon.name} · ${cost}`;
+ $('growth-preview').innerHTML=forge
+  ?option.stats.map(({label,before,after,unit})=>`<p class="talent-change">${esc(label)} <b>${esc(before)} → ${esc(after)}${esc(unit)}</b></p>`).join('')
+   +(option.note?`<p>${esc(option.note)}</p>`:'')
+  :`<p>${esc(option.description)}</p>`+(current&&current.id!==key&&option.compatible
+    ?`<p class="growth-replacement"><b>替换「${esc(current.name)}」</b><br>原效果将移除。${esc(current.description)}</p>`:'');
+ $('growth-feedback').textContent=option.blocked||(!g.safe?'请先脱战并等待回程波结算。':'');
+ $('confirm-growth').textContent=forge?'确认锻造':'确认刻印';
+}
+
 const QUICK_ITEMS=[
  {key:'q',storage:'bobozan-quick-item',id:'heal'},
  {key:'e',storage:'bobozan-quick-item-e',id:'smoke'}
 ];
 for(const slot of QUICK_ITEMS){
  try{slot.id=localStorage.getItem(slot.storage)??slot.id}catch{}
+}
+function bindQuickItem(key,id){
+ const slot=QUICK_ITEMS.find(entry=>entry.key===key);
+ slot.id=id;
+ try{localStorage.setItem(slot.storage,id)}catch{}
+ renderBag();
+ renderControls();
 }
 function renderQuickItems(){
  const available=new Map(state.inventory.filter(item=>!item.passive).map(item=>[item.id,item]));
@@ -396,15 +500,17 @@ function renderQuickItems(){
   select.value=id;
   if(!id)return '';
   const count=state.inventory.filter(entry=>entry.id===id).length;
-  return `<button type="button" data-quick-use="${key}" title="使用快捷道具 · ${key.toUpperCase()}" ${item?'':'disabled'}>
-   ${item?`${ITEM_GLYPHS[id]??'•'} ${esc(item.name)} ×${count}`:'空'} <kbd>${key.toUpperCase()}</kbd></button>`;
+  const label=item?`${item.name} ×${count}`:'当前未携带已绑定道具';
+  return `<button type="button" data-quick-use="${key}" aria-label="${esc(label)} · ${key.toUpperCase()}" title="${esc(label)}" ${item?'':'disabled'}>
+   ${art.itemIcon(id)}<span class="quick-count">${count}</span><kbd>${key.toUpperCase()}</kbd></button>`;
  }).join('');
 }
 function throwTargets(item=aimingItem){
+ if(item==='anchor_chain')return Object.keys(state.anchorChain?.targets??{}).map(key=>key.split(',').map(Number));
  return (item==='plant'?state.plantTargets:state.lureTargets)??[];
 }
 function useItem(item){
- if(item!=='plant'&&!state.thrownItems?.includes(item))return send('item',null,item);
+ if(item!=='plant'&&item!=='anchor_chain'&&!state.thrownItems?.includes(item))return send('item',null,item);
  if(!throwTargets(item).length){toast(item==='plant'?'附近没有可播种的空地。':'附近没有可投掷的空地。',true);return}
  closeDialogs();
  cancelTravel();
@@ -425,7 +531,7 @@ function useQuickItem(key){
  useItem(item.id);
 }
 
-let selectedBagItem=null;
+let selectedBagItem=null, selectedBagSlot=-1;
 function renderBagItem(){
  const item=state.inventory.find(entry=>entry.id===selectedBagItem);
  $('bag-item-detail').hidden=!item;
@@ -433,6 +539,12 @@ function renderBagItem(){
  $('bag-use-item').hidden=!!item.passive;
  $('bag-plant-item').hidden=!item.plantable;
  $('bag-item-name').textContent=item.name;
+ $('bag-item-icon').innerHTML=art.itemIcon(item.id);
+ for(const button of document.querySelectorAll('[data-bind-item]')){
+  const bound=QUICK_ITEMS.some(slot=>slot.key===button.dataset.bindItem&&slot.id===item.id);
+  button.hidden=!!item.passive;
+  button.setAttribute('aria-pressed',String(bound));
+ }
  $('bag-drop-item').textContent=item.plantable?'放下一颗 · 1 拍':'放下 · 1 拍';
  $('bag-item-description').textContent=item.description;
 }
@@ -440,13 +552,17 @@ function renderBag(){
  renderQuickItems();
  $('drink-dew').textContent=`饮用露珠 ${state.dew??0}/${state.dewCapacity??3} · 1 拍`;
  $('bag-count').textContent=`${state.bagSlots.length} / ${state.bagCapacity} 槽 · 钥匙 ${state.keys}`;
+ if(state.bagSlots[selectedBagSlot]?.id!==selectedBagItem){
+  selectedBagSlot=state.bagSlots.findIndex(slot=>slot.id===selectedBagItem);
+ }
  $('bag-slots').innerHTML=Array.from({length:state.bagCapacity},(_,i)=>{
   const slot=state.bagSlots[i];
-  if(!slot)return `<div class="bag-slot empty-slot" aria-label="第 ${i+1} 槽，空"></div>`;
+  if(!slot)return `<div class="bag-slot empty-slot" aria-label="第 ${i+1} 槽，空"><span aria-hidden="true">空</span></div>`;
   const item=state.inventory.find(entry=>entry.id===slot.id);
-  const glyph=ITEM_GLYPHS[item.id]||'•';
-  return `<button class="bag-slot" data-item="${esc(item.id)}" aria-pressed="${item.id===selectedBagItem}">
-   <span aria-hidden="true">${glyph}</span><b>${esc(item.name)}${slot.count>1?' ×'+slot.count:''}</b></button>`;
+  const keys=QUICK_ITEMS.filter(quick=>quick.id===item.id).map(quick=>quick.key.toUpperCase()).join(' ');
+  return `<button class="bag-slot" data-item="${esc(item.id)}" data-bag-slot="${i}" aria-pressed="${i===selectedBagSlot}">
+   ${art.itemIcon(item.id)}<b>${esc(item.name)}</b>${keys?`<kbd class="bag-binding">${keys}</kbd>`:''}
+   ${slot.count>1?`<span class="bag-stack">×${slot.count}</span>`:''}</button>`;
  }).join('');
  renderBagItem();
  $('recipes').innerHTML=(state.recipes??[]).map(recipe=>{
@@ -473,8 +589,15 @@ function renderTalentChoice(){
  if(dialog.open)return;
  $('talent-title').textContent=`第 ${offer.depth} 层 · 天赋`;
  $('talent-instruction').textContent=`选 ${offer.limit} 项。本层的选择机会只出现一次。`;
- $('talent-options').innerHTML='<legend>本层天赋</legend>'+offer.options.map(t=>
-  `<label class="talent-option"><input type="checkbox" value="${esc(t.id)}"><span><b>${esc(t.name)}</b><small>${esc(t.description)}</small></span></label>`).join('');
+ const type=offer.limit===1?'radio':'checkbox';
+ $('talent-options').innerHTML='<legend>本层天赋</legend>'+offer.options.map(t=>{
+  const preview=t.preview;
+  const change=preview?.label?`<span class="talent-change">${esc(preview.label)}
+   <b>${preview.before} → ${preview.after}</b></span>`:'';
+  const note=preview?.note?`<small class="talent-note">${esc(preview.note)}</small>`:'';
+  return `<label class="talent-option"><input type="${type}" name="talent-choice" value="${esc(t.id)}">
+   <span><b>${esc(t.name)}</b><small>${esc(t.description)}</small>${change}${note}</span></label>`;
+ }).join('');
  $('confirm-talents').disabled=true;
  $('talent-feedback').textContent='';
  closeDialogs();
@@ -483,8 +606,9 @@ function renderTalentChoice(){
 
 function activeConditions(){
  const conditions=[];
- if(state.trapClues)conditions.push(['trap-clues','⌕','机关痕迹','这个房间可能藏有机关。按 X 搜查周围两格内可见的地板，消耗一拍。']);
+ if(state.sanity<=state.sanityLow)conditions.push(['corrosion','◇',state.sanity?'理智偏低':'诅咒腐蚀',state.sanity?'未探索区域可能出现增援。拾取圣光可恢复理智。':'诅咒会随行动持续扣除生命。拾取圣光可恢复理智。']);
  if(state.counter)conditions.push(['counter','✦','反击 +'+state.waveStats.counterBonus,'成功挡伤后获得。移动或攒能不会消耗它，下一发波或重波会使用这次加成。']);
+ if(state.gateShieldReady)conditions.push(['gate-shield','⬟','守门盾就绪','下一发波或重波的主束附带击退。发射后消耗，再次挡伤可重新触发。瞄准时用金色菱形标出可见的击退落点。']);
  if(state.poisoned)conditions.push(['poison','☣','中毒 · 1 伤','下一拍会受到 1 点毒伤。可在结算前使用疗愈药剂，也可用普通防抵挡。']);
  if(state.snared)conditions.push(['snared','⟐','夹足 · 1 拍','本拍不能移动或用飞雷神。其他行动仍可使用。']);
  else if(state.movementLocked)conditions.push(['frost','❄','霜冻 · 1 拍','本拍不能移动，也无法用飞雷神。可以攒、出波或防来度过这一拍。']);
@@ -511,6 +635,7 @@ function showGroundItems(){
 function renderConditions(){
  $('condition-strip').innerHTML=activeConditions().map(([id,icon,label])=>
   `<button type="button" data-condition="${id}" aria-haspopup="dialog"><span aria-hidden="true">${icon}</span> ${esc(label)}</button>`).join('');
+
 }
 
 function renderHistory(){
@@ -527,17 +652,33 @@ function renderHistory(){
   </details>`;
  }).join(''):'<p class="muted">完成一次冒险后会出现在这里。</p>';
 }
+function renderCombatRecap(){
+ const rows=state.effects.filter(fx=>fx.cells.length&&fx.target&&art.statusLabel(fx)).map(fx=>{
+  const target=fx.targetId==null?fx.target:`${fx.target} #${fx.targetId+1}`;
+  const label=art.statusLabel(fx);
+  return `<li data-effect="${esc(fx.kind)}"><span>${esc(target)}</span><b>${esc(label)}</b>
+   ${fx.source?`<small>${esc(fx.source)}</small>`:''}</li>`;
+ }).join('');
+ $('combat-recap').hidden=!rows;
+ $('combat-recap').innerHTML=rows;
+ $('journal-combat').hidden=!rows;
+ $('journal-combat-title').textContent=`第 ${state.turn} 拍结算`;
+ $('journal-combat-recap').innerHTML=rows;
+}
 function render(showEffects=false){
  $('room-name').textContent=state.roomName;
  const theme={water:'积水',grass:'草木茂盛'}[state.floorTheme];
  $('floor-theme').hidden=!theme;
  $('floor-theme').textContent=theme?' · '+theme:'';
- $('floor-label').textContent=state.region+' · '+state.depth+'/'+state.lastFloor+' 层';
+ $('floor-label').textContent=state.region;
+ $('floor-index').hidden=false;
+ $('floor-index').textContent=`${state.depth}/${state.lastFloor} 层`;
  renderGrowth();renderBag();
  $('tactics').innerHTML=
+  (state.anchorChain?`<button data-anchor-chain title="每下到新的一层补充一次充能">锚链 ${state.anchorChain.charges}/1</button>`:'')+
+  (state.storedCharge!=null?`<button data-stored-charge>预藏 ${state.storedCharge}/1</button>`:'')+
   (state.lock&&Math.abs(state.lock[0]-state.player.x)+Math.abs(state.lock[1]-state.player.y)===1?'<button data-unlock>打开锁门</button>':'')+
-  (state.features.some(f=>f.kind==='supply_choice'&&!f.used&&same(pos(f),pos(state.player)))?
-   '<button data-open-supply>查看补给箱</button>':'')+
+  (unopenedSupplyAt(pos(state.player))?'<button data-open-supply>打开补给箱</button>':'')+
   (state.groundItems?.length?'<button data-ground>脚下物品</button>':'');
  $('turn').textContent=String(state.turn).padStart(2,'0');$('seed').textContent='SEED '+state.seed;
  $('room-status').textContent=state.result?(state.result==='victory'?'试炼完成':'冒险结束'):state.choices.length?'选择旅途馈赠':state.returning.length?'回旋波即将返回':state.pursuing?(state.enemies.find(e=>e.intent.action==='notice')?'敌人刚发现你':'敌人警觉'):'探索中';
@@ -547,9 +688,14 @@ function render(showEffects=false){
  document.querySelector('[data-action="heavy"] small').textContent=`消耗 ${state.waveStats.heavyCost} · 伤害 ${state.waveStats.heavyDamage}`;
  document.querySelector('[data-action="guard"] small').textContent=`${state.mode==='armor'?'消耗 1 · ':''}挡 ${state.waveStats.guardLimit} 伤`;
  $('hp').textContent=state.player.hp+' / '+(state.maxHp??6);$('energy').textContent=state.player.energy+' / '+state.energyCap;
+ $('sanity').textContent=`${state.sanity} / ${state.sanityMax}`;
+ $('sanity-bar').max=state.sanityMax;
+ $('sanity-bar').value=state.sanity;
+ $('sanity-status').classList.toggle('low-sanity',state.sanity<=state.sanityLow);
+ $('sanity-status').title=state.sanity>state.sanityLow?'每行动一拍消耗 1 点理智，圣光可回复':state.sanity?'理智偏低，未探索区域可能出现增援':'理智耗尽，诅咒腐蚀生命';
  $('hp-bar').innerHTML=Array.from({length:state.maxHp??6},(_,i)=>`<i class="pip ${i<state.player.hp?'on':''}"></i>`).join('');
  $('energy-bar').innerHTML=Array.from({length:state.energyCap},(_,i)=>`<i class="pip ${i<state.player.energy?'on':''}"></i>`).join('');
- $('enemies').innerHTML=state.enemies.map(e=>`<div class="enemy"><div class="enemy-line"><span class="enemy-name"><span class="enemy-badge">${e.id+1}</span>${esc(e.name)}</span><span class="enemy-hp">${e.disguised?'状态未知':`${e.hp} 血 · ${e.energy} 能量`}${e.burning?' · 灼烧 '+e.burning:''}${e.frost_stacks?' · 霜 '+e.frost_stacks:''}${e.frozen?' · 冻结':''}</span></div><div class="enemy-intent">${esc(e.intent.label)} ${e.intent.direction?arrows[e.intent.direction]:''}</div></div>`).join('')||'<p class="empty">当前视野内没有敌人。<br>雾后的动静仍然未知。</p>';
+ renderEnemyLists();
  const owned=new Map(state.upgrades.map(u=>[u.id,u.name]));
  const names={heart:'护心',refund:'余势',echo:'回响',bag:'蓄能袋',pierce:'穿透',heavy:'重波'};
  $('upgrade-count').textContent=state.upgrades.length+' / '+(state.upgradeCount??6);
@@ -557,13 +703,44 @@ function render(showEffects=false){
  $('upgrades').innerHTML+=state.builds.map(b=>`<div class="upgrade">${esc(b.name)} · ${b.active?'已激活':b.requires.map(k=>names[k]).join(' + ')}<p>${esc(b.effect)}</p></div>`).join('');
  if(owned.has('echo')) $('upgrades').innerHTML+=`<p>回响已累计 ${state.echoProgress} 次攒</p>`;
  if(owned.has('heart')) $('upgrades').innerHTML+=`<p>护心本区域剩余 ${state.heartLeft} 次</p>`;
+ if(owned.has('gate_shield')) $('upgrades').innerHTML+=`<p>守门盾 · ${state.gateShieldReady?'下一发主束附带击退':'等待有效格挡'}</p>`;
  renderHistory();
+ renderCombatRecap();
  $('log').innerHTML=state.log.map(t=>`<li>${esc(t)}</li>`).join('');
  renderBoard(showEffects);if($('ground-dialog').open)renderGroundItems();renderLandmarks();renderControls();renderTalentChoice();
  if(state.talentChoice)return;
- if(state.choices.length){$('rewards').innerHTML=state.choices.map(c=>`<button data-choice="${c.id}" data-blocked="${!!c.blocked}" ${c.blocked?'disabled':''}><b>${esc(c.name)} ↗</b><small>${esc(c.description)}${c.blocked?' · 背包已满':''}</small></button>`).join('');const supply=state.choices[0].supply;$('reward-title').textContent=supply?'选择一件战术补给':'选择一件遗物';$('reward-description').textContent=supply?'选中的道具放入背包，另一件留在箱中封存。':'选择一项，本次冒险持续生效。';$('skip-reward').textContent=supply?'稍后再选':'跳过本次奖励';if(!$('reward-dialog').open){closeDialogs();$('reward-dialog').showModal()}}
+ if(state.choices.length){
+  const supply=state.choices[0].supply;
+  const selected=$('reward-dialog').open?$('rewards').querySelector('input:checked')?.value:null;
+  $('rewards').innerHTML=state.choices.map(c=>{
+   const id=esc(c.id), name=esc(c.name), description=esc(c.description);
+   if(supply){
+    return `<button class="reward-option" type="button" data-supply="${id}" ${c.blocked?'disabled':''}>
+     ${art.itemIcon(c.id)}<span><b>${name}</b>
+     <small>${description}${c.blocked?' · 背包装不下':''}</small></span>
+    </button>`;
+   }
+   const stats=(c.preview?.stats??[]).map(({label,before,after})=>
+    `<span class="talent-change">${esc(label)} <b>${before==null?'':esc(before)+' → '}${esc(after)}</b></span>`).join('');
+   const combos=(c.preview?.combos??[]).map(({name,effect,missing})=>
+    `<small class="reward-combo">${missing.length?'还需 '+esc(missing.join('、')):'立即激活'} · ${esc(name)}<br>${esc(effect)}</small>`).join('');
+   return `<label class="reward-option">
+    <input type="radio" name="relic" value="${id}" aria-labelledby="reward-name-${id}"
+     aria-describedby="reward-detail-${id}" ${selected===c.id?'checked':''}>
+    <span><b id="reward-name-${id}">${c.id==='impact'?'<i class="relic-impact-icon">'+art.uiIcon('impact')+'</i>':''}${name}</b><span id="reward-detail-${id}">
+     <small>${description}</small>${stats}${combos}</span></span>
+   </label>`;
+  }).join('');
+  $('reward-title').textContent=supply?'选择一件战术补给':'选择一件遗物';
+  $('reward-description').textContent=supply?'可以带走一件。背包装不下时，可先整理再继续选择。':'领取后在本次冒险中持续生效。';
+  $('confirm-reward').hidden=!!supply;
+  $('confirm-reward').disabled=busy||!selected;
+  $('organize-for-supply').hidden=!supply||!state.choices.some(c=>c.blocked);
+  $('skip-reward').textContent=supply?'稍后再选':'跳过本次奖励';
+  if(!$('reward-dialog').open){closeDialogs();$('reward-dialog').showModal()}
+ }
  else if($('reward-dialog').open)$('reward-dialog').close();
- if(state.result&&showEffects&&state.falls.length){setTimeout(()=>render(),800);return}
+ if(state.result&&showEffects&&(state.falls.length||state.fallTransition)){setTimeout(()=>render(),800);return}
  if(state.result&&displayedResult!==state.result){
   displayedResult=state.result;
   closeDialogs();
@@ -577,7 +754,47 @@ function render(showEffects=false){
  }
 
 }
-async function send(action,direction=null,choice=null){if(busy||!state)return false;let success=false;busy=true;aim=null;aimingItem=null;refreshPreview();renderControls();$('saved').textContent='保存中…';try{const depth=state.depth;state=await api('action',{action,direction,choice,version:state.version});if(state.result||state.depth!==depth)forgetTravel();else if(same(pos(state.player),pausedTravel))setPausedTravel(null);toast(state.log[0]||'继续探索。');render(true);clearTimeout(fxTimer);fxTimer=setTimeout(()=>renderBoard(),state.falls.length?780:540);$('saved').textContent='● 进度已保存';success=true}catch(e){toast(e.name==='AbortError'?'连接超时，正在恢复已保存局面。':e.message,true);try{state=await api('state');render();$('saved').textContent='● 已恢复存档'}catch{$('saved').textContent='连接断开 · 刷新重试'}}finally{busy=false;renderControls()}return success}
+async function send(action,direction=null,choice=null){
+ if(busy||!state)return false;
+ busy=true;
+ aim=null;
+ aimingItem=null;
+ refreshPreview();
+ renderControls();
+ $('saved').textContent='保存中…';
+ try{
+  const {depth,turn,version}=state;
+  state=await api('action',{action,direction,choice,version});
+  if(state.result||state.depth!==depth)forgetTravel();
+  else if(same(pos(state.player),pausedTravel))setPausedTravel(null);
+  toast(state.log[0]||'继续探索。');
+  const animate=state.turn!==turn;
+  if(state.fallTransition){
+   const wrap=$('board').parentElement;
+   wrap.classList.remove('fall-arrival');
+   void wrap.offsetWidth;
+   wrap.classList.add('fall-arrival');
+  }
+  render(animate);
+  clearTimeout(fxTimer);
+  if(animate)fxTimer=setTimeout(()=>renderBoard(),state.falls.length?820:740);
+  $('saved').textContent='● 进度已保存';
+  return true;
+ }catch(e){
+  toast(e.name==='AbortError'?'连接超时，正在恢复已保存局面。':e.message,true);
+  try{
+   state=await api('state');
+   render();
+   $('saved').textContent='● 已恢复存档';
+  }catch{
+   $('saved').textContent='连接断开 · 刷新重试';
+  }
+  return false;
+ }finally{
+  busy=false;
+  renderControls();
+ }
+}
 let previewRequest=0;
 async function refreshPreview(){
  const request=++previewRequest;
@@ -619,53 +836,120 @@ function direction(d){
  if(aimingItem){aimingItem=null;renderControls();renderBoard()}
  setInspecting(false);
  cancelTravel();if(!canAct())return;
- const cell=[state.player.x+dirs[d][0],state.player.y+dirs[d][1]];
- const tile=state.terrain.find(t=>same(pos(t),cell));
- const occupied=state.enemies.some(enemy=>same(pos(enemy),cell));
- if(!aim&&!occupied&&!state.movementLocked&&tile){
-  const warning=tile.kind==='fragile'&&tile.stage>=1
-   ?['这一步会坠落。','目标格已开裂或塌陷，踩入会立即死亡。防御与护心无法抵挡坠落。']
-   :tile.kind==='trap'&&tile.armed
-    ?[terrainName(tile), '可以在远处用波先触发。'+({alarm:'直接踩踏会招来附近敌人。',dart:'直接踩踏会受到 1 点伤害。',grip:'直接踩踏会让下一拍无法移动或用飞雷神。'}[tile.mechanism]??'')]
-    :null;
-  if(warning){
-   pendingFall={direction:d,version:state.version};
-   $('danger-title').textContent=warning[0];
-   $('danger-description').textContent=warning[1];
-   $('danger-dialog').showModal();
-   return;
-  }
- }
- send(aim||'move',d);
+ return send(aim||'move',d);
 }
-$('confirm-fall').addEventListener('click',()=>{
- const pending=pendingFall;pendingFall=null;$('danger-dialog').close();
- if(pending&&pending.version===state.version&&canAct())send('move',pending.direction);
-});
 $('loadout').addEventListener('click',event=>{
  const button=event.target.closest('button');if(!button||!canAct())return;
  cancelTravel();send(button.dataset.equip?'equip':'tune',null,button.dataset.equip||button.dataset.tune);
 });
 async function reset(seed,heroClass){aimingItem=null;setInspecting(false);forgetTravel();if(busy)return;busy=true;renderControls();try{state=await api('reset',{version:state.version,heroClass,...(seed===undefined?{}:{seed})});aim=null;refreshPreview();displayedResult=null;closeDialogs();toast('新的冒险。先观察敌人，再行动。');render();$('saved').textContent='● 进度已保存'}catch(e){toast(e.message,true);try{state=await api('state');render()}catch{}}finally{busy=false;renderControls()}}
 const enemyProfiles = {
- charger: {maxHp:2,attack:'1',description:'无能量时先攒；有能量且与你处于无遮挡的同一直线时出波，射程 4 格。否则会接近你。侧移或利用墙壁可避开已锁定的波。'},
+ charger: {maxHp:2,attack:'1',description:'无能量时先攒；有能量且与你处于无遮挡的同一直线时出波。否则会接近你。侧移或利用墙壁可避开已锁定的波。'},
  ram: {maxHp:2,attack:'1',description:'远处时向你接近，相邻时冲撞提前锁定的格子。冲撞不会追踪你移动后的位置，可以侧移躲开。'},
- shield: {maxHp:3,attack:'1',description:'举盾 → 卸盾空档 → 接近或冲撞，循环行动。举盾只抵挡 1 点伤害，卸盾时防御为 0；重波可以打穿盾。'},
- boss: {maxHp:6,attack:'1 / 2',description:'直线波造成 1 伤。震荡蓄力时以虚线标出范围，下一拍攻击原位置。半血后改为伤害更高的十字震荡，看到预警就开始撤离。震荡后会休整一拍。'}
+ shield: {maxHp:3,attack:'1',description:'举盾 → 卸盾空档 → 接近或冲撞，循环行动。举盾可抵挡 1 点伤害，卸盾时露出空档。'},
+ boss: {maxHp:6,attack:'1 / 2',description:'会发射直线波，也会先预告震荡范围，再攻击原位置。半血后改为更强的十字震荡。震荡后会休整一拍。'}
 };
+function enemyEffects(enemy){
+ if(enemy.disguised)return [];
+ return [
+  enemy.burning&&['灼烧 '+enemy.burning+' 拍','每拍受到 1 点伤害，浅水可熄灭。','burn'],
+  enemy.frost_stacks&&['叠霜 '+enemy.frost_stacks+'/2 层','叠满后会冻结一次移动。','frost'],
+  enemy.frozen&&['冻结','下一次尝试移动时停在原地。','frost'],
+  enemy.fear&&['惊退 '+enemy.fear+' 拍','接下来会尝试远离你。','fear']
+ ].filter(Boolean);
+}
+function renderEnemyLists(){
+ const priority=e=>e.intent.cells.length||e.intent.water?.length?2:e.intent.warning?.length?1:0;
+ const enemies=[...state.enemies].sort((a,b)=>priority(b)-priority(a));
+ const rows=enemies.map(enemy=>{
+  const risk=['quiet','warning','danger'][priority(enemy)];
+  const hp=enemy.disguised?'状态未知':`${enemy.hp}/${enemy.maxHp??enemy.hp} 生命`;
+  const statuses=enemyEffects(enemy).map(([label])=>label);
+  return `<button type="button" class="enemy-card" data-inspect-enemy="${enemy.id}" data-risk="${risk}">
+   <span class="enemy-line"><b class="enemy-name">${esc(enemy.name)}</b><span class="enemy-hp">${hp}</span></span>
+   <span class="enemy-intent">${esc(enemy.intent.label)}${enemy.intent.direction?' '+arrows[enemy.intent.direction]:''}</span>
+   ${statuses.length?`<small>${esc(statuses.join(' · '))}</small>`:''}</button>`;
+ }).join('');
+ $('enemies').innerHTML=rows||'<p class="empty">当前视野内没有敌人。</p>';
+ $('encounter-strip').innerHTML=rows;
+ const boss=enemies.find(e=>['boss','breaker','mirrorboss'].includes(e.kind)&&!e.disguised);
+ $('boss-banner').hidden=!boss;
+ if(boss){
+  $('boss-name').textContent=boss.name;
+  $('boss-hp').textContent=`${boss.hp}/${boss.maxHp??boss.hp}`;
+  $('boss-health').max=boss.maxHp??boss.hp;
+  $('boss-health').value=boss.hp;
+ }
+}
+
+function renderEnemyIntent(enemy){
+ const {intent}=enemy;
+ const area=[
+  ...intent.cells.map(cell=>[cell,'attack']),
+  ...(intent.water??[]).map(cell=>[cell,'water']),
+  ...(intent.warning??[]).map(cell=>[cell,'warning']),
+  ...(intent.target&&intent.action==='move'?[[intent.target,'move']]:[])
+ ];
+ const layer=new Map(area.map(([cell,kind])=>[cell.join(','),kind]));
+ const hero=pos(state.player), origin=pos(enemy);
+ const heroRisk=layer.get(hero.join(','));
+ const risk=heroRisk==='attack'||heroRisk==='water'?' · 你脚下在攻击范围内'
+  :heroRisk==='warning'?' · 你脚下在预告范围内':'';
+ $('enemy-current').textContent=intent.label+risk;
+ const map=$('enemy-intent-map');
+ map.hidden=!area.length;
+ if(map.hidden)return;
+ const cells=[hero,origin,...area.map(([cell])=>cell)];
+ const xs=cells.map(([x])=>x), ys=cells.map(([,y])=>y);
+ const left=Math.min(...xs), top=Math.min(...ys);
+ const width=Math.max(...xs)-left+1, height=Math.max(...ys)-top+1;
+ const walls=new Set(state.walls.map(c=>c.join(',')));
+ const tiles=state.visible.filter(([x,y])=>x>=left&&x<left+width&&y>=top&&y<top+height);
+ const marks=tiles.map(([x,y])=>{
+  const key=[x,y].join(','), kind=layer.get(key)??(walls.has(key)?'wall':'floor');
+  return `<rect class="intent-${kind}" x="${x-left+.06}" y="${y-top+.06}" width=".88" height=".88"/>`;
+ }).join('');
+ const marker=([x,y],kind)=>`<circle class="intent-${kind}" cx="${x-left+.5}" cy="${y-top+.5}" r=".25"/>`;
+ const legend={attack:'攻击',water:'导电',warning:'预告',move:'移动落点',hero:'你',source:'敌人'};
+ const keys=[...new Set(layer.values()),'hero','source'];
+ map.innerHTML=`<svg viewBox="0 0 ${width} ${height}" width="${width*22}" height="${height*22}" aria-hidden="true">
+  ${marks}${marker(hero,'hero')}${marker(origin,'source')}</svg>
+  <ul class="enemy-intent-key" aria-label="意图图例">${keys.map(key=>`<li><i class="intent-${key}"></i>${legend[key]}</li>`).join('')}</ul>`;
+}
+
 function inspectEnemy(enemy){
  const profile=enemyProfiles[enemy.kind]||{maxHp:enemy.maxHp,attack:enemy.attack??(enemy.kind==='breaker'?2:enemy.intent.damage||1),description:enemy.description};
  $('enemy-name').textContent=enemy.name;
- $('enemy-hp').textContent=enemy.disguised?'未知':`${enemy.hp} / ${enemy.maxHp??profile.maxHp}`;
- $('enemy-attack').textContent=enemy.disguised?'未知':(enemy.intent.damage??enemy.attack??profile.attack);
- $('enemy-defense').textContent=enemy.disguised?'未知':enemy.defense?'1（护甲 / 举盾）':'0';
+ $('enemy-portrait').innerHTML=art.enemyPortrait(enemy);
+ $('enemy-health').hidden=!!enemy.disguised;
+ $('enemy-stats').hidden=!!enemy.disguised;
+ $('enemy-intent-panel').hidden=!!enemy.disguised;
+ const maxHp=enemy.maxHp??profile.maxHp??enemy.hp;
+ $('enemy-hp').textContent=`生命 ${enemy.hp} / ${maxHp}`;
+ $('enemy-hp-bar').max=maxHp;
+ $('enemy-hp-bar').value=enemy.hp;
+ $('enemy-attack').textContent=enemy.attack??profile.attack;
+ $('enemy-defense').textContent=enemy.defense?`${enemy.defense} · ${enemy.kind==='escort'?'护甲':'举盾'}`:'0';
+ $('enemy-energy').textContent=enemy.energy;
+ if(!enemy.disguised)renderEnemyIntent(enemy);
+ const effects=enemyEffects(enemy);
+ $('enemy-effects-panel').hidden=!effects.length;
+ $('enemy-effects').innerHTML=effects.map(([label,detail,kind])=>`<li data-effect="${kind}"><b>${esc(label)}</b><span>${esc(detail)}</span></li>`).join('');
+ $('enemy-method-title').textContent=enemy.disguised?'外观':'攻击方式';
  const weapon=state.weapons.find(w=>w.id===enemy.emitter)?.name;
  const rune=RUNE_DETAILS[enemy.inscription];
- $('enemy-method').textContent=profile.description+(weapon?` 持有：${weapon} · ${rune}。`:'');
- $('enemy-current').textContent=`已锁定意图：${enemy.intent.label}。当前能量：${enemy.energy}。`+(enemy.stolen?' 携带偷来的能量。':'');
+ $('enemy-method').textContent=(profile.description??'')+(weapon?` 持有 ${[weapon,rune].filter(Boolean).join(' · ')}。`:'');
  $('enemy-loot').hidden=!enemy.lootHint;
  $('enemy-loot').textContent=enemy.lootHint??'';
  $('enemy-dialog').showModal();
+}
+for(const id of ['enemies','encounter-strip']){
+ $(id).addEventListener('click',event=>{
+  const button=event.target.closest('[data-inspect-enemy]');
+  if(!button||busy)return;
+  const enemy=state.enemies.find(e=>e.id===Number(button.dataset.inspectEnemy));
+  if(enemy){cancelTravel();inspectEnemy(enemy)}
+ });
 }
 let travelId=0, travelMove=null, travelPath=[], travelTarget=null, pausedTravel=null;
 let fillingEnergy=false;
@@ -717,22 +1001,22 @@ function cancelTravel(){
  travelPath=[];
  if(wasTraveling)setTravelTarget(null);
 }
-function unsafeTravelStep(cell){
+function unsafeTravelStep(cell,stepOnTrap=false){
  return state.walls.some(wall=>same(wall,cell))||same(state.lock,cell)||
   state.dangerCells?.some(danger=>same(danger,cell))||
   state.returning.some(wave=>wave.owner==='enemy'&&wave.cells.some(danger=>same(danger,cell)))||
   state.enemies.some(enemy=>same(pos(enemy),cell)||same(enemy.intent.target,cell)&&enemy.intent.action==='move')||
   state.terrain.some(tile=>same(pos(tile),cell)&&
-   (['fragile','mirror','rubble'].includes(tile.kind)||(tile.kind==='trap'&&tile.armed)));
+   (['mirror','rubble'].includes(tile.kind)||(!stepOnTrap&&(tile.kind==='fragile'||tile.kind==='trap'&&tile.armed))));
 }
 function travelNeedsCaution(){
  return state.pursuing||state.returning.length||state.enemies.some(e=>!e.dormant)||state.fireCells?.length;
 }
-async function travelTo(target,id,previous){
+async function travelTo(target,id,previous,stepOnTrap){
  let replan=false;
  try{
   do{
-   const response=await api('path',{target,version:state.version});
+   const response=await api('path',{target,version:state.version,stepOnTrap});
    if(id!==travelId)return;
    if(response.version!==state.version)throw Error('局面已变化，请重新选择目的地。');
    if(!response.path.length){
@@ -749,7 +1033,7 @@ async function travelTo(target,id,previous){
     const hp=state.player.hp, step=travelPath[0];
     const [dx,dy]=dirs[step];
     const next=[state.player.x+dx,state.player.y+dy];
-    if(unsafeTravelStep(next)){
+    if(unsafeTravelStep(next,stepOnTrap&&same(next,target))){
      if(!movedOnPath)throw Error('前方没有可自动通过的地格。');
      replan=true;
      $('travel-steps').textContent='重新寻路…';
@@ -778,6 +1062,10 @@ async function travelTo(target,id,previous){
      }
      break;
     }
+    if(same(pos(state.player),target)&&unopenedSupplyAt(target)){
+     await send('open_supply');
+     break;
+    }
     // A contested move or forced displacement invalidates the cached directions.
     if(!same(pos(state.player),next)){
      setPausedTravel(target);
@@ -803,13 +1091,13 @@ async function travelTo(target,id,previous){
   }
  }finally{if(id===travelId)cancelTravel()}
 }
-function requestTravel(target){
+function requestTravel(target,stepOnTrap=false){
  const previous=pausedTravel;
  setPausedTravel(null);
  travelPath=[];
  const id=++travelId;
  setTravelTarget(target,'寻路中…');
- return travelTo(target,id,previous);
+ return travelTo(target,id,previous,stepOnTrap);
 }
 function setInspecting(active){
  if(inspecting===active)return;
@@ -824,18 +1112,20 @@ function toggleInspection(){
 }
 function examineCell(target){
  const enemy=state.enemies.find(e=>same(pos(e),target));
+ const hazardDetails=cellHazards(target);
  setInspecting(false);
- if(enemy){inspectEnemy(enemy);return}
+ if(enemy&&!hazardDetails.length){inspectEnemy(enemy);return}
  const terrain=state.terrain.find(t=>same(pos(t),target));
  const door=state.doors.some(p=>same(p,target));
  const title=state.walls.some(p=>same(p,target))?'石墙':
   same(target,state.lock)?(lockStyle()?.name??'库房锁门'):door?'石门':
   same(target,state.exit)?(state.floorKind==='relic'?'终点祭坛':'下层阶梯'):
-  terrain?terrainName(terrain):'地面';
- const lines=[];
+  same(target,state.upStairs)?'上层阶梯':terrain?terrainName(terrain):'地面';
+ const lines=[...hazardDetails];
+ if(same(target,state.entrance))lines.push(state.upStairs?'站在阶梯上再点击，即可返回上一层。':'本层入口，也是回程卷轴的落点。');
+ if(state.openedShortcuts?.some(cell=>same(cell,target)))lines.push('已经揭开的隐蔽通路，可以双向穿行。');
  const smoke=state.smokeCells?.find(c=>same(pos(c),target));
  if(smoke)lines.push('烟雾还会持续 '+smoke.turns+' 拍，遮蔽敌人的视线。');
- if(state.fireCells?.some(cell=>same(cell,target)))lines.push('地火会在下一拍造成 1 点伤害，并可能蔓延到相邻高草。凝霜雾弹可以扑灭火焰。');
  if(title==='石墙')lines.push((state.secretClues??state.searchHints??[]).some(p=>same(p,target))
   ?'墙上有一道金色刻痕。站在旁边搜查可揭开暗门。':'阻挡移动、视线和能量波。');
  if(door)lines.push(state.openDoors.some(p=>same(p,target))
@@ -847,25 +1137,48 @@ function examineCell(target){
  if(same(target,state.exit)&&state.exitLockReason)lines.push(state.exitLockReason+'后解锁。');
  if((state.mapped??[]).some(p=>same(p,target)))lines.push('来自卷轴测绘，尚未亲眼确认。');
  for(const feature of state.features.filter(f=>same(pos(f),target))){
-  lines.push((['dry_spring','materials'].includes(feature.kind)?'':feature.used?'已使用：':'可拾取或使用：')+featureName(feature));
+  lines.push((feature.kind==='dry_spring'||emptyChest(feature)?'':feature.used?'已使用：':'可拾取或使用：')+featureName(feature));
   if(feature.kind==='supply_choice'&&!feature.used){
+   lines.push('点击箱子走过去并打开。已站在箱上时，可点脚下或「打开补给箱」。');
    for(const item of state.supplyOptions??[])lines.push(item.name+' · '+item.description);
   }
  }
- if((state.dangerCells??[]).some(p=>same(p,target))||state.returning.some(w=>w.owner==='enemy'&&w.cells.some(p=>same(p,target))))
-  lines.push('此格在下一拍攻击范围内。');
  $('cell-title').textContent=title;
  $('cell-details').innerHTML=lines.map(line=>`<li>${esc(line)}</li>`).join('');
  $('cell-details').hidden=!lines.length;
  openPanel('cell-dialog');
 }
+function cellHazards(target){
+ const details=[];
+ const contains=cells=>cells?.some(cell=>same(cell,target));
+ if(contains(state.fireCells))details.push('下一拍 · 地火 1 伤。凝霜雾弹可扑灭。');
+ if(contains(state.boneburstCells))details.push('下一拍 · 碎骨爆发 1 伤。');
+ for(const wave of state.returning){
+  if(wave.owner==='enemy'&&contains(wave.cells))details.push(`下一拍 · 敌方回波 ${wave.damage} 伤。`);
+ }
+ const terrainSources=details.length;
+ let namedAttack=false;
+ for(const enemy of state.enemies){
+  const {intent}=enemy;
+  if(contains(intent.cells)||contains(intent.water)){
+   const effect=contains(intent.water)?'（浅水导电）':'';
+   details.push(`下一拍 · ${enemy.name}：${intent.label}${effect}。`);
+   namedAttack=true;
+  }
+  if(contains(intent.warning))details.push(`敌方预告 · ${enemy.name}：${intent.label}。`);
+ }
+ if(!namedAttack&&!terrainSources&&contains(state.dangerCells))details.push('下一拍 · 此格在攻击范围内。');
+ return details;
+}
 async function mapClick(target, landmark=false){
  if(!state)return;
  if(inspecting&&!landmark){examineCell(target);return}
  if(aimingItem&&!landmark){
-  if(!throwTargets().some(p=>same(p,target))){toast('请选择四格内高亮的空地。',true);return}
+  const redirect=aimingItem!=='plant'&&aimingItem!=='anchor_chain'&&state.throwRedirects?.[target.join(',')];
+  if(!redirect&&!throwTargets().some(p=>same(p,target))){toast('请选择四格内高亮的地格。',true);return}
   lureSelection=target;
   lureHover=null;
+  if(redirect)toast('道具会落在障碍近侧的高亮格。');
   renderControls();
   renderBoard();
   return;
@@ -891,6 +1204,14 @@ async function mapClick(target, landmark=false){
   cancelTravel();toast(state.exitLockReason??'阶梯仍被封锁。',true);return;
  }
  if(!landmark&&stoodAtExit&&state.exitUnlocked&&same(target,state.exit)&&same(pos(state.player),state.exit)){cancelTravel();send('exit');return}
+ if(!landmark&&!aim&&same(target,state.upStairs)&&same(target,pos(state.player))){cancelTravel();send('ascend');return}
+ if(!aim&&unopenedSupplyAt(target)){
+  if(same(target,pos(state.player))){
+   cancelTravel();
+   await send('open_supply');
+  }else requestTravel(target);
+  return;
+ }
  if(!aim&&!landmark&&same(target,pos(state.player))){
   if(state.groundItems?.length){
    showGroundItems();
@@ -907,6 +1228,10 @@ async function mapClick(target, landmark=false){
   else if(dy===0&&dx!==0)d=dx<0?'left':'right';
   else return toast('请选择一条已标出的射线，或使用方向按钮。',true);
  }else{
+  if(!landmark&&tile&&(tile.kind==='fragile'||tile.kind==='trap'&&tile.armed)){
+   if(Math.abs(dx)+Math.abs(dy)!==1){requestTravel(target,true);return}
+   direction(dx===1?'right':dx===-1?'left':dy===1?'down':'up');return;
+  }
   if(landmark||rerouting||state.secretClues?.some(cell=>same(cell,target))||Math.abs(dx)+Math.abs(dy)!==1){requestTravel(target);return}
   d=dx===1?'right':dx===-1?'left':dy===1?'down':'up';
  }
@@ -915,7 +1240,9 @@ async function mapClick(target, landmark=false){
 $('tactics').addEventListener('click',event=>{
  const button=event.target.closest('button');
  if(!button||!canAct())return;
+ if(button.hasAttribute('data-anchor-chain')){setInspecting(false);useItem('anchor_chain');return}
  cancelTravel();
+ if(button.hasAttribute('data-stored-charge')){setInspecting(false);send('stored_charge');return}
  if(button.hasAttribute('data-ground')){showGroundItems();return}
  send(button.hasAttribute('data-open-supply')?'open_supply':'unlock');
 });
@@ -923,6 +1250,7 @@ $('tactics').addEventListener('click',event=>{
 // even if the original SVG node has been replaced by the time the tap ends.
 for(const map of [$('board'),$('minimap')]){
  let press=null;
+ const select=target=>map.id==='minimap'&&$('map-dialog').open?previewMapRoute(target):mapClick(target);
  const targetAt=event=>event.target.closest('[data-cell]')?.dataset.cell.split(',').map(Number);
  map.addEventListener('pointerdown',event=>{
   if(!event.isPrimary||event.button!==0)return;
@@ -937,23 +1265,27 @@ for(const map of [$('board'),$('minimap')]){
   if(press?.id!==event.pointerId)return;
   const {target,x,y}=press;
   press=null;
-  if(Math.hypot(event.clientX-x,event.clientY-y)<12)mapClick(target);
+  if(Math.hypot(event.clientX-x,event.clientY-y)<12)select(target);
  });
  map.addEventListener('click',event=>{
   if(event.detail!==0)return;
   const target=targetAt(event);
-  if(target)mapClick(target);
+  if(target)select(target);
  });
 }
 for(const list of [$('landmarks'),$('journal-landmark-list')]){
  list.addEventListener('click',event=>{
   const button=event.target.closest('[data-landmark]');
   if(!button||button.disabled||!state||state.result||state.talentChoice||state.choices.length)return;
+  const target=button.dataset.landmark.split(',').map(Number);
+  if(list.id==='landmarks'&&$('map-dialog').open){
+   previewMapRoute(target,button.dataset.landmarkName);
+   return;
+  }
   if(aim||aimingItem){aim=null;aimingItem=null;refreshPreview();renderControls()}
   if(inspecting)setInspecting(false);
-  const target=button.dataset.landmark.split(',').map(Number);
   $('journal-dialog').close();
-  if(same(target,pos(state.player))&&state.groundItems?.length){
+  if(same(target,pos(state.player))&&!unopenedSupplyAt(target)&&state.groundItems?.length){
    showGroundItems();
    return;
   }
@@ -976,8 +1308,8 @@ $('board').addEventListener('wheel',event=>{
 $('board').addEventListener('pointermove',event=>{
  if(!aimingItem||event.pointerType==='touch')return;
  const key=event.target.closest('[data-cell]')?.dataset.cell;
- const previews=state.smokeItems?.includes(aimingItem)?state.smokePreviews:state.lurePreviews;
- const next=previews?.[key]?key:null;
+ const previews=aimingItem==='anchor_chain'?state.anchorChain?.targets:state.smokeItems?.includes(aimingItem)?state.smokePreviews:state.lurePreviews;
+ const next=previews?.[key]||(aimingItem!=='plant'&&aimingItem!=='anchor_chain'&&state.throwRedirects?.[key])?key:null;
  if(next===lureHover)return;
  lureHover=next;
  renderBoard();
@@ -990,6 +1322,7 @@ $('board').addEventListener('pointerleave',()=>{
 $('throw-lure').addEventListener('click',()=>{
  if(!aimingItem||!lureSelection||!canAct())return;
  if(aimingItem==='plant')send('plant',lureSelection,plantingSeed);
+ else if(aimingItem==='anchor_chain')send('anchor_chain',lureSelection);
  else send('item',lureSelection,aimingItem);
 });
 $('inspect-cell').addEventListener('click',toggleInspection);
@@ -1001,12 +1334,14 @@ document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click'
 document.querySelectorAll('[data-direction]').forEach(b=>b.addEventListener('click',()=>direction(b.dataset.direction)));
 $('cancel-aim').addEventListener('click',()=>{aim=null;aimingItem=null;refreshPreview();renderBoard();renderControls();toast('已取消瞄准。')});
 $('exit').addEventListener('click',()=>send('exit'));
+$('ascend').addEventListener('click',()=>send('ascend'));
 function openPanel(id){
  cancelTravel();closeDialogs();$(id).showModal();
 }
 $('open-pack').addEventListener('click',()=>{
  if(!state)return;
  selectedBagItem=null;
+ selectedBagSlot=-1;
  renderBag();
  $('bag-feedback').textContent='';
  openPanel('pack-dialog');
@@ -1016,7 +1351,7 @@ $('talent-options').addEventListener('change',()=>{
  const limit=state.talentChoice.limit;
  const selected=document.querySelectorAll('#talent-options input:checked');
  document.querySelectorAll('#talent-options input').forEach(input=>{
-  input.disabled=!input.checked&&selected.length>=limit;
+  input.disabled=input.type==='checkbox'&&!input.checked&&selected.length>=limit;
  });
  renderControls();
 });
@@ -1035,10 +1370,7 @@ $('drink-dew').addEventListener('click',async()=>{
 $('quick-item-settings').addEventListener('change',event=>{
  const slot=QUICK_ITEMS.find(slot=>slot.key===event.target.dataset.quickBind);
  if(!slot)return;
- slot.id=event.target.value;
- try{localStorage.setItem(slot.storage,slot.id)}catch{}
- renderQuickItems();
- renderControls();
+ bindQuickItem(slot.key,event.target.value);
 });
 $('quick-items').addEventListener('click',event=>{
  const key=event.target.closest('[data-quick-use]')?.dataset.quickUse;
@@ -1054,9 +1386,15 @@ $('pack-dialog').addEventListener('click',async event=>{
  const item=event.target.closest('#bag-slots [data-item]');
  if(item){
   selectedBagItem=item.dataset.item;
+  selectedBagSlot=Number(item.dataset.bagSlot);
   document.querySelectorAll('#bag-slots [data-item]').forEach(slot=>
-   slot.setAttribute('aria-pressed',String(slot.dataset.item===selectedBagItem)));
+   slot.setAttribute('aria-pressed',String(slot===item)));
   renderBagItem();
+  return;
+ }
+ const binding=event.target.closest('[data-bind-item]');
+ if(binding&&canAct()&&state.inventory.some(item=>item.id===selectedBagItem&&!item.passive)){
+  bindQuickItem(binding.dataset.bindItem,selectedBagItem);
   return;
  }
  const recipe=event.target.closest('[data-recipe]');
@@ -1081,8 +1419,20 @@ $('pack-dialog').addEventListener('click',async event=>{
  }
  const button=event.target.closest('[data-growth]');
  if(!button||button.disabled)return;
- const ok=await send(button.dataset.growth,null,button.dataset.key||null);
- $('growth-status').textContent=ok?state.log[0]:$('message').textContent;
+ pendingGrowth={action:button.dataset.growth,key:button.dataset.key};
+ renderGrowthPreview();
+ renderControls();
+ $('growth-dialog').showModal();
+});
+$('growth-dialog').addEventListener('close',()=>{pendingGrowth=null});
+$('confirm-growth').addEventListener('click',async()=>{
+ if(!pendingGrowth||$('confirm-growth').disabled)return;
+ const {action,key}=pendingGrowth;
+ if(await send(action,null,key||null)){
+  $('growth-dialog').close();
+  $('growth-status').textContent=state.log[0];
+  document.querySelector(`[data-growth="${action}"][data-key="${CSS.escape(key)}"]`)?.focus();
+ }else $('growth-feedback').textContent=$('message').textContent;
 });
 $('ground-bag').addEventListener('click',()=>$('open-pack').click());
 $('ground-pick-all').addEventListener('click',()=>{if(canAct())send('pickup',null,{all:true})});
@@ -1107,16 +1457,118 @@ $('run-history').addEventListener('click',event=>{
  reset(record.seed,record.heroClass);
 });
 $('open-journal').addEventListener('click',()=>openPanel('journal-dialog'));
+async function previewMapRoute(target,name='所选地格'){
+ if(!canAct()||!$('map-dialog').open)return;
+ const current=same(target,pos(state.player));
+ const interaction=current&&(unopenedSupplyAt(target)?'open_supply':state.groundItems?.length?'ground':null);
+ const selection={target,version:state.version,interaction};
+ mapSelection=selection;
+ const go=$('map-route-go');
+ go.textContent=interaction==='open_supply'?'打开补给箱':interaction==='ground'?'查看脚下物品':'出发';
+ $('map-route-preview').textContent=interaction?`${name} · 就在脚下`:`${name} · 正在寻路…`;
+ renderControls();
+ renderBoard();
+ if(interaction)return;
+ try{
+  const response=await api('path',{target,version:selection.version});
+  if(mapSelection!==selection||!$('map-dialog').open||response.version!==state.version)return;
+  selection.path=response.path;
+  $('map-route-preview').textContent=selection.path.length
+   ?`${name} · ${travelNeedsCaution()?'谨慎行走，先走一步':selection.path.length+' 步'}`
+   :current?'你已在所选地格。':'你已到达目标附近。';
+ }catch(e){
+  if(mapSelection!==selection||!$('map-dialog').open)return;
+  $('map-route-preview').textContent=e.name==='AbortError'?'寻路超时，请重新点选目的地。':e.message;
+ }
+ renderControls();
+ renderBoard();
+}
 $('toggle-map').addEventListener('click',()=>{
- const expanded=$('map-rail').classList.toggle('expanded');
- $('toggle-map').setAttribute('aria-expanded',String(expanded));
+ if(!state||busy)return;
+ if(travelTarget)setPausedTravel(travelTarget);
+ mapSelection=null;
+ $('map-route-preview').textContent='点选地格或路标，预览路线。';
+ $('map-route-go').textContent='出发';
+ $('map-dialog-content').append($('floor-map-card'));
+ openPanel('map-dialog');
+ renderControls();
+ renderBoard();
+});
+$('map-dialog').addEventListener('close',()=>{
+ if($('map-dialog').open)return;
+ mapSelection=null;
+ $('map-rail').prepend($('floor-map-card'));
+ $('map-magnify').setAttribute('aria-pressed','false');
+ $('map-magnify').textContent='放大';
+ $('minimap').parentElement.classList.remove('magnified');
+ renderBoard();
+});
+$('map-magnify').addEventListener('click',()=>{
+ const viewport=$('minimap').parentElement;
+ const magnified=viewport.classList.toggle('magnified');
+ $('map-magnify').setAttribute('aria-pressed',String(magnified));
+ $('map-magnify').textContent=magnified?'适应':'放大';
+ if(!magnified){viewport.scrollTo(0,0);return}
+ const [x,y]=mapSelection?.target??pos(state.player);
+ const matrix=$('minimap').getScreenCTM();
+ if(!matrix)return;
+ const location=new DOMPoint(x*8+4,y*8+4).matrixTransform(matrix);
+ const bounds=viewport.getBoundingClientRect();
+ viewport.scrollBy(location.x-bounds.left-viewport.clientWidth/2,location.y-bounds.top-viewport.clientHeight/2);
+});
+$('map-route-go').addEventListener('click',()=>{
+ if($('map-route-go').disabled||!mapSelection)return;
+ const {target,interaction}=mapSelection;
+ $('map-dialog').close();
+ aim=null;aimingItem=null;
+ refreshPreview();
+ setInspecting(false);
+ renderControls();
+ if(interaction==='open_supply')send('open_supply');
+ else if(interaction==='ground')showGroundItems();
+ else requestTravel(target);
 });
 $('help').addEventListener('click',()=>openPanel('help-dialog'));
 document.querySelectorAll('.close-dialog').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
 $('reward-dialog').addEventListener('cancel',e=>e.preventDefault());
 $('skip-reward').addEventListener('click',()=>send('skip_reward'));
-$('rewards').addEventListener('click',e=>{const b=e.target.closest('[data-choice]');if(b)send('choose',null,b.dataset.choice)});
+$('organize-for-supply').addEventListener('click',async()=>{
+ if(state.choices[0]?.supply&&await send('skip_reward'))$('open-pack').click();
+});
+$('return-to-supply').addEventListener('click',()=>{
+ if(canAct()&&unopenedSupplyAt(pos(state.player)))send('open_supply');
+});
+$('rewards').addEventListener('click',e=>{
+ const button=e.target.closest('[data-supply]');
+ if(button)send('choose',null,button.dataset.supply);
+});
+$('rewards').addEventListener('change',()=>{$('confirm-reward').disabled=busy||!$('rewards').querySelector('input:checked')});
+$('confirm-reward').addEventListener('click',()=>{
+ const selection=$('rewards').querySelector('input:checked');
+ if(selection)send('choose',null,selection.value);
+});
 let startingFirstRun=false;
+function renderClassPreview(){
+ const selection=$('class-options').querySelector('input:checked');
+ const hero=state.classes.find(entry=>entry.id===selection?.value);
+ const panel=$('class-preview');
+ panel.hidden=!hero?.preview;
+ if(panel.hidden)return;
+ const {range,cells,targets,returns}=hero.preview;
+ panel.style.setProperty('--class-color',hero.color);
+ const detail=returns?'下一拍沿去程返回。可先移动，再让回波击中原路径上的敌人。':
+  hero.id==='lance'?'直线最多击中两名敌人。把敌人引到同一条线上再出波。':
+  hero.id==='fan'?'扇面可同时命中两侧的敌人。适合在近距离应对围攻。':
+  '波止于第一个敌人。可以在射程内先拉开距离。';
+ const board=Array.from({length:(range+1)*3},(_,i)=>{
+  const cell=[i%(range+1),Math.floor(i/(range+1))];
+  const origin=same(cell,[0,1]), hit=targets.some(target=>same(target,cell));
+  const beam=cells.some(target=>same(target,cell));
+  return `<span class="class-demo-cell"${beam?' data-wave':''}${hit?' data-target':''}>${origin?art.portrait(hero.color):hit?'◆':beam?(returns?'⇄':'·'):''}</span>`;
+ }).join('');
+ panel.innerHTML=`<div class="class-preview-copy"><b>${esc(hero.name)} · 射程 ${range} 格</b><p>${detail}</p></div>
+  <div class="class-preview-art" aria-hidden="true"><div class="class-demo" style="--demo-columns:${range+1}">${board}</div><small>◆ 示例敌人</small></div>`;
+}
 function chooseClass(firstRun=false){
  if(!state)return;
  startingFirstRun=firstRun;
@@ -1126,8 +1578,10 @@ function chooseClass(firstRun=false){
  <input type="radio" name="hero-class" value="${c.id}" ${(state.heroClass||'straight')===c.id?'checked':''}>
  <span class="class-avatar" aria-hidden="true">${art.portrait(c.color)}</span>
  <span><b>${esc(c.name)}</b><small>${esc(c.description)}</small></span></label>`).join('');
+ renderClassPreview();
  openPanel('restart-dialog');
 }
+$('class-options').addEventListener('change',renderClassPreview);
 $('restart').addEventListener('click',()=>chooseClass());
 $('restart-dialog').addEventListener('cancel',event=>{if(startingFirstRun)event.preventDefault()});
 $('confirm-restart').addEventListener('click',()=>{
@@ -1136,6 +1590,106 @@ $('confirm-restart').addEventListener('click',()=>{
 });
 $('retry').addEventListener('click',()=>reset(state.seed,state.heroClass));
 $('new-seed').addEventListener('click',()=>chooseClass());
-document.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.isComposing||document.querySelector('dialog[open]'))return;const key=e.key.toLowerCase();if(key==='escape'){setInspecting(false);forgetTravel()}const d={arrowup:'up',w:'up',arrowright:'right',d:'right',arrowdown:'down',s:'down',arrowleft:'left',a:'left'}[key];if(d){e.preventDefault();direction(d)}else if(key==='i'){e.preventDefault();toggleInspection()}else if(QUICK_ITEMS.some(slot=>slot.key===key)){e.preventDefault();useQuickItem(key)}else if(key==='x'){e.preventDefault();chooseAction('search')}else if(['1','2','3','4','5'].includes(key)){e.preventDefault();chooseAction({'1':'charge','2':'wave','3':'guard','4':'heavy','5':'reflect'}[key])}else if(key==='escape'){$('cancel-aim').click()}else if(key==='?'){$('help').click()}});
+const directionKeys={arrowup:'up',w:'up',arrowright:'right',d:'right',
+ arrowdown:'down',s:'down',arrowleft:'left',a:'left'};
+const actionKeys={'1':'charge','2':'wave','3':'guard','4':'heavy','5':'reflect',x:'search'};
+const WALK_START_DELAY=240, WALK_STEP_DELAY=110;
+let heldWalk=null;
+
+function stopHeldWalk(){
+ clearTimeout(heldWalk?.timer);
+ heldWalk=null;
+}
+
+function heldWalkThreat(){
+ return state.pursuing||state.enemies.some(enemy=>!enemy.dormant)||
+  state.returning.some(wave=>wave.owner==='enemy');
+}
+
+async function walkHeldStep(walk,first){
+ if(heldWalk!==walk)return;
+ if(!canAct()||document.querySelector('dialog[open]')||aim||aimingItem||state.movementLocked){
+  stopHeldWalk();
+  return;
+ }
+ const [dx,dy]=dirs[walk.direction];
+ const next=[state.player.x+dx,state.player.y+dy];
+ const [x,y]=next;
+ if(!first&&(heldWalkThreat()||unsafeTravelStep(next,true)||state.fireCells?.some(cell=>same(cell,next))||
+     x<0||x>=state.width||y<0||y>=state.height)){
+  stopHeldWalk();
+  return;
+ }
+ const {depth}=state, hp=state.player.hp;
+ walk.step=direction(walk.direction);
+ const moved=await walk.step;
+ if(heldWalk!==walk)return;
+ if(!moved||state.depth!==depth||state.player.hp<hp||!same(pos(state.player),next)||
+   state.effects.some(fx=>['trap','revive'].includes(fx.kind))){
+  stopHeldWalk();
+  return;
+ }
+ if(heldWalkThreat()){
+  stopHeldWalk();
+  toast('遇敌 · 已停止连续行走。');
+  return;
+ }
+ walk.timer=setTimeout(()=>walkHeldStep(walk,false),first?WALK_START_DELAY:WALK_STEP_DELAY);
+}
+
+async function startHeldWalk(key,heading){
+ const previousStep=busy?heldWalk?.step:null;
+ stopHeldWalk();
+ if(!previousStep&&!canAct())return;
+ if(aim||aimingItem||state.movementLocked||heldWalkThreat()){
+  direction(heading);
+  return;
+ }
+ const walk={key,direction:heading};
+ heldWalk=walk;
+ if(previousStep){
+  await previousStep;
+  if(heldWalk!==walk)return;
+  if(heldWalkThreat()){stopHeldWalk();return}
+ }
+ await walkHeldStep(walk,true);
+}
+
+document.addEventListener('keydown',event=>{
+ if(event.ctrlKey||event.metaKey||event.altKey||event.isComposing||
+    event.target.closest?.('input, textarea, select, [contenteditable]')||
+    document.querySelector('dialog[open]'))return;
+ const key=event.key.toLowerCase();
+ const heading=directionKeys[key];
+ if(heading){
+  event.preventDefault();
+  if(!event.repeat)startHeldWalk(key,heading);
+  return;
+ }
+ if(event.repeat)return;
+ stopHeldWalk();
+ if(key==='escape'){
+  setInspecting(false);
+  forgetTravel();
+  $('cancel-aim').click();
+ }else if(key==='i'){
+  event.preventDefault();
+  toggleInspection();
+ }else if(QUICK_ITEMS.some(slot=>slot.key===key)){
+  event.preventDefault();
+  useQuickItem(key);
+ }else if(actionKeys[key]){
+  event.preventDefault();
+  chooseAction(actionKeys[key]);
+ }else if(key==='?')$('help').click();
+});
+document.addEventListener('keyup',event=>{
+ if(event.key.toLowerCase()===heldWalk?.key)stopHeldWalk();
+});
+document.addEventListener('pointerdown',stopHeldWalk,{capture:true});
+window.addEventListener('blur',stopHeldWalk);
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden)stopHeldWalk();
+});
 matchMedia('(max-width: 680px)').addEventListener('change',()=>renderBoard());
-api('state').then(s=>{if(!s.floorVersion||!s.depth||!s.mechanicsVersion||!s.lastFloor||s.growthVersion!==2)throw Error('服务仍为旧版，请重启 Python 服务。');state=s;busy=false;render();$('saved').textContent='● 进度已保存';if(!state.result&&!state.choices.length&&!state.talentChoice&&state.turn===0&&!state.heroClass){chooseClass(true);return}if(!state.result&&!state.choices.length&&!state.talentChoice&&state.turn===0){try{if(!localStorage.getItem('bobozan-floor-guide-v1')){$('help-dialog').showModal();localStorage.setItem('bobozan-floor-guide-v1','seen')}}catch{}}}).catch(e=>{toast(e.message==='服务仍为旧版，请重启 Python 服务。'?e.message:'无法连接地牢。请运行 python3 server.py 后刷新页面。',true);$('saved').textContent='连接失败';$('restart').disabled=true;document.querySelectorAll('[data-action],[data-direction],#exit').forEach(b=>b.disabled=true)});
+api('state').then(s=>{if(!s.floorVersion||!s.depth||!s.mechanicsVersion||!s.lastFloor||!s.sanityMax||s.growthVersion!==5)throw Error('服务仍为旧版，请重启 Python 服务。');state=s;busy=false;render();$('saved').textContent='● 进度已保存';if(!state.result&&!state.choices.length&&!state.talentChoice&&state.turn===0&&!state.heroClass){chooseClass(true);return}if(!state.result&&!state.choices.length&&!state.talentChoice&&state.turn===0){try{if(!localStorage.getItem('bobozan-floor-guide-v1')){$('help-dialog').showModal();localStorage.setItem('bobozan-floor-guide-v1','seen')}}catch{}}}).catch(e=>{toast(window.bobozanLocalApi||e.message==='服务仍为旧版，请重启 Python 服务。'?e.message:'无法连接地牢。请运行 python3 server.py 后刷新页面。',true);$('saved').textContent='连接失败';$('restart').disabled=true;document.querySelectorAll('[data-action],[data-direction],#exit').forEach(b=>b.disabled=true)});

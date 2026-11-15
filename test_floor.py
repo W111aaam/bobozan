@@ -10,12 +10,15 @@ def go(g,action,direction=None,choice=None):g.act(action,direction,g.version,cho
 
 def route(g,target):
     start=(g.player['x'],g.player['y']);q=deque([(start,[])]);seen={start}
+    hazards = {position(tile) for tile in g.terrain if tile['kind'] == 'fragile'
+               or tile['kind'] == 'trap' and tile['mechanism'] == 'fall' and tile['armed']}
     while q:
         p,path=q.popleft()
         if p==tuple(target):return path
         for d,(dx,dy) in DIRS.items():
             n=(p[0]+dx,p[1]+dy)
-            if n not in seen and g.walkable(n) and not g.unsafe_ground(n):seen.add(n);q.append((n,path+[d]))
+            if n not in seen and n not in hazards and g.walkable(n):
+                seen.add(n);q.append((n,path+[d]))
     raise AssertionError('No path')
 
 
@@ -37,6 +40,78 @@ def center(g, room):
 
 
 class FloorTests(unittest.TestCase):
+    def test_floor_snapshots_keep_consumed_resources_and_persistent_player_state(self):
+        g = FloorDungeon(13)
+        upper = g.exit[:]
+        relic = feature(g, 'key')
+        relic['used'] = True
+        g.keys = 1
+        g.locked = False
+        g.enemies[0]['hp'] = 1
+        place(g, upper)
+        go(g, 'exit')
+        lower = g.entrance_cell()
+        self.assertEqual(g.state()['upStairs'], lower)
+        g.keys = 0
+        g.inventory.append('heal')
+        g = FloorDungeon.restore(g.dump())
+        go(g, 'ascend')
+        self.assertEqual((g.depth, list(position(g.player)), g.sanity), (1, upper, 448))
+        self.assertTrue(feature(g, 'key')['used'])
+        self.assertFalse(g.locked)
+        self.assertEqual((g.keys, g.enemies[0]['hp']), (1, 1))
+        go(g, 'exit')
+        self.assertEqual((g.depth, list(position(g.player)), g.keys, g.inventory), (2, lower, 0, ['heal']))
+
+    def test_fall_trap_uses_safe_cell_on_next_floor(self):
+        g = FloorDungeon(13)
+        x, y = position(g.player)
+        g.terrain.append(dict(x=x+1, y=y, kind='trap', mechanism='fall', armed=True))
+        g.update_visibility()
+        with self.assertRaisesRegex(ValueError, '绕过'):
+            g.path_to([x+1, y])
+        self.assertEqual(g.path_to([x+1, y], True), ['right'])
+        go(g, 'move', 'right')
+        self.assertEqual((g.result, g.depth, g.player['hp'], g.sanity), (None, 2, 3, 449))
+        target = position(g.player)
+        self.assertNotIn((g.tile_at(target) or {}).get('kind'), ('trap', 'fragile'))
+        self.assertTrue(g.walkable(target))
+        self.assertFalse(any(position(f) == target for f in g.features))
+        self.assertIn(g.rooms_data[g.room]['kind'], ('entry', 'standard', 'combat', 'branch'))
+        self.assertEqual(g.state()['fallTransition']['landing'], list(target))
+
+    def test_corrosion_ticks_and_light_is_the_only_sanity_refill(self):
+        g = FloorDungeon(13)
+        g.sanity = 151
+        g.enemies = []
+        go(g, 'guard')
+        self.assertEqual(g.sanity, 150)
+        self.assertGreater(len(g.corruption_rooms), 0)
+        old_ids = [enemy['id'] for enemy in g.enemies]
+        g = FloorDungeon.restore(g.dump())
+        go(g, 'guard')
+        self.assertEqual([enemy['id'] for enemy in g.enemies], old_ids)
+        g.sanity = 1
+        g.player['energy'] = 0
+        go(g, 'charge')
+        self.assertEqual((g.sanity, g.player['hp']), (0, 4))
+        g.corrosion = 115
+        go(g, 'guard')
+        self.assertEqual(g.player['hp'], 3)
+        x, y = position(g.player)
+        g.features.append(dict(id='test-light', kind='light_wisp', x=x, y=y, used=False))
+        go(g, 'guard')
+        self.assertEqual((g.sanity, g.player['hp'], g.corrosion), (64, 3, 0))
+        self.assertNotIn('test-light', [f['id'] for f in g.state()['features']])
+
+    def test_ordinary_floors_generate_real_loot_and_do_not_spawn_empty_features(self):
+        for seed in range(8):
+            for depth in (1, 2, 3, 4, 7, 12, 19, 24):
+                generated = generate_layout(seed, depth)
+                self.assertFalse({'materials', 'dry_spring'} & {f['kind'] for f in generated['features']})
+                self.assertTrue(any(f['id'] == 'light' for f in generated['features']))
+                self.assertGreaterEqual(sum(t['kind'] == 'trap' for t in generated['terrain']), 2)
+                self.assertGreaterEqual(sum(t['kind'] == 'high_grass' for t in generated['terrain']), 8)
     def test_loop_and_all_objectives_reachable(self):
         layouts = set()
         for seed in range(40):
@@ -75,10 +150,10 @@ class FloorTests(unittest.TestCase):
                     if shape == 'chamfered':
                         self.assertFalse(g.walkable((left+1, top+1)))
                     if shape == 'hall':
-                        self.assertEqual(max(right-left, bottom-top), 12)
+                        self.assertEqual((max(right-left, bottom-top), min(right-left, bottom-top)), (10, 8))
                     route(g, room['anchor'])
                 route(g, g.exit)
-        self.assertEqual(shapes, {'rectangle', 'hall', 'chamfered'})
+        self.assertEqual(shapes, {'rectangle', 'hall', 'chamfered', 'compact', 'cross', 'alcove'})
 
     def test_themed_floor_has_extra_terrain_and_survives_restore(self):
         seen = set()
@@ -383,7 +458,7 @@ class FloorTests(unittest.TestCase):
             for depth in range(first, first + 4):
                 g.depth = depth
                 g.enter_room()
-                if feature(g, 'chest')['kind'] == 'supply_choice':
+                if any(f['kind'] == 'supply_choice' for f in g.features):
                     options.append(depth)
             self.assertEqual(len(options), 1)
         g.depth = 2
@@ -393,12 +468,16 @@ class FloorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             go(g, 'open_supply')
         place(g, position(box))
-        self.assertEqual([item['id'] for item in g.state()['supplyOptions']], ['smoke', 'lure'])
-        g.inventory = ['lure'] * g.bag_capacity
+        expected = ['smoke', 'lure']
+        self.assertEqual([item['id'] for item in g.state()['supplyOptions']], expected)
+        g.inventory = ['ankh'] * g.bag_capacity
+        go(g, 'open_supply')
+        self.assertTrue(all(entry['blocked'] for entry in g.state()['choices']))
         before = g.dump()
         with self.assertRaises(ValueError):
-            go(g, 'open_supply')
+            go(g, 'choose', choice='smoke')
         self.assertEqual(g.dump(), before)
+        go(g, 'skip_reward')
         g.inventory.pop()
 
         go(g, 'open_supply')
@@ -406,7 +485,7 @@ class FloorTests(unittest.TestCase):
         self.assertFalse(box['used'])
         go(g, 'open_supply')
         g = FloorDungeon.restore(g.dump())
-        self.assertEqual([entry['id'] for entry in g.state()['choices']], ['smoke', 'lure'])
+        self.assertEqual([entry['id'] for entry in g.state()['choices']], expected)
         go(g, 'choose', choice='smoke')
         self.assertEqual(g.inventory[-1], 'smoke')
         self.assertTrue(feature(g, 'chest')['used'])
@@ -428,10 +507,10 @@ class FloorTests(unittest.TestCase):
         self.assertEqual(g.keys, 0)
         for direction in route(g, cache):
             go(g, 'move', direction)
-        self.assertEqual(g.inventory, ['smoke', 'lure'])
+        self.assertEqual(g.inventory, ['smoke'])
         turn = g.turn
         go(g, 'item', choice='smoke')
-        self.assertEqual((g.turn, g.smoke, g.inventory), (turn+1, 3, ['lure']))
+        self.assertEqual((g.turn, g.smoke, g.inventory), (turn+1, 3, []))
 
     def test_route_opens_closed_door_that_blocks_sight_and_shots(self):
         g = FloorDungeon(0)

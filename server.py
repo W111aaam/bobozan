@@ -132,6 +132,8 @@ class Handler(LegacyHandler):
             name, mime = {'/': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascript'),
                           '/style.css': ('style.css', 'text/css'), '/art.js': ('art.js', 'text/javascript')}[self.path]
             self.reply(200, Path(__file__).with_name('web').joinpath(name).read_bytes(), mime+'; charset=utf-8')
+        elif self.path == '/reflect-button.png':
+            self.reply(200, Path(__file__).with_name('web').joinpath(self.path[1:]).read_bytes(), 'image/png')
         elif self.path == '/favicon.ico':
             self.reply(204, b'', 'image/x-icon')
         else:
@@ -169,7 +171,7 @@ class Handler(LegacyHandler):
             elif self.path == '/api/path':
                 if data.get('version') != game.version:
                     raise ValueError('局面已更新，请重新选择。')
-                return self.reply(200, {'path': game.path_to(data.get('target')), 'version': game.version})
+                return self.reply(200, {'path': game.path_to(data.get('target'), data.get('stepOnTrap')), 'version': game.version})
             elif self.path == '/api/action':
                 game.act(data.get('action'), data.get('direction'), data.get('version'), data.get('choice'))
             else:

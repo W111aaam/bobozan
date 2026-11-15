@@ -41,7 +41,7 @@ class SideEncounters:
             enemy.pop('last_seen', None)
             enemy['intent'] = dict(action='wait', label='静伏', cells=[])
             return True
-        if kind == 'sparkthief' and enemy.get('stolen'):
+        if kind == 'sparkthief' and enemy.get('stolen') and enemy.get('sound', {}).get('kind') != 'alarm':
             self.plan_thief_escape(enemy, player)
             return True
         return False
@@ -237,7 +237,8 @@ class SideEncounters:
         if count >= 2:
             return 0
         chance, item = ENEMY_LOOT[kind]
-        if item == 'kit' and getattr(self, 'enemy_heal_region', None) == (self.depth - 1) // 5:
+        heal_region = getattr(self, 'enemy_heal_region', None)
+        if item == 'kit' and heal_region is not None and heal_region >= (self.depth - 1) // 5:
             return 0
         return chance // 2 if count else chance
 
@@ -260,6 +261,10 @@ class SideEncounters:
                 continue
             drop = ('stolen_energy' if enemy.get('stolen') else
                     FIXED_ENEMY_LOOT.get(enemy['kind']) or self.roll_enemy_loot(enemy))
+            if (not drop and enemy['kind'] == 'canalfish' and not getattr(self, 'light_enemy_drop', False)
+                    and Random(f'{self.seed}:{self.depth}:{enemy["id"]}:light').randrange(4) == 0):
+                self.light_enemy_drop = True
+                drop = 'light_wisp'
             if drop:
                 x,y = cell(enemy)
                 self.features.append(dict(id=f'drop-{enemy["id"]}', kind=drop, x=x, y=y, used=False))

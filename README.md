@@ -12,6 +12,13 @@ python3 server.py --port 8767
 
 打开 <http://127.0.0.1:8767>，Ctrl+C 停止。修改 Python 后需要重启服务，修改页面后刷新即可。服务只监听本机，尚未发布到公网。
 
+## 静态试玩版
+
+    python3 tools/build_static.py dist/bobozan
+    python3 -m http.server 8768 --directory dist --bind 127.0.0.1
+
+打开 <http://127.0.0.1:8768/bobozan/>。此版本在 Web Worker 中运行游戏的 Python 逻辑，首次加载需要访问 Pyodide 的 CDN。进度保存在当前浏览器。发布到 GitHub Pages 时，将 `dist/bobozan` 用作站点产物。
+
 ## 本轮完成
 
 1. **整层自由探索**：按种子生成房间、环路和支路。走过门即可往返；敌人生命、奖励、宝箱、泉水状态不会重置。
@@ -23,7 +30,7 @@ python3 server.py --port 8767
 
 | 操作 | 键盘 / 鼠标 | 效果 |
 | --- | --- | --- |
-| 移动 | 方向键 / WASD / 相邻格 / 方向按钮 | 移动一格，消耗一拍 |
+| 移动 | 方向键 / WASD / 相邻格 / 方向按钮 | 每步消耗一拍。长按键盘方向可连续移动，松键或遇敌即停 |
 | 自动行走 | 点击地图或小地图的已探索地面 | 途中可点另一处地面改道。遇敌、受伤或触发事件时停下并保留目标。手动走位后可点「继续前往」；局面仍危险时点「继续一步」，每次重新计算一格安全路线 |
 | 停止行走 / 取消瞄准 | Esc / 停止按钮 | 停止后续步骤，已提交的一步仍结算 |
 | 攒 | 1 / 攒按钮 | 增加 1 能量 |
@@ -48,13 +55,13 @@ python3 server.py --port 8767
 | 21–25 | 恶魔大厅 | 25 |
 | 26 | 终点 | 抵达祭坛结算 |
 
-普通层根据种子和区域分配入口、战斗、补给、泉水和阶梯。房间数、位置和连接随种子变化，主环可接支房与捷径。普通战斗房至少有两个入口，入口前后有侧移空间。每区第 4 层（第 4、9、14、19、24 层）必须清理指定战斗区才可下楼。其他普通层允许绕开敌人。设计参考 [Shattered Pixel Dungeon 的楼层分配](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/Dungeon.java#L280) 和[房间生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java#L99)。
+普通层根据种子和区域分配入口、战斗、补给、泉水和阶梯。房间数、位置和连接随种子变化，主环可接支房与捷径。普通房间可生成紧凑、狭长、切角、十字或带凹角的房型，门口留出侧移空间，高草与短草成片出现。普通战斗房至少有两个入口，入口前后有侧移空间。每区第 4 层（第 4、9、14、19、24 层）必须清理指定战斗区才可下楼。其他普通层允许绕开敌人。设计参考 [Shattered Pixel Dungeon 的楼层分配](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/Dungeon.java#L280) 和[房间生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java#L99)。
 
 普通门关闭时挡视线和波，玩家或敌人踏入就打开，门格无人时关闭。点击已探索地面可沿途打开普通门。自动移动遇到新发现的障碍或危险地格时会尝试绕路。找不到已知的安全路线时停步并保留目的地。新敌人出现、受伤或触发选项时会立即停下。接战时点击远处只走一步，并绕开已标出的危险格。敌人首次发现玩家时先警觉一拍，追击后会记住最后看到的位置，也能开门继续追击。旧存档保留当前层地形，下楼时使用新生成规则。
 
 部分普通层有暗门。亲眼看到金色刻痕后，本层日志会记下位置。点击日志、主地图或小地图上的刻痕会导航到可搜查的位置。按 `X` 或点「搜查」消耗一拍揭开暗门，随后可进去拾取刻印碎片。设计参考 [原作的地牢日志](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/journal/Notes.java#L138)和[主动搜查](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/hero/Hero.java#L2490)。
 
-从第 3 层开始，部分支房有一次性陷阱。刺针格被踩中会造成 1 伤，警报会吸引房内敌人。第 12、17、22 层的支房可能有夹足陷阱，扣住踩中的角色一拍，攻击仍可使用。参考 [原作夹足陷阱](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/GrippingTrap.java)。可用波、投出的诱饵或响草种子远程触发。从监狱开始，部分陷阱会藏在地板下。进入相关房间会提示「机关痕迹」，按 X 可搜出两格内可见的陷阱。自动行走绕过已发现的陷阱，触发机关会停步；手动踩向已知陷阱时会先确认。设计参考 [原作的陷阱触发](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/Trap.java)和[警报陷阱](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/AlarmTrap.java)。
+普通层布置刺针、夹足、警报和坠落陷阱。自动寻路会绕开已布置的未触发机关和裂地。点选陷阱或手动踩入会直接触发，按 X 搜查仍可揭露两格内的隐藏机关。警报将触发位置广播给整层敌人。踩中坠落机关或塌地会掉到下一层的安全普通格，受到自身最大生命 30%–50% 的伤害，按整数结算。参考 [原作机关触发](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/Trap.java)、[全层警报](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/AlarmTrap.java)和[坠落过渡](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/features/Chasm.java)。
 
 地图右上角可缩放，桌面也可在地图上滚动；点击倍率恢复默认大小。参考 [原作的地图缩放](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/scenes/CellSelector.java)。
 
@@ -76,7 +83,7 @@ python3 server.py --port 8767
 
 每个区域的第三层有机会出现刺针库房。开锁后，一排可见机关横在刻印碎片前。可用波或诱饵远程触发其中一格，再从那格安全通过。门纹与本层路标会预告机关和奖励。参考 [原作陷阱房的布置](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/TrapsRoom.java#L55)。
 
-从第 6 层起，部分普通层会在原本相邻但未直通的房间之间藏一条捷径。找到墙上的刻痕后可以搜查开门，之后可双向穿越，自动寻路也会计算新通道。捷径避开入口和阶梯所在房间。设计参考 [原作的环形房间布局和暗门](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java)。
+从第 6 层起，部分普通层会在原本相邻但未直通的房间之间藏一条捷径。找到墙上的刻痕后可以搜查开门，之后可双向穿越，自动寻路也会计算新通道。捷径避开入口和阶梯所在房间。入口和已揭开的捷径都会记入本层路标，也可从地图直接寻路。设计参考 [原作的环形房间布局和暗门](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java)。
 
 ## 波形、机关与新敌人
 
@@ -92,14 +99,14 @@ python3 server.py --port 8767
 - 监狱护卫怪会掩护相邻同伴。破城守关者的震波可打开通往补给的脆墙。洞穴和矮人都市部分楼层的共鸣双子会因同伴受伤或死亡改变招式，镜像守关者会复制波形、强波和穿透等能力，攻击范围提前显示。
 - 每层有约一成概率在锁门支路出现镜间奇遇。第一层可用种子 `3` 重现。奇遇一次性恢复 3 生命并补满能量。
 
-每区有一只战术补给箱，出现在该区第 2 或第 4 层。站上去点「查看补给箱」，可在两件消耗品中带走一件，或合上箱子稍后再选。本层路标和地格查看可预览已发现箱子的候选道具。背包需要能放下选中的道具，种子可以补进未满的种子槽。下水道提供烟雾弹或诱饵，之后提供响雾弹或响草种子。参考 [原作的水晶选择房](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/CrystalChoiceRoom.java)。
+每区有一只战术补给箱，出现在该区第 2 或第 4 层。点击箱子会走过去并打开，也可以站在箱子上点「打开补给箱」。可在两件消耗品中带走一件，或合上箱子稍后再选。本层路标和地格查看可预览已发现箱子的候选道具。即使背包已满也可以查看箱内物品。点「整理背包」腾出空间，再点「返回补给箱」继续挑选。种子可以补进未满的种子槽。下水道提供烟雾弹或诱饵，之后提供响雾弹或响草种子。参考 [原作的水晶选择房](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/CrystalChoiceRoom.java)。
 
-区域内的第 2、4 层，钥匙有机会打开封闭花圃或警戒库房。亲眼见过锁门后，门纹和本层路标会标出房间类型。按 I 查看门纹可了解里面的补给或警报。花圃的阳草可在受伤后回来踩，恢复 2 生命，旁边的缠根能限制追来的敌人。警戒库房的响雾弹占一个背包槽，入口警报会引来补给区域的守卫。可先用波从远处触发警报，再利用声音引走守卫。镜间奇遇仍可能出现在这些楼层。参考 [原作特殊房间生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/SpecialRoom.java)和[花园](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/GardenRoom.java)。
+区域内的第 2、4 层，钥匙有机会打开封闭花圃或警戒库房。亲眼见过锁门后，门纹和本层路标会标出房间类型。按 I 查看门纹可了解里面的补给或警报。花圃的阳草可在受伤后回来踩，恢复 2 生命，旁边的缠根能限制追来的敌人。警戒库房的响雾弹占一个背包槽，入口警报会通知整层敌人。可先用波从远处触发警报，再利用声音引开追来的敌人。镜间奇遇仍可能出现在这些楼层。参考 [原作特殊房间生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/SpecialRoom.java)和[花园](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/GardenRoom.java)。
 
 
 普通层有 12 种区域敌人和 10 种支房敌人，随区域和楼层轮换。金色虚线是蓄力预告，红格是下一拍的伤害范围，青色虚线标出侧闪或跃进方向。见[敌人图鉴与头脑风暴](ENEMY_DESIGN.md)。
 
-旧存档保留当前楼层的敌人。新楼层按新版规则生成。
+旧存档保留当前楼层的地图与敌人，从更新后首次下楼起记录可往返的楼层。站在下层出生点的上行阶梯上，再点地格或「上楼」回到上一层。探索记录、敌人与物资均按楼层保存。上下楼各消耗一拍理智。
 
 ## 难度与补给
 
@@ -109,7 +116,9 @@ python3 server.py --port 8767
 
 第 5、20 层首领的震荡先以金色虚线预告，下一拍攻击原位置，之后休整一拍。半血后从横排变为更强的十字震荡，通常需要在蓄力时开始撤离。墙和关闭的门可挡住震荡。参考 [Goo 的蓄力与半血阶段](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Goo.java)。
 
-第 1、7、12、17、22 层各有一瓶固定疗愈药剂，回复 2 生命并解毒。第 2、9、14、19、24 层及守关层有一次性泉水，各回复 1 生命。额外疗愈可从露珠、阳草和配方等途径获得。护心每个区域在受伤时生效一次。安全区域仍可蓄满能量再接战。
+第 1、7、12、17、22 层各有一瓶固定疗愈药剂，回复 2 生命并解毒。第 2、9、14、19、24 层及守关层有一次性泉水，各回复 1 生命。额外疗愈可从露珠、阳草和配方等途径获得。护心每个区域在受伤时生效一次。安全区域仍可蓄满能量再接战。 地图只生成可用的泉水和有内容的宝箱。使用过的泉水变为干石池，空箱保留打开的箱盖。
+
+理智上限 450，每行动一拍降低 1 点。降到 150 及以下时，本层至多在两个未探索战斗或探索房间各增加一只敌人。理智耗尽立即扣 1 生命，之后按最大生命积累腐蚀，累计 120 点再扣 1 生命。微光、圣光、辉光拾取即分别恢复 65、105、155 理智，普通层至少有一份圣光。沟渠鱼偶尔掉落微光，圣光不占背包槽。参考 [原作饱食度](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/buffs/Hunger.java)及[普通层资源生成](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java#L355)。
 
 ## 职业与成长
 
@@ -119,11 +128,13 @@ python3 server.py --port 8767
 
 同格多件物品会在地图上标出数量。站在该格可逐件选取，也可用一拍捡起背包装得下的物品，余下的留在原地。参考 [原作的地面物品堆](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/Heap.java#L122)。
 
-背包初始有 5 个物品槽，点槽内道具可先查看说明，再选择使用或放下。快捷栏可同时绑定两种道具，默认用 Q 喝疗愈药剂、用 E 瞄准烟雾弹，可在背包改绑。第 5 层和第 15 层的守关战分别奖励一件扩容遗物，各增加 1 槽。第 5 层的侧袋还能把同类种子每 3 颗放一槽。拾取可补进未满的种子槽，播种、投掷和放下一次只用一颗。参考 [原作种子袋](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/bags/VelvetPouch.java)。背包的人物信息可查看生命、能量、发射器、遗物和已学天赋。
+背包初始有 8 个物品槽，同类消耗品每 3 件占一槽，护命符单独占槽，点槽内道具可先查看说明，再选择使用或放下。背包、地面和快捷栏共用道具像素图标。快捷栏可同时绑定两种道具，默认用 Q 喝疗愈药剂、用 E 瞄准烟雾弹。可在道具详情直接绑定 Q 或 E，也可用下拉框解除绑定。第 5 层和第 15 层的守关战分别奖励一件扩容遗物，各增加 2 槽。第 5 层的侧袋还能把同类种子每 5 颗放一槽。拾取可补进未满的种子槽，播种、投掷和放下一次只用一颗。参考 [原作种子袋](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/bags/VelvetPouch.java)。背包的人物信息可查看生命、能量、发射器、遗物和已学天赋。
 
-首次进入第 1、6、11 层时弹出天赋窗口，每组 3 选 1，也可以跳过。确认或跳过后，该层不再提供天赋选择。重波节能需要先通过遗物解锁重波。
+首次进入第 1、6、11 层时弹出天赋窗口，每组 3 选 1，也可以跳过。选择前可查看天赋对当前射程、命中上限、防御或耗能的影响，以及缺少的生效条件。确认或跳过后，该层不再提供天赋选择。重波节能需要先通过遗物解锁重波。
 
 第 3、8、13、18、23 层的遗物宝箱各提供一枚锻造核心，可将当前发射器强化至 +3。第一级和第三级各加 1 点伤害，第二级加 1 格基础射程。暗门和守关战提供刻印碎片，可装破甲、回音或凝滞刻印。每把发射器只保留当前刻印，扇形与回旋不能装回音。锻造与刻印可在背包的人物信息中操作，需要脱战，不消耗行动拍数。
+
+后续构筑按[构筑与赐福脑暴](docs/BUILD_IDEAS.md)的最新版实现。功能落地并验证后，在原条目标注「已完成」。
 
 每个区域只有遗物宝箱和守关战各提供一次三选一遗物。普通清场解锁通路或附近资源。并行束从右侧一格补射，双击扳机追加一次连射。冲击波在本拍攻击结算后推开主束打伤的存活目标。灼烧在之后两拍各造成 1 伤，冰冻在叠两层霜后取消目标下一次移动。副束不触发这些遗物效果。
 
@@ -139,11 +150,11 @@ python3 server.py --port 8767
 
 地图下方的状态标签会同时显示反击、中毒、霜冻、烟雾和敌方回波，点击可查看效果和应对方式。参考 [原作的状态栏](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/ui/BuffIndicator.java)。
 
-诱饵和响草种子会先进入投掷瞄准。选择四格内的高亮空地可预览可见范围和听得见的敌人，点「投掷」才消耗一拍。落点有陷阱时，投出的诱饵或响草种子也会压下机关。普通敌人走过隐藏陷阱时不会触发它。声音能绕过转角、穿过高草，遇到墙或关门会停止传播。听到诱饵的敌人会转去调查，玩家近在一格时则会重新专注于玩家。警报仍会提醒同房敌人，敌人看到玩家时会优先追击。参考 [原作的道具投掷](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/Item.java#L633)。
+诱饵和响草种子会先进入投掷瞄准。选择四格内的高亮空地可预览可见范围和听得见的敌人，点「投掷」才消耗一拍。可瞄准四格内高亮的墙、关门或其他障碍，道具会落在障碍近侧的可用地格，影响范围按实际落点预览。落点有陷阱时，投出的诱饵或响草种子也会压下机关。普通敌人走过隐藏陷阱时不会触发它。声音能绕过转角、穿过高草，遇到墙或关门会停止传播。听到诱饵的敌人会转去调查，玩家近在一格时则会重新专注于玩家。警报声传遍整层，敌人会先追踪触发位置。参考 [原作的道具投掷](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/Item.java#L633)。
 
 烟雾弹也可选择落点。烟雾持续三拍，遮住落点及相邻的可通行地格。远处敌人的视线被挡住，相邻敌人仍可攻击，能量波仍可穿过。参考 [原作的遮蔽药剂](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/potions/exotic/PotionOfShroudingFog.java)。
 
-每个区域的第四层，泉水旁有回程卷轴。使用后消耗一拍，先传送到本层入口，再结算锁定攻击。入口有敌人、被敌人抢位或不安全时会保留卷轴。参考 [原作的传送卷轴](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/scrolls/ScrollOfTeleportation.java)。
+每个区域的第四层，泉水旁有回程卷轴。使用后消耗一拍，先传送到本层入口，再结算锁定攻击。入口有敌人、被敌人抢位，或处在现有攻击范围、地火、碎骨和敌方回波中时，会保留卷轴。参考 [原作的传送卷轴](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/scrolls/ScrollOfTeleportation.java)。
 
 生命已满时，拾到的露珠会存起来，上限 3 滴。受伤后可在背包中花一拍饮用，每滴恢复 1 生命，仅消耗补满所需的数量。参考 [原作的露珠与水袋](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/Dewdrop.java)。
 

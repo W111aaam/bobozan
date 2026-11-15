@@ -3,6 +3,7 @@ import unittest
 from floor import FloorDungeon
 from dungeon import DIRS
 from test_floor import go, place, position, route
+import test_mechanics
 
 
 class ExplorationTests(unittest.TestCase):
@@ -19,6 +20,7 @@ class ExplorationTests(unittest.TestCase):
         place(game, start)
         game.chart_floor()
         self.assertIn(gate, game.state()['secretClues'])
+        self.assertEqual(game.state()['openedShortcuts'], [])
         self.assertIn(gate, game.state()['walls'])
         old_path = game.path_to(target)
         self.assertGreater(len(old_path), 6)
@@ -27,6 +29,7 @@ class ExplorationTests(unittest.TestCase):
         self.assertTrue(any('发现隐蔽通路' in entry for entry in game.log))
         game = FloorDungeon.restore(game.dump())
         self.assertEqual(game.path_to(target), ['up'] * 6)
+        self.assertEqual(game.state()['openedShortcuts'], [gate])
         for direction in game.path_to(target):
             go(game, 'move', direction)
         self.assertEqual(list(position(game.player)), target)
@@ -34,6 +37,7 @@ class ExplorationTests(unittest.TestCase):
         game.depth = 10
         game.enter_room()
         self.assertFalse(game.shortcut_doors)
+        self.assertEqual(game.state()['entrance'], list(position(game.player)))
 
     def test_seen_secret_clue_persists_and_paths_to_search_range(self):
         game = FloorDungeon(0)
@@ -128,7 +132,7 @@ class ExplorationTests(unittest.TestCase):
         game.update_visibility()
         self.assertTrue(game.state()['trapClues'])
         self.assertNotIn(tile, game.state()['terrain'])
-        self.assertEqual(game.path_to([x+3, y]), ['right'] * 3)
+        self.assertGreater(len(game.path_to([x+3, y])), 3)
         go(game, 'charge')
         self.assertNotIn('将触发陷阱', game.preview_details('wave', 'right')['events'])
         go(game, 'search')
@@ -141,6 +145,20 @@ class ExplorationTests(unittest.TestCase):
         self.assertNotEqual(game.path_to([x+3, y])[0], 'right')
         go(game, 'wave', 'right')
         self.assertFalse(game.tile_at([x+2, y])['armed'])
+
+    def test_alarm_broadcasts_to_distant_enemies_and_they_follow_the_fixed_location(self):
+        fixture = test_mechanics.ExpeditionMechanicsTests()
+        game = fixture.arena()
+        x, y = position(game.player)
+        game.terrain.append(dict(x=x+1, y=y, kind='trap', mechanism='alarm', armed=True))
+        near = fixture.enemy(game, x+4, y)
+        far = fixture.enemy(game, x+9, y)
+        go(game, 'move', 'right')
+        for enemy in (near, far):
+            self.assertEqual(enemy['sound']['target'], [x+1, y])
+            self.assertEqual(enemy['intent']['action'], 'move')
+        go(game, 'move', 'down')
+        self.assertEqual(far['sound']['target'], [x+1, y])
 
     def test_search_does_not_reveal_trap_behind_closed_door(self):
         game, x, y = self.trap_arena()
@@ -277,7 +295,7 @@ class ExplorationTests(unittest.TestCase):
     def test_full_bag_can_pick_supply_without_leaving_tile(self):
         game, x, y = self.trap_arena()
         game.features = [dict(id='cache-test', kind='cache', x=x+1, y=y, used=False)]
-        game.inventory = ['heal'] * game.bag_capacity
+        game.inventory = ['ankh'] * game.bag_capacity
         go(game, 'move', 'right')
         self.assertEqual([item['name'] for item in game.state()['groundItems'][0]['items']], ['烟雾弹', '诱饵'])
         before = game.dump()
@@ -285,7 +303,7 @@ class ExplorationTests(unittest.TestCase):
             go(game, 'pickup', choice='cache-test')
         self.assertEqual(game.dump(), before)
 
-        go(game, 'drop', choice='heal')
+        go(game, 'drop', choice='ankh')
         self.assertEqual(len(game.inventory), game.bag_capacity - 1)
         self.assertEqual(len(game.state()['groundItems']), 2)
         game = FloorDungeon.restore(game.dump())
@@ -304,7 +322,7 @@ class ExplorationTests(unittest.TestCase):
 
     def test_pickup_all_uses_one_turn_and_keeps_overflow_on_the_ground(self):
         game, x, y = self.trap_arena()
-        game.inventory = ['heal'] * (game.bag_capacity - 2)
+        game.inventory = ['ankh'] * (game.bag_capacity - 1) + ['heal']
         game.features = [dict(id='drop-0', kind='kit', x=x, y=y, used=False),
                          dict(id='drop-1', kind='kit', x=x, y=y, used=False),
                          dict(id='drop-2', kind='smoke', x=x, y=y, used=False),
@@ -313,7 +331,7 @@ class ExplorationTests(unittest.TestCase):
         before = game.turn
         go(game, 'pickup', choice={'all': True})
         self.assertEqual(game.turn, before + 1)
-        self.assertEqual(game.inventory, ['heal'] * game.bag_capacity)
+        self.assertEqual(game.inventory, ['ankh'] * (game.bag_capacity - 1) + ['heal'] * 3)
         game = FloorDungeon.restore(game.dump())
         state = game.state()
         self.assertEqual([f['id'] for f in state['groundItems']], ['drop-2'])
@@ -323,30 +341,30 @@ class ExplorationTests(unittest.TestCase):
             go(game, 'pickup', choice={'all': True})
         self.assertEqual(game.dump(), before)
 
-    def test_seed_stack_accepts_pickup_at_capacity_but_not_a_fourth_seed(self):
+    def test_seed_stack_accepts_pickup_at_capacity_but_not_a_sixth_seed(self):
         game, x, y = self.trap_arena()
         game.bag_relics = [5]
-        game.inventory = ['heal'] * 5 + ['grass_seed'] * 2
+        game.inventory = ['ankh'] * (game.bag_capacity - 1) + ['grass_seed'] * 4
         game.features = [dict(id='seeds', kind='grass_seed', x=x+1, y=y, used=False),
                          dict(id='extra', kind='grass_seed', x=x+1, y=y, used=False)]
         go(game, 'move', 'right')
         game = FloorDungeon.restore(game.dump())
         slots = game.state()['bagSlots']
         self.assertEqual(len(slots), game.bag_capacity)
-        self.assertEqual(slots[-1], dict(id='grass_seed', count=3, limit=3))
+        self.assertEqual(slots[-1], dict(id='grass_seed', count=5, limit=5))
         with self.assertRaises(ValueError):
             go(game, 'pickup', choice=dict(feature='extra', item='grass_seed'))
         go(game, 'drop', choice='grass_seed')
         self.assertIn('grass_seed', game.state()['packableItems'])
         go(game, 'pickup', choice=dict(feature='extra', item='grass_seed'))
-        self.assertEqual(game.inventory.count('grass_seed'), 3)
+        self.assertEqual(game.inventory.count('grass_seed'), 5)
         self.assertEqual(len(game.state()['groundItems']), 1)
 
     def test_full_bag_supply_box_offers_seed_that_can_join_a_stack(self):
         game, x, y = self.trap_arena()
         game.depth = 7
         game.bag_relics = [5]
-        game.inventory = ['heal'] * 5 + ['grass_seed']
+        game.inventory = ['ankh'] * (game.bag_capacity - 1) + ['grass_seed']
         game.features = [dict(id='box', kind='supply_choice', x=x, y=y, used=False)]
         go(game, 'open_supply')
         self.assertEqual([choice['blocked'] for choice in game.state()['choices']], [True, False])
@@ -366,6 +384,24 @@ class ExplorationTests(unittest.TestCase):
         effects = {effect['kind']: effect['amount'] for effect in game.state()['effects']}
         self.assertEqual(effects['healed'], 2)
         self.assertIn('cured', effects)
+
+    def test_throw_at_closed_door_lands_on_near_side(self):
+        game, x, y = self.trap_arena()
+        door, landing = [x+2, y], [x+1, y]
+        game.doors = [door]
+        game._door_cells = {tuple(door)}
+        game.inventory = ['lure', 'smoke']
+        game.terrain.append(dict(x=x+1, y=y, kind='trap', mechanism='dart', armed=True))
+        game.update_visibility()
+        key = ','.join(map(str, door))
+        self.assertEqual(game.state()['throwRedirects'][key], landing)
+        self.assertNotIn(key, game.state()['smokePreviews'])
+        go(game, 'item', door, 'lure')
+        self.assertFalse(game.tile_at(landing)['armed'])
+        self.assertEqual(game.player['hp'], game.max_hp)
+        go(game, 'item', door, 'smoke')
+        self.assertTrue(game.smoke_at(landing))
+        self.assertFalse(game.smoke_at(door))
 
     def test_lure_selects_remote_cell_and_invalid_target_does_not_consume(self):
         game,x,y = self.trap_arena()
@@ -469,6 +505,28 @@ class ExplorationTests(unittest.TestCase):
             go(game, 'item', choice='recall')
         self.assertEqual(game.dump(), before)
 
+    def test_recall_rejects_known_attack_at_entrance_without_consuming(self):
+        for hazard in ('ground_fire', 'bonebursts', 'returning', 'attack'):
+            with self.subTest(hazard=hazard):
+                game, x, y = self.trap_arena()
+                entrance = [x, y]
+                place(game, (x+2, y))
+                game.inventory = ['recall']
+                if hazard == 'ground_fire':
+                    game.ground_fire = [dict(x=x, y=y, spread=0)]
+                elif hazard == 'bonebursts':
+                    game.bonebursts = [[entrance]]
+                elif hazard == 'returning':
+                    game.returning = [dict(owner='enemy', cells=[entrance], damage=1)]
+                else:
+                    enemy = game.add_enemy('bonepuppet', [x+3, y], 0, 2)
+                    enemy['intent'] = dict(action='area', cells=[entrance])
+                self.assertEqual(game.state()['entrance'], entrance)
+                before = game.dump()
+                with self.assertRaises(ValueError):
+                    go(game, 'item', choice='recall')
+                self.assertEqual(game.dump(), before)
+
     def test_ankh_revives_once_from_poison_and_combat(self):
         game, x, y = self.trap_arena()
         game.inventory = ['ankh']
@@ -496,6 +554,7 @@ class ExplorationTests(unittest.TestCase):
             go(game, 'item', choice='ankh')
         self.assertEqual(game.dump(), before)
         game.terrain.append(dict(x=x+1,y=y,kind='fragile',stage=1))
+        game.player['hp'] = 1
         go(game, 'move', 'right')
         self.assertEqual(game.defeat_cause, '坠入深渊')
         self.assertEqual(game.inventory, ['ankh'])
@@ -558,7 +617,7 @@ class ExplorationTests(unittest.TestCase):
     def test_recipe_counts_materials_and_leaves_output_at_full_capacity(self):
         game, _, _ = self.trap_arena()
         game.bag_relics = [5]
-        game.inventory = ['smoke'] * 5 + ['grass_seed'] * 3
+        game.inventory = ['ankh'] * (game.bag_capacity - 1) + ['grass_seed'] * 3
         game.dew = 2
         recipe = next(r for r in game.state()['recipes'] if r['id'] == 'heal')
         self.assertEqual(recipe['ingredients'][0]['owned'], 3)
@@ -574,7 +633,7 @@ class ExplorationTests(unittest.TestCase):
         recipe = next(r for r in game.state()['recipes'] if r['id'] == 'heal')
         self.assertEqual((recipe['ingredients'][0]['owned'], recipe['batches']), (1, 0))
 
-        go(game, 'drop', choice='smoke')
+        go(game, 'drop', choice='ankh')
         go(game, 'pickup', choice=dict(feature=ground['id'], item='heal'))
         self.assertEqual(game.inventory.count('heal'), 1)
 
