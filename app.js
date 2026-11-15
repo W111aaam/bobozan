@@ -74,6 +74,9 @@ const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice
  lure_cache:'诱饵',smoke:'烟雾弹',wonder:'镜间奇遇',dew:'露珠',grass_seed:'响草种子',sun_seed:'阳草种子',chart:'测绘卷轴',recall:'回程卷轴',ankh:'护命符',terror:'惊退卷轴',
  echo_smoke:'响雾弹',stolen_energy:'被偷走的能量',rune_shard:'刻印碎片'};
 function featureName(f){return f.itemName||FEATURE_NAMES[f.kind]}
+function unopenedSupplyAt(cell){
+ return state.features.some(f=>f.kind==='supply_choice'&&!f.used&&same(pos(f),cell));
+}
 function countFeatures(features){return features.reduce((count,f)=>count+Math.max(1,f.itemCount??1),0)}
 function featuresByCell(){
  const cells=new Map();
@@ -244,7 +247,8 @@ function renderBoard(showEffects=false){
   const doorLabel=doorway?(openDoor?'打开的门':'关闭的门 · 踏入开启'):'';
   const onFire=fireCells.has(key);
   const groundLabel=[doorLabel,onFire?'地火 · 下一拍 1 伤':'',supplies].filter(Boolean).join('，')||(tile?terrainName(tile):`地面 ${x},${y}`);
-  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，点击查看信息':hero?(supplies?'你的位置，'+supplies:'你的位置'):groundLabel;
+  const box=available.some(f=>f.kind==='supply_choice');
+  const label=same([x,y],state.lock)?((lockStyle()?.name??'库房')+'锁门，点击使用钥匙'):same([x,y],state.exit)?(hero?(state.floorKind==='relic'?'终点祭坛，点击完成试炼':(state.exitUnlocked?'阶梯，点击下楼':'阶梯已封锁')):'阶梯'):enemy?enemy.name+'，'+enemy.intent.label+'，点击查看信息':box?(hero?'战术补给箱，点击打开':'战术补给箱，点击前往并打开'):hero?(supplies?'你的位置，'+supplies:'你的位置'):groundLabel;
   svg+=`<g ${wall?'':`data-cell="${key}" role="button" tabindex="-1" aria-label="${esc(label)}"`} opacity="${visible?1:.38}">`;
   if(wall){
    if(inspecting||secretClues.has(key))svg+=`<rect data-cell="${key}" x="${x*60}" y="${y*60}" width="60" height="60" fill="transparent" role="button" aria-label="${secretClues.has(key)?'墙上的刻痕':'石墙'}"/>`;
@@ -536,8 +540,7 @@ function render(showEffects=false){
  renderGrowth();renderBag();
  $('tactics').innerHTML=
   (state.lock&&Math.abs(state.lock[0]-state.player.x)+Math.abs(state.lock[1]-state.player.y)===1?'<button data-unlock>打开锁门</button>':'')+
-  (state.features.some(f=>f.kind==='supply_choice'&&!f.used&&same(pos(f),pos(state.player)))?
-   '<button data-open-supply>查看补给箱</button>':'')+
+  (unopenedSupplyAt(pos(state.player))?'<button data-open-supply>打开补给箱</button>':'')+
   (state.groundItems?.length?'<button data-ground>脚下物品</button>':'');
  $('turn').textContent=String(state.turn).padStart(2,'0');$('seed').textContent='SEED '+state.seed;
  $('room-status').textContent=state.result?(state.result==='victory'?'试炼完成':'冒险结束'):state.choices.length?'选择旅途馈赠':state.returning.length?'回旋波即将返回':state.pursuing?(state.enemies.find(e=>e.intent.action==='notice')?'敌人刚发现你':'敌人警觉'):'探索中';
@@ -778,6 +781,10 @@ async function travelTo(target,id,previous){
      }
      break;
     }
+    if(same(pos(state.player),target)&&unopenedSupplyAt(target)){
+     await send('open_supply');
+     break;
+    }
     // A contested move or forced displacement invalidates the cached directions.
     if(!same(pos(state.player),next)){
      setPausedTravel(target);
@@ -849,6 +856,7 @@ function examineCell(target){
  for(const feature of state.features.filter(f=>same(pos(f),target))){
   lines.push((['dry_spring','materials'].includes(feature.kind)?'':feature.used?'已使用：':'可拾取或使用：')+featureName(feature));
   if(feature.kind==='supply_choice'&&!feature.used){
+   lines.push('点击箱子走过去并打开。已站在箱上时，可点脚下或「打开补给箱」。');
    for(const item of state.supplyOptions??[])lines.push(item.name+' · '+item.description);
   }
  }
@@ -891,6 +899,13 @@ async function mapClick(target, landmark=false){
   cancelTravel();toast(state.exitLockReason??'阶梯仍被封锁。',true);return;
  }
  if(!landmark&&stoodAtExit&&state.exitUnlocked&&same(target,state.exit)&&same(pos(state.player),state.exit)){cancelTravel();send('exit');return}
+ if(!aim&&unopenedSupplyAt(target)){
+  if(same(target,pos(state.player))){
+   cancelTravel();
+   await send('open_supply');
+  }else requestTravel(target);
+  return;
+ }
  if(!aim&&!landmark&&same(target,pos(state.player))){
   if(state.groundItems?.length){
    showGroundItems();
@@ -953,7 +968,7 @@ for(const list of [$('landmarks'),$('journal-landmark-list')]){
   if(inspecting)setInspecting(false);
   const target=button.dataset.landmark.split(',').map(Number);
   $('journal-dialog').close();
-  if(same(target,pos(state.player))&&state.groundItems?.length){
+  if(same(target,pos(state.player))&&!unopenedSupplyAt(target)&&state.groundItems?.length){
    showGroundItems();
    return;
   }
