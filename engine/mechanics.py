@@ -2,7 +2,7 @@
 from copy import deepcopy
 from random import Random
 
-from dungeon import DIRS
+from dungeon import DIRS, NAMES
 from enemy_design import ENEMY_DESIGNS
 from encounters import SideEncounters
 
@@ -73,6 +73,15 @@ class ExpeditionMechanics(SideEncounters):
         tile.pop('hidden', None)
         self.run_stats['traps'] += 1
         self.effects.append(dict(kind='trap', cells=[cell]))
+        if tile['mechanism'] == 'fall':
+            tile.clear()
+            tile.update(x=cell[0], y=cell[1], kind='fragile', stage=2)
+            actor = next((actor for actor in [self.player, *self.enemies] if position(actor) == cell), None)
+            if actor is not None:
+                self.resolve_fragile_actor('hero' if actor is self.player else actor['id'], actor, cell)
+            else:
+                self.note('坠落陷阱打开，露出一处深坑。')
+            return
         if tile['mechanism'] == 'dart':
             if position(self.player) == cell:
                 self._trap_hits.append((1, None, {'cause': '刺针陷阱'}))
@@ -93,16 +102,14 @@ class ExpeditionMechanics(SideEncounters):
                 else:
                     self.note('空地上的夹足陷阱合拢了。')
             return
-        room = self.room_at(cell)
-        vault_alarm = room >= 0 and self.rooms_data[room]['kind'] == 'alarm_store'
-        if vault_alarm:
-            room = self.rooms_data[room]['parent']
         for enemy in self.enemies:
-            if room >= 0 and enemy['hp'] > 0 and self.room_at(position(enemy)) == room:
-                self.alert_by_sound(enemy, cell, 'alarm')
-                if vault_alarm and enemy.get('sound', {}).get('kind') == 'alarm':
-                    enemy['sound'].update(priority=True, remaining=2)
-        self.note('警报响起，附近的敌人会调查触发位置。')
+            if enemy['hp'] > 0:
+                enemy['sound'] = dict(target=list(cell), kind='alarm', priority=True)
+                if enemy.pop('dormant', False):
+                    self.note('警报惊醒了武器石像。')
+                if enemy.get('disguised'):
+                    self.reveal_mimic(enemy)
+        self.note('警报传遍整层，敌人开始追踪你最后出现的位置。')
 
     def trample_plant(self, actor):
         cell = position(actor)
@@ -115,7 +122,7 @@ class ExpeditionMechanics(SideEncounters):
                 if not healed:
                     return
                 actor['hp'] += healed
-                self.effects.append(dict(kind='healed', cells=[cell], amount=healed))
+                self.record_status('healed', self.player, healed, source='阳草')
                 self.note(f'阳草恢复 {healed} 生命。')
             else:
                 self.note(actor['name'] + '踩坏了阳草。')
@@ -154,8 +161,12 @@ class ExpeditionMechanics(SideEncounters):
             if tile and tile['kind'] == 'rubble' and not through_rubble:
                 break
             if tile and tile['kind'] == 'mirror':
-                dx, dy = (-dy, -dx) if tile['slash'] == '/' else (dy, dx)
+                dx, dy = self.mirror_vector(dx, dy, tile['slash'])
         return cells
+
+    @staticmethod
+    def mirror_vector(dx, dy, slash):
+        return (-dy, -dx) if slash == '/' else (dy, dx)
 
     def ray(self, pos, direction):
         return self.trace(pos, direction)
@@ -169,15 +180,25 @@ class ExpeditionMechanics(SideEncounters):
         distance = self.wave_range(weapon, mode, bonus)
         if weapon != 'fan':
             return [self.trace(origin, direction, distance)]
+        return [[cell for cell in self.fan_cells(origin, direction, distance)
+                 if self.has_sight(origin, cell, ignore_grass=True) and self.projectile_cell(cell)]]
+
+    def parallel_paths(self, origin, direction):
+        if 'parallel' not in self.upgrades:
+            return
         dx, dy = DIRS[direction]
-        cells = []
-        for step in range(1, distance + 1):
-            for offset in range(-(step - 1), step):
-                cell = [origin[0] + dx * step - dy * offset,
-                        origin[1] + dy * step + dx * offset]
-                if self.has_sight(origin, cell, ignore_grass=True) and self.projectile_cell(cell):
-                    cells.append(cell)
-        return [cells]
+        distance = self.wave_range(self.weapon, self.mode, self.range_bonus)
+        offsets = (1, -1) if 'flank_array' in self.upgrades else (1,)
+        for offset in offsets:
+            side = [origin[0] - dy * offset, origin[1] + dx * offset]
+            if self.walkable(side) and self.projectile_cell(side):
+                yield side, self.trace(side, direction, distance)
+
+    @staticmethod
+    def fan_cells(origin, direction, distance):
+        dx, dy = DIRS[direction]
+        return [[origin[0] + dx * step - dy * offset, origin[1] + dy * step + dx * offset]
+                for step in range(1, distance + 1) for offset in range(1 - step, step)]
 
     def projectile_cell(self, cell):
         return (0 <= cell[0] < self.width and 0 <= cell[1] < self.height
@@ -409,6 +430,12 @@ class ExpeditionMechanics(SideEncounters):
             return 'right' if dx >= 0 else 'left'
         return 'down' if dy >= 0 else 'up'
 
+    def record_status(self, kind, actor, amount=None, source=None):
+        hero = actor is self.player
+        target = '你' if hero else ('可疑的宝箱' if actor.get('disguised') else actor['name'])
+        self.effects.append(dict(kind=kind, cells=[position(actor)], amount=amount, target=target,
+                                 targetId=None if hero or actor.get('disguised') else actor['id'], source=source))
+
     def resolve_combat(self, action, direction, cost):
         """Accumulate simultaneous hits, then apply deaths and linked reactions."""
         self.preview_hits = {}
@@ -418,10 +445,18 @@ class ExpeditionMechanics(SideEncounters):
         self._touched_mirrors = set()
         healed = self.player['hp'] - self._hp_before_action
         if healed > 0:
-            self.effects.append(dict(kind='healed', cells=[position(self.player)], amount=healed))
+            self.record_status('healed', self.player, healed)
         if self._poison_before_action and not self.poisoned:
-            self.effects.append(dict(kind='cured', cells=[position(self.player)]))
+            self.record_status('cured', self.player)
         outgoing = {e['id']: 0 for e in self.enemies}
+        if action == 'anchor_chain':
+            _, _, path = self._anchor_chain_cast
+            self.effects.append(dict(kind='anchor_chain', origin=self._positions_before['hero'], cells=path))
+        if action == 'stored_charge':
+            gained = self.cap - self.player['energy']
+            self.player['energy'] = self.cap
+            self.record_status('energy_gain', self.player, gained, source='预藏')
+            self.note(f'预藏补充 {gained} 点能量。')
         if hasattr(self, '_recall_landing'):
             destination = self._recall_landing
             del self._recall_landing
@@ -446,6 +481,9 @@ class ExpeditionMechanics(SideEncounters):
         reflected = 0
         reflected_source = None
         self.resolve_fragile()
+        if getattr(self, '_pending_fall', None) is not None:
+            del self._trap_hits
+            return
         for ident, actor in [('hero', self.player), *((e['id'], e) for e in self.enemies)]:
             cell = position(actor)
             if cell != self._positions_before[ident]:
@@ -453,6 +491,9 @@ class ExpeditionMechanics(SideEncounters):
                 tile = self.tile_at(cell)
                 if actor is self.player or not (tile and tile.get('hidden')):
                     self.spring_trap(cell)
+                if getattr(self, '_pending_fall', None) is not None:
+                    del self._trap_hits
+                    return
                 self.trample_plant(actor)
         chilled_ground = []
         if action == 'item' and hasattr(self, '_item_target'):
@@ -478,7 +519,8 @@ class ExpeditionMechanics(SideEncounters):
         previous_returns, self.returning = self.returning, []
         for wave in previous_returns:
             if wave['owner'] == 'hero':
-                self.player_wave(wave['cells'], wave['damage'], outgoing, wave['pierce'], returning=True, rune=wave.get('rune'))
+                self.player_wave(wave['cells'], wave['damage'], outgoing, wave['pierce'],
+                                 returning=True, rune=wave.get('rune'))
             else:
                 hit, cells = self.enemy_wave_path(wave['cells'], wave['source'])
                 self.effects.append(dict(kind='return', cells=cells))
@@ -570,29 +612,35 @@ class ExpeditionMechanics(SideEncounters):
                 self.effects.append(dict(kind='enemy', cells=cells))
             enemy['phase'] += 1
         incoming = sum(damage for damage, _, _ in hits)
-        guard_capacity = 1 + int(self.mode == 'armor') + int('guard_mastery' in self.talents)
         blockable = sum(damage for damage, _, intent in hits if intent.get('rune') != 'shatter')
-        blocked = min(guard_capacity, blockable) if action == 'guard' else 0
+        blocked = min(self.guard_limit, blockable) if action == 'guard' else 0
         if blocked or reflected:
             self.counter = True
             self.on_block()
             if 'heart' in self.upgrades and self.use_heart():
                 # Falling is irreversible, including when an earlier locked wave was reflected.
-                if self.player['hp'] > 0:
-                    self.player['hp'] = min(self.max_hp, self.player['hp'] + 1)
+                if 0 < self.player['hp'] < self.max_hp:
+                    self.player['hp'] += 1
+                    self.record_status('healed', self.player, 1, source='护心')
+                    self.note('护心回复 1 生命。')
         hp_left = self.player['hp']
         self.player['hp'] = max(0, hp_left - incoming + blocked)
-        if action in ('guard', 'reflect'):
+        if action == 'reflect':
+            self.effects.append(dict(kind='reflect_arc', cells=[position(self.player)], direction=DIRS[direction]))
+        elif action == 'guard':
             self.effects.append(dict(kind='guard', cells=[position(self.player)]))
-            if action == 'guard':
-                self.note(f'防御抵挡 {blocked} 点伤害。')
+            self.note(f'防御抵挡 {blocked} 点伤害。')
         if blocked:
-            self.effects.append(dict(kind='blocked', cells=[position(self.player)], amount=blocked))
+            self.record_status('blocked', self.player, blocked)
+            if 'gate_shield' in self.upgrades and not self.gate_shield_ready:
+                self.gate_shield_ready = True
+                self.note('守门盾已就绪，下一发主束附带击退。')
+        if reflected:
+            self.record_status('reflected', self.player, reflected)
         damage_taken = min(hp_left, incoming - blocked)
         if damage_taken:
-            self.effects.append(dict(kind='damage', cells=[position(self.player)], amount=damage_taken))
-        if incoming > blocked:
-            self.note(f'受到 {incoming - blocked} 点伤害。')
+            self.record_status('damage', self.player, damage_taken)
+            self.note(f'受到 {damage_taken} 点伤害。')
         self._reflected_hit = (reflected_source, reflected) if reflected else None
         self._received_hits = []
         block_left = blocked
@@ -615,13 +663,17 @@ class ExpeditionMechanics(SideEncounters):
                 self.note('蚀能波抽走 1 能量。')
             if intent.get('heals') and 0 < enemy['hp'] < enemy.get('maxHp', enemy['hp']):
                 enemy['hp'] += 1
+                self.record_status('healed', enemy, 1, source='吸取生命')
                 self.note(enemy['name'] + '吸取生命，回复 1 点。')
-        self.resolve_wave_relics(impacts, outgoing)
+        shield_shot = (action in ('wave', 'heavy') and 'gate_shield' in self.upgrades
+                       and self.gate_shield_ready)
+        if shield_shot:
+            self.gate_shield_ready = False
+        self.resolve_wave_relics(impacts, outgoing, knockback=shield_shot or 'impact' in self.upgrades)
         for enemy in self.enemies:
             damage = outgoing[enemy['id']]
             if damage and enemy['hp'] > 0:
-                self.effects.append(dict(kind='damage', cells=[position(enemy)],
-                                         amount=min(damage, enemy['hp'])))
+                self.record_status('damage', enemy, min(damage, enemy['hp']))
             enemy['hp'] -= damage
         for enemy in self.enemies:
             if enemy['kind'] == 'twin':
@@ -652,7 +704,7 @@ class ExpeditionMechanics(SideEncounters):
 
     def add_enemy(self, kind, target, home, hp, **fields):
         serial = max(getattr(self, 'enemy_serial', 0), max((e['id'] for e in self.enemies), default=-1) + 1)
-        enemy = dict(id=serial, kind=kind, name=PROFILES[kind][0], home=home,
+        enemy = dict(id=serial, kind=kind, name=PROFILES[kind][0] if kind in PROFILES else NAMES[kind], home=home,
                      x=target[0], y=target[1], hp=hp, maxHp=hp, energy=0, phase=0,
                      intent=dict(action='wait', label='刚出现', cells=[]), **fields)
         self.enemies.append(enemy)
@@ -700,21 +752,18 @@ class ExpeditionMechanics(SideEncounters):
         if 'double' in self.upgrades:
             self.player_wave(cells, max(1, damage // 2), outgoing, pierce, rune=self.rune,
                              bypass_defeated=True, origin=origin)
-        if 'parallel' in self.upgrades:
-            dx, dy = DIRS[direction]
-            side = [origin[0] - dy, origin[1] + dx]
-            if self.walkable(side) and self.projectile_cell(side):
-                distance = self.wave_range(self.weapon, self.mode, self.range_bonus)
-                self.player_wave(self.trace(side, direction, distance), max(1, damage - 1), outgoing,
-                                 1 if self.weapon == 'fan' else pierce, rune=self.rune,
-                                 bypass_defeated=True, origin=side)
+        for side, side_cells in self.parallel_paths(origin, direction):
+            self.player_wave(side_cells, max(1, damage - 1), outgoing,
+                             1 if self.weapon == 'fan' else pierce, rune=self.rune,
+                             bypass_defeated=True, origin=side)
+        if 'mirror_chain' in self.upgrades and self.weapon != 'fan':
+            self.split_mirror_wave(actual, damage, outgoing)
         if 'drain' in self.talents and sum(outgoing[k] > v for k, v in previous_damage.items()) >= 2:
             self.player['energy'] = min(self.cap, self.player['energy'] + 1)
             self.note('波击回收 · 返还 1 能量。')
         if (self.weapon == 'return' or self.rune == 'echo') and actual:
-            return_damage = damage if self.weapon == 'return' else max(1, damage // 2)
             self.returning.append(dict(owner='hero', cells=list(reversed(actual)),
-                                       damage=return_damage + int('undertow' in self.talents),
+                                       damage=self.return_damage(damage),
                                        pierce=pierce, rune=self.rune))
         self.note(f'第 {self.turn} 拍 · {WEAPONS[self.weapon][0]}发射。')
         if 'blink' in self.upgrades and 'pierce' in self.upgrades and self.player['hp'] > 0:
@@ -722,6 +771,25 @@ class ExpeditionMechanics(SideEncounters):
                 self.note('脚下受困，本拍无法使用飞雷神。')
             else:
                 self.blink_along_wave(origin, direction, actual)
+
+    def split_mirror_wave(self, actual, damage, outgoing):
+        mirrors = {tuple(cell) for cell in actual
+                   if (tile := self.tile_at(cell)) and tile['kind'] == 'mirror'}
+        if len(mirrors) < 2:
+            return
+        end, previous = actual[-1], actual[-2]
+        dx, dy = end[0] - previous[0], end[1] - previous[1]
+        tile = self.tile_at(end)
+        if tile and tile['kind'] == 'rubble':
+            return
+        if tuple(end) in mirrors:
+            dx, dy = self.mirror_vector(dx, dy, tile['slash'])
+        for side, vector in DIRS.items():
+            if dx * vector[0] + dy * vector[1] == 0:
+                cells = self.trace(end, side, distance=2)
+                if cells:
+                    self.player_wave(cells, max(1, damage // 2), outgoing, 1, origin=end,
+                                     bypass_defeated=True, effect_kind='mirror_split')
 
     def blink_along_wave(self, origin, direction, cells):
         dx, dy = DIRS[direction]
@@ -744,7 +812,7 @@ class ExpeditionMechanics(SideEncounters):
             self.note('飞雷神 · 沿主束位移。')
             return
 
-    def resolve_wave_relics(self, impacts, outgoing):
+    def resolve_wave_relics(self, impacts, outgoing, knockback):
         for enemy in self.enemies:
             ident = enemy['id']
             self.extinguish_in_water(enemy)
@@ -768,7 +836,7 @@ class ExpeditionMechanics(SideEncounters):
                     self._shot_events.append((ident, f"{enemy['name']}冻结下一次移动"))
                 else:
                     self._shot_events.append((ident, f"{enemy['name']}叠霜 1 层"))
-            if 'impact' in self.upgrades:
+            if knockback:
                 self.push_enemy(enemy, impacts[ident])
                 self.extinguish_in_water(enemy)
 
@@ -802,13 +870,14 @@ class ExpeditionMechanics(SideEncounters):
         if hasattr(self, '_trap_hits'):
             self.spring_trap(cell)
         self.trample_plant(enemy)
-        self.effects.append(dict(kind='impact', cells=[cell]))
+        self.effects.append(dict(kind='impact', cells=[cell], direction=direction, targetId=enemy['id']))
         label = '被推入深渊' if enemy['hp'] <= 0 else '被击退一格'
         self._shot_events.append((enemy['id'], enemy['name'] + label))
         self.note(enemy['name'] + label + '。')
 
     def player_wave(self, cells, damage, outgoing, pierce, returning=False, rune=None,
-                    impacts=None, origin=None, direction=None, bypass_defeated=False, ignite=False):
+                    impacts=None, origin=None, direction=None, bypass_defeated=False, ignite=False,
+                    effect_kind=None):
         actual, struck, damaged = [], set(), set()
         for cell in cells:
             previous = actual[-1] if actual else origin
@@ -858,7 +927,7 @@ class ExpeditionMechanics(SideEncounters):
                 self.note('护卫替' + target['name'] + '承受来波。')
             if len(struck) >= pierce:
                 break
-        self.effects.append(dict(kind='return' if returning else 'wave', cells=actual,
+        self.effects.append(dict(kind=effect_kind or ('return' if returning else 'wave'), cells=actual,
                                  origin=origin, spread=pierce == 99 and not returning))
         return actual
 
@@ -960,6 +1029,8 @@ class ExpeditionMechanics(SideEncounters):
         actors = [('hero', self.player)] + [(e['id'], e) for e in self.enemies]
         for ident, actor in actors:
             self.resolve_fragile_actor(ident, actor, self._positions_before.get(ident))
+            if getattr(self, '_pending_fall', None) is not None:
+                return
 
     def resolve_fragile_actor(self, ident, actor, previous):
         tile = self.tile_at(position(actor))
@@ -969,21 +1040,27 @@ class ExpeditionMechanics(SideEncounters):
             tile['stage'] += 1
             self.note('地板出现裂缝，再次踩入会塌陷！' if tile['stage'] == 1 else '地板塌陷！')
         if tile['stage'] == 2:
-            actor['hp'] = 0
             if ident == 'hero':
-                self.defeat_cause = '坠入深渊'
+                self._pending_fall = position(actor)
+                return
+            actor['hp'] = 0
             self.falls.append(dict(id=ident, kind='hero' if ident == 'hero' else actor['kind'], cell=position(actor)))
-            self.effects.append(dict(kind='fall', cells=[position(actor)]))
+            self.record_status('fall', actor)
             self.note(('你' if ident == 'hero' else actor['name']) + '坠入深渊。')
 
     def mechanic_state(self, known, visible):
         terrain = [deepcopy(t) for t in self.terrain_memory.values() if (t['x'], t['y']) in known]
         returns = [dict(owner=w['owner'], damage=w['damage'], cells=[c for c in w['cells'] if tuple(c) in visible])
                    for w in self.returning]
+        origin = position(self.player)
+        aim_paths = {}
+        for direction in DIRS:
+            paths = self.wave_paths(origin, direction, self.weapon, self.mode, self.range_bonus)
+            paths.extend(cells for _, cells in self.parallel_paths(origin, direction))
+            aim_paths[direction] = [cell for path in paths for cell in path if tuple(cell) in visible]
         return dict(mechanicsVersion=1, weapon=self.weapon, mode=self.mode,
                     weapons=[dict(id=k, name=v[0], description=v[1]) for k, v in WEAPONS.items()],
                     modes=[dict(id=k, name=v[0], description=v[1]) for k, v in MODES.items()],
                     terrain=terrain, returning=returns,
-                    aimPaths={d: [c for c in self.wave_paths(position(self.player), d, self.weapon, self.mode, self.range_bonus)[0]
-                                  if tuple(c) in visible] for d in DIRS},
+                    aimPaths=aim_paths,
                     falls=[deepcopy(f) for f in self.falls if tuple(f['cell']) in visible])
