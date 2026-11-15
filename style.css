@@ -144,6 +144,9 @@ dialog h3 { color: var(--gold); font-size: 14px; }
 #enemy-effects [data-effect=burn] b { color:#f3b1a1; }
 #enemy-effects [data-effect=frost] b { color:#b3e7ef; }
 #enemy-effects [data-effect=fear] b { color:#ebc698; }
+#enemy-effects [data-effect=defense_loss] b, .combat-recap [data-effect=defense_loss] b { color:#e6a3ba; }
+#enemy-effects [data-effect=range_loss] b, .combat-recap [data-effect=range_loss] b { color:#d8bbfa; }
+#enemy-effects [data-effect=stun] b, .combat-recap [data-effect=stun] b { color:#f4cb82; }
 #loadout button { text-align: left; }
 #loadout small { display: block; color: var(--muted); margin-top: 3px; }
 #loadout [aria-pressed="true"] { border-color: var(--jade); background: #314437; opacity: 1; }
@@ -199,7 +202,6 @@ dialog h3 { color: var(--gold); font-size: 14px; }
 
 .pack-tabs { display:flex; gap:6px; margin-bottom:12px; }
 .pack-tabs [aria-pressed="true"] { color:var(--jade); border-color:var(--jade); }
-.growth-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:7px; }
 [data-growth] { text-align:left; }
 [data-growth] small, .class-option small { display:block; font-size:11px; color:var(--muted); margin-top:3px; }
 #growth-weapon h3, #talent-list h3 { margin:12px 0 6px; }
@@ -210,7 +212,6 @@ dialog h3 { color: var(--gold); font-size: 14px; }
 #growth-preview:empty, #growth-feedback:empty { display:none; }
 #growth-preview p { margin:4px 0; }
 #growth-preview .talent-change { font-size:14px; }
-#growth-preview .growth-replacement { border-top:1px solid var(--edge); margin-top:9px; padding-top:9px; color:#ebc698; }
 #growth-feedback { color:#ebc698; }
 #class-options { border:0; margin:12px 0 0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 #class-options legend { color:var(--muted); margin-bottom:5px; }
@@ -355,6 +356,9 @@ dialog::backdrop { background:#100e19d9; }
 .hit-fx[data-effect=blocked], .hit-fx[data-effect=reflected] { fill:#a8ddfc; }
 .hit-fx[data-effect=energy_gain] { fill:#9de8f7; }
 .hit-fx[data-effect=sanity_gain] { fill:#f4d699; }
+.hit-fx[data-effect=defense_loss] { fill:#e6a3ba; }
+.hit-fx[data-effect=range_loss] { fill:#d8bbfa; }
+.hit-fx[data-effect=stun] { fill:#f4cb82; }
 .hit-fx[data-effect=healed], .hit-fx[data-effect=cured], .hit-fx[data-effect=revive] { fill:#c5ef9a; }
 .combat-recap { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 0; padding:0; list-style:none; }
 .combat-recap li { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px; padding:3px 6px;

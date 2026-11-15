@@ -487,7 +487,7 @@ const art = (() => {
   return `<svg class="item-icon" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${itemPixels(id)}</svg>`;
  }
  function prop(kind,x,y,used=false,item=null){
-  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew',rune_shard:'wonder'})[kind]||kind;
+  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew',rune:'wonder'})[kind]||kind;
   const sprite=used&&key==='chest'?'open_chest':used&&key==='shrine'?'dry_spring':key;
   if(!items[sprite])return '';
   if(!cache.has(sprite))cache.set(sprite,pixels(items[sprite],itemColors[sprite]||props));
@@ -582,7 +582,7 @@ const art = (() => {
  function statusLabel({kind,amount}){
   return {
    damage:'−'+amount, blocked:'挡 '+amount, reflected:'反弹 '+amount,
-   healed:'+'+amount, cured:'解毒', revive:'复苏至 '+amount, fall:'坠落', energy_gain:'能量 +'+amount, sanity_gain:'理智 +'+amount,
+   healed:'+'+amount, cured:'解毒', revive:'复苏至 '+amount, fall:'坠落', energy_gain:'能量 +'+amount, sanity_gain:'理智 +'+amount, defense_loss:'防御 −'+amount, range_loss:'射程 −'+amount, stun:'击晕',
   }[kind];
  }
  function statusEffects(effects, top, left, width, height){
@@ -604,7 +604,19 @@ const art = (() => {
      paint-order="stroke">${statusLabel(fx)}</text>`).join('')}</g>`;
   }).join('');
  }
+ function refraction(path,preview=false){
+  const points=path.map(([x,y])=>`${x*60+30},${y*60+30}`).join(' ');
+  return `<g data-refraction="${preview?'preview':'hit'}" class="${preview?'':'fx beam-fx'}" pointer-events="none" fill="none" stroke-linejoin="bevel">
+   <polyline points="${points}" stroke="#bd86ff" stroke-width="${preview?4:11}" opacity="${preview ? .65 : .32}"${preview?' stroke-dasharray="5 7"':''}/>
+   ${preview?'':`<polyline points="${points}" stroke="#f0d8ff" stroke-width="4"/>`}
+  </g>`;
+ }
  function effects(fx,color){
+  if(fx.kind==='refraction')return (fx.segments??[]).map(path=>refraction(path)).join('');
+  if(fx.kind==='conduction')return fx.cells.map(([x,y])=>`<g data-conduction-hit class="fx beam-fx" transform="translate(${x*60},${y*60})" pointer-events="none">
+   <path d="M9 43l13-15 7 8 11-19 10 5M29 36l4 12 14 2" fill="none" stroke="#7feaff" stroke-width="5"/>
+   <path d="M9 43l13-15 7 8 11-19 10 5" fill="none" stroke="#e6fbff" stroke-width="2"/>
+  </g>`).join('');
   if(fx.kind==='guard'){
    const [rows,colors]=uiIcons.guard;
    return fx.cells.map(([x,y])=>`<g transform="translate(${x*60+30},${y*60+32})" pointer-events="none" aria-hidden="true">
@@ -656,5 +668,5 @@ const art = (() => {
   }
   return fx.cells.map(([x,y])=>`<g transform="translate(${x*60+30},${y*60+30})" pointer-events="none"><g class="fx pulse-fx" fill="none" stroke="${tint}" stroke-width="4"><path d="M-21 -12l9-9h24l9 9v24l-9 9h-24l-9-9z"/><path d="M-7 0h14m-7-7v14"/></g></g>`).join('');
  }
- return {actor,portrait,enemyPortrait,uiIcon,buttonIcon,prop,itemIcon,ground,fragileFloor,stoneWall,effects,statusLabel,statusEffects,doorway};
+ return {actor,portrait,enemyPortrait,uiIcon,buttonIcon,prop,itemIcon,ground,fragileFloor,stoneWall,effects,refraction,statusLabel,statusEffects,doorway};
 })();

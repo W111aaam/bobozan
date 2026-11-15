@@ -1,5 +1,6 @@
 """Persistent class, weapon, inscription and talent progression."""
 from copy import copy
+from random import Random
 
 CLASSES = {
     'straight': ('行波者', '#b9de9e', '直线出波，射程 4 格。'),
@@ -22,9 +23,14 @@ RUNES = {
     'shatter': ('破甲', '发射的波及其回程无视举盾和护卫护甲。'),
     'echo': ('回音', '直线器和穿透器的波下一拍沿去程返回，回程伤害减半，至少 1。'),
     'frost': ('凝滞', '被波实际伤到的敌人，下一拍若要移动则停在原地。'),
+    'point_blank': ('近战', '主束命中上下左右相邻的敌人时，伤害乘以 1.5，向上取整后再计算护甲。'),
+    'shield_erosion': ('蚀盾', '主束命中后削减目标 1 点防御，最低为 0。本次命中仍按原防御结算，即使伤害被完全抵挡也能蚀盾。'),
+    'range_break': ('中断', '主束命中正在蓄力或已经锁定蓄力攻击的敌人，每次使其下一发射程缩短 1 格（最低 0）。敌人仍会出招。'),
+    'stagger': ('击晕', '连续两拍以主束命中同一敌人后，该敌人跳过下一拍。触发后重新计数。'),
+    'refraction': ('折射', '主束首次命中后，向距离命中点 8 格内最近的另一名可直达敌人发射一条折射光束。伤害为主束的一半，向下取整，最低 1，再计算防御。'),
+    'conduction': ('导电', '主束每次造成伤害都会放电。命中未冻结浅水里的敌人时，同片浅水里的其他敌人受到等量伤害。其余情况下，命中点半径 6 格内的其他敌人受到本发主束攻击力一半的伤害，向下取整，最低 1。'),
 }
 TALENTS_PER_TIER = 1
-GROWTH_ACTIONS = ('forge', 'etch')
 TALENT_FLOORS = (1, 6, 11)
 BAG_RELICS = {5: '旅人的侧袋', 15: '工匠的夹层'}
 
@@ -36,7 +42,7 @@ class Growth:
         self.weapon_levels = {}
         self.inscriptions = {}
         self.forge_cores = 0
-        self.rune_shards = 0
+        self.dropped_runes = []
         self.talent_milestones = [] if hero_class else [1]
         self.bag_relics = []
         if hero_class:
@@ -71,26 +77,29 @@ class Growth:
                   if choices else '已跳过本层天赋选择。')
 
     def award_boss_growth(self):
-        self.rune_shards += 1
-        self.note('守关战奖励：刻印碎片 1 枚。')
         if self.depth in BAG_RELICS and self.depth not in self.bag_relics:
             self.bag_relics.append(self.depth)
             self.note(f'获得遗物「{BAG_RELICS[self.depth]}」，背包容量 +2。')
 
-    def apply_growth(self, action, choice):
+    def forge_weapon(self):
         if not self.can_upgrade_weapon():
             raise ValueError('请先脱战，再强化武器。')
-        blocked = self.forge_block() if action == 'forge' else self.etch_block(choice)
+        blocked = self.forge_block()
         if blocked:
             raise ValueError(blocked)
-        if action == 'forge':
-            self.weapon_levels[self.weapon] = self.weapon_level + 1
-            self.forge_cores -= 1
-            self.note(f'当前发射器强化至 +{self.weapon_level}。')
-        elif action == 'etch':
-            self.inscriptions[self.weapon] = choice
-            self.rune_shards -= 1
-            self.note('当前发射器获得刻印：' + RUNES[choice][0] + '。')
+        self.weapon_levels[self.weapon] = self.weapon_level + 1
+        self.forge_cores -= 1
+        self.note(f'当前发射器强化至 +{self.weapon_level}。')
+
+    def assign_rune_drop(self, feature):
+        order = list(RUNES)
+        Random(f'{self.seed}:rune-drops').shuffle(order)
+        rune = next((rune for rune in order if rune not in self.dropped_runes), None)
+        if rune is None:
+            return False
+        self.dropped_runes.append(rune)
+        feature.update(kind='rune', rune=rune)
+        return True
 
     def forge_block(self):
         if self.weapon_level >= 3:
@@ -104,18 +113,6 @@ class Growth:
             return '扇形器无法使用回音刻印。'
         if rune == 'echo' and self.weapon == 'return':
             return '回旋器已经自带回程。'
-        return None
-
-    def etch_block(self, rune):
-        if not isinstance(rune, str) or rune not in RUNES:
-            return '请选择有效的刻印。'
-        if rune == self.rune:
-            return '当前已装备。'
-        incompatible = self.rune_incompatibility(rune)
-        if incompatible:
-            return incompatible
-        if self.rune_shards < 1:
-            return '缺少刻印碎片。'
         return None
 
     def talents_in_tier(self, depth):
@@ -244,7 +241,7 @@ class Growth:
 
     def growth_state(self):
         safe = self.can_upgrade_weapon()
-        return dict(growthVersion=5, heroClass=self.hero_class, talentChoice=self.talent_choice,
+        return dict(growthVersion=6, heroClass=self.hero_class, talentChoice=self.talent_choice,
                     bagCapacity=self.bag_capacity,
                     bagRelics=[dict(name=BAG_RELICS[depth], description='背包容量 +2，同类种子每 5 颗放一槽' if depth == 5 else '背包容量 +2')
                                for depth in self.bag_relics],
@@ -252,15 +249,12 @@ class Growth:
                     classes=[dict(id=k, name=name, color=color, description=description, preview=self.class_preview(k))
                              for k, (name, color, description) in CLASSES.items()],
                     growth=dict(safe=safe, cores=self.forge_cores,
-                                shards=self.rune_shards, level=self.weapon_level, rune=self.rune,
+                                level=self.weapon_level, runeName=RUNES[self.rune][0] if self.rune else None,
+                                runeDescription=RUNES[self.rune][1] if self.rune else None,
                                 forge=self.forge_preview(),
                                 talents=[dict(id=k, depth=depth, name=name, description=description,
                                               learned=k in self.talents)
-                                         for k, (depth, name, description) in TALENTS.items()],
-                                runes=[dict(id=k, name=name, description=description,
-                                            compatible=not self.rune_incompatibility(k),
-                                            blocked=self.etch_block(k))
-                                       for k, (name, description) in RUNES.items()]),
+                                         for k, (depth, name, description) in TALENTS.items()]),
                     waveStats=dict(damage=self.wave_damage_before_defense('wave'),
                                    heavyDamage=self.wave_damage_before_defense('heavy'),
                                    waveCost=self.action_cost('wave'), heavyCost=self.action_cost('heavy'), range=self.wave_range(
