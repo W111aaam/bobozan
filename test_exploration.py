@@ -95,10 +95,11 @@ class ExplorationTests(unittest.TestCase):
         game = FloorDungeon.restore(game.dump())
         go(game, 'search')
         self.assertEqual(game.doors.count(gate), 1)
-        shards = game.rune_shards
         for step in route(game, (reward['x'], reward['y'])):
             go(game, 'move', step)
-        self.assertEqual(game.rune_shards, shards + 1)
+        self.assertEqual(game.ground_runes_here()[0]['id'], reward['id'])
+        go(game, 'equip_ground_rune', choice=reward['id'])
+        self.assertEqual(game.rune, reward['rune'])
 
     def trap_arena(self):
         game = FloorDungeon(0)

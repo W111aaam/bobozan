@@ -182,7 +182,8 @@ class SideEncounterTests(unittest.TestCase):
         self.assertTrue(g.movement_locked())
         go(g,'wave','right')
         self.assertFalse(g.movement_locked())
-        self.assertEqual(g.features[0]['kind'],'rune_shard')
+        self.assertEqual(g.features[0]['kind'], 'rune')
+        self.assertIn(g.features[0]['rune'], g.dropped_runes)
 
     def test_dormant_statue_can_be_scouted_and_revisited_before_engaging(self):
         g = self.arena()

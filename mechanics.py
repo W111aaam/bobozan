@@ -405,6 +405,8 @@ class ExpeditionMechanics(SideEncounters):
 
     def plan_committed_enemies(self):
         for enemy in self.enemies:
+            if enemy.get('stunned'):
+                continue
             if self.plan_committed_summon(enemy):
                 continue
             aim = enemy.get('eye_aim')
@@ -422,6 +424,30 @@ class ExpeditionMechanics(SideEncounters):
                 cells = [[x + dx, y + dy] for dx, dy in DIRS.values()
                          if self.projectile_cell([x + dx, y + dy])]
                 enemy['intent'] = dict(action='melee', label='裂步横扫 · 1伤', damage=1, cells=cells)
+
+    def enemy_attack_intent(self, enemy):
+        intent = enemy['intent']
+        penalty = enemy.get('range_penalty', 0)
+        if not penalty or not (intent['action'] in ('wave', 'special_wave', 'siege') or intent.get('sweep')):
+            return intent
+        cells = intent['cells']
+        if intent.get('sweep') or intent.get('weapon') == 'fan':
+            x, y = position(enemy)
+            if intent.get('weapon') == 'fan':
+                dx, dy = DIRS[intent['direction']]
+                reach = [(a - x) * dx + (b - y) * dy for a, b in cells]
+            else:
+                reach = [abs(a - x) + abs(b - y) for a, b in cells]
+            current = max(reach, default=0)
+            limit = max(0, current - penalty)
+            cells = [cell for cell, distance in zip(cells, reach) if distance <= limit] if limit else []
+        else:
+            limit = max(0, len(cells) - penalty)
+            cells = cells[:limit]
+        shortened = dict(intent, cells=cells, range_limit=limit, label=f'{intent["label"]} · 射程 {limit}')
+        if 'water' in intent:
+            shortened['water'] = self.conducted_water(cells)
+        return shortened
 
     @staticmethod
     def direction_toward(start, end):
@@ -541,7 +567,16 @@ class ExpeditionMechanics(SideEncounters):
         for enemy in self.enemies:
             if enemy['hp'] <= 0:
                 continue
-            intent = enemy['intent']
+            intent = self.enemy_attack_intent(enemy)
+            if intent['action'] == 'stunned':
+                enemy.pop('stunned', None)
+                if position(enemy) in self.visible:
+                    self.note(f'{enemy["name"]}因击晕跳过一拍。')
+                continue
+            if 'range_limit' in intent:
+                enemy.pop('range_penalty', None)
+                if position(enemy) in self.visible:
+                    self.note(f'{enemy["name"]}释放攻击，中断后射程 {intent["range_limit"]} 格。')
             attack = intent['action']
             self.resolve_side_intent(enemy, intent, hits)
             if attack == 'windup':
@@ -878,10 +913,52 @@ class ExpeditionMechanics(SideEncounters):
         self._shot_events.append((enemy['id'], enemy['name'] + label))
         self.note(enemy['name'] + label + '。')
 
+    def refract_wave(self, source, damage, outgoing):
+        origin = position(source)
+        candidates = []
+        for enemy in self.enemies:
+            if enemy is source or enemy['hp'] <= outgoing[enemy['id']]:
+                continue
+            target = position(enemy)
+            distance = sum((a - b) ** 2 for a, b in zip(origin, target))
+            if distance <= 64 and self.walkable(target) and self.has_sight(origin, target, ignore_grass=True):
+                candidates.append((distance, enemy['id'], enemy))
+        if not candidates:
+            return
+        _, ident, enemy = min(candidates)
+        cells = [list(cell) for cell, _ in self.line_steps(origin, position(enemy))]
+        amount = self.wave_damage(max(1, damage // 2), enemy, 0)
+        outgoing[ident] += amount
+        self.preview_hits[ident] = self.preview_hits.get(ident, 0) + amount
+        self.effects.append(dict(kind='refraction', origin=origin, cells=cells))
+        self._shot_events.append((ident, f'折射 · {enemy["name"]} {amount} 伤'))
+
+    def conduct_from_hit(self, source, damage, dealt, outgoing):
+        origin = position(source)
+        water = self.conducted_water([origin])
+        connected = set(map(tuple, water))
+        amount = dealt if connected else max(1, damage // 2)
+        cells = []
+        for enemy in self.enemies:
+            if enemy is source or enemy['hp'] <= 0:
+                continue
+            target = position(enemy)
+            in_range = (tuple(target) in connected if connected
+                        else sum((a - b) ** 2 for a, b in zip(origin, target)) <= 36)
+            if in_range:
+                ident = enemy['id']
+                outgoing[ident] += amount
+                self.preview_hits[ident] = self.preview_hits.get(ident, 0) + amount
+                self._shot_events.append((ident, f'导电 · {enemy["name"]} {amount} 伤'))
+                cells.append(target)
+        if cells:
+            self.effects.append(dict(kind='conduction', cells=water or cells))
+
     def player_wave(self, cells, damage, outgoing, pierce, returning=False, rune=None,
                     impacts=None, origin=None, direction=None, bypass_defeated=False, ignite=False,
                     effect_kind=None):
         actual, struck, damaged = [], set(), set()
+        conduction_hits = []
         for cell in cells:
             previous = actual[-1] if actual else origin
             if not self.projectile_cell(cell):
@@ -908,28 +985,57 @@ class ExpeditionMechanics(SideEncounters):
             struck.add(target['id'])
             # An adjacent escort steps into the impact; the target's armour is not applied twice.
             guard = next((e for e in self.enemies if e['kind'] == 'escort' and e is not target and e['hp'] > 0
+                          and e['intent']['action'] != 'stunned'
                           and (not bypass_defeated or e['hp'] > outgoing[e['id']])
                           and e['home'] == target['home'] and abs(e['x'] - target['x']) + abs(e['y'] - target['y']) == 1), None)
             recipient = guard or target
+            point_blank = (rune == 'point_blank' and impacts is not None
+                           and sum(abs(a - b) for a, b in zip(origin, position(recipient))) == 1)
+            impact_damage = (3 * damage + 1) // 2 if point_blank else damage
             if rune == 'shatter':
-                amount = damage
-            elif recipient['kind'] == 'escort':
-                amount = max(0, damage - 1)
+                amount = impact_damage
             else:
-                amount = self.wave_damage(damage, recipient, len(struck) - 1)
+                amount = self.wave_damage(impact_damage, recipient, len(struck) - 1)
             if recipient['id'] not in damaged:
                 outgoing[recipient['id']] += amount
                 self.preview_hits[recipient['id']] = self.preview_hits.get(recipient['id'], 0) + amount
                 damaged.add(recipient['id'])
+                if rune == 'refraction' and impacts is not None and len(damaged) == 1:
+                    self.refract_wave(recipient, damage, outgoing)
+                if rune == 'conduction' and impacts is not None and amount:
+                    conduction_hits.append((recipient, amount))
                 if impacts is not None and amount:
                     impacts[recipient['id']] = (DIRS[direction] if self.weapon == 'fan'
                                                 else (cell[0] - previous[0], cell[1] - previous[1]))
                 if rune == 'frost' and amount:
                     recipient['frosted'] = True
+                if point_blank and amount:
+                    self._shot_events.append((recipient['id'], f'近战 · {recipient["name"]}受到贴身增伤'))
+                if rune == 'shield_erosion' and impacts is not None and self.enemy_defense(recipient):
+                    recipient['defense_lost'] = recipient.get('defense_lost', 0) + 1
+                    self.record_status('defense_loss', recipient, 1, source='蚀盾')
+                    self._shot_events.append((recipient['id'], f'蚀盾 · {recipient["name"]}防御 −1'))
+                if (rune == 'range_break' and impacts is not None
+                        and (recipient['intent']['action'] in ('charge', 'windup', 'sweep_windup')
+                             or recipient.get('eye_aim') or recipient.get('sweep_aim'))):
+                    recipient['range_penalty'] = recipient.get('range_penalty', 0) + 1
+                    self.record_status('range_loss', recipient, 1, source='中断')
+                    self._shot_events.append((recipient['id'], f'中断 · {recipient["name"]}下一发射程 −1'))
+                if rune == 'stagger' and impacts is not None:
+                    if recipient.get('stagger_hit_turn') == self.turn - 1:
+                        recipient.pop('stagger_hit_turn')
+                        recipient['stunned'] = True
+                        self.record_status('stun', recipient, 1, source='击晕')
+                        self._shot_events.append((recipient['id'], f'击晕 · {recipient["name"]}跳过下一拍'))
+                    else:
+                        recipient['stagger_hit_turn'] = self.turn
+                        self._shot_events.append((recipient['id'], f'击晕 · {recipient["name"]}已命中 1/2'))
             if guard:
                 self.note('护卫替' + target['name'] + '承受来波。')
             if len(struck) >= pierce:
                 break
+        for source, dealt in conduction_hits:
+            self.conduct_from_hit(source, damage, dealt, outgoing)
         self.effects.append(dict(kind=effect_kind or ('return' if returning else 'wave'), cells=actual,
                                  origin=origin, spread=pierce == 99 and not returning))
         return actual

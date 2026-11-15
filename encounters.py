@@ -265,7 +265,9 @@ class SideEncounters:
                     and Random(f'{self.seed}:{self.depth}:{enemy["id"]}:light').randrange(4) == 0):
                 self.light_enemy_drop = True
                 drop = 'light_wisp'
-            if drop:
+            if drop == 'rune_shard':
+                self.drop_rune(f'drop-{enemy["id"]}', cell(enemy))
+            elif drop:
                 x,y = cell(enemy)
                 self.features.append(dict(id=f'drop-{enemy["id"]}', kind=drop, x=x, y=y, used=False))
         for enemy in self.enemies[:]:

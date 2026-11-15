@@ -59,7 +59,7 @@ python3 server.py --port 8767
 
 普通门关闭时挡视线和波，玩家或敌人踏入就打开，门格无人时关闭。点击已探索地面可沿途打开普通门。自动移动遇到新发现的障碍或危险地格时会尝试绕路。找不到已知的安全路线时停步并保留目的地。新敌人出现、受伤或触发选项时会立即停下。接战时点击远处只走一步，并绕开已标出的危险格。敌人首次发现玩家时先警觉一拍，追击后会记住最后看到的位置，也能开门继续追击。旧存档保留当前层地形，下楼时使用新生成规则。
 
-部分普通层有暗门。亲眼看到金色刻痕后，本层日志会记下位置。点击日志、主地图或小地图上的刻痕会导航到可搜查的位置。按 `X` 或点「搜查」消耗一拍揭开暗门，随后可进去拾取刻印碎片。设计参考 [原作的地牢日志](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/journal/Notes.java#L138)和[主动搜查](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/hero/Hero.java#L2490)。
+部分普通层有暗门。亲眼看到金色刻痕后，本层日志会记下位置。点击日志、主地图或小地图上的刻痕会导航到可搜查的位置。按 `X` 或点「搜查」消耗一拍揭开暗门，随后可进去寻找随机刻印。设计参考 [原作的地牢日志](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/journal/Notes.java#L138)和[主动搜查](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/hero/Hero.java#L2490)。
 
 普通层布置刺针、夹足、警报和坠落陷阱。自动寻路会绕开已布置的未触发机关和裂地。点选陷阱或手动踩入会直接触发，按 X 搜查仍可揭露两格内的隐藏机关。警报将触发位置广播给整层敌人。布满裂纹的脆弱地板在首次踩过后会变成方形破洞。踩中坠落机关或踏入已打开的破洞会掉到下一层的安全普通格，受到自身最大生命 30%–50% 的伤害，按整数结算。参考 [原作机关触发](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/Trap.java)、[全层警报](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/traps/AlarmTrap.java)和[坠落过渡](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/features/Chasm.java)。
 
@@ -81,7 +81,7 @@ python3 server.py --port 8767
 
 敌人会绕开地火、已开裂的地板和可见的未触发陷阱。玩家站在危险格时，近战怪可追到旁边继续攻击。敌人仍会经过隐藏陷阱，玩家可趁机远程触发，也可用冲击波把敌人推入危险格。参考 [原作按角色判断地格是否可走](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/actors/mobs/Mob.java#L541)。
 
-每个区域的第三层有机会出现刺针库房。开锁后，一排可见机关横在刻印碎片前。可用波或诱饵远程触发其中一格，再从那格安全通过。门纹与本层路标会预告机关和奖励。参考 [原作陷阱房的布置](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/TrapsRoom.java#L55)。
+每个区域的第三层有机会出现刺针库房。开锁后，一排可见机关挡住通往奖励的路。可用波或诱饵远程触发其中一格，再从那格安全通过。门纹与本层路标会预告机关和奖励。参考 [原作陷阱房的布置](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/rooms/special/TrapsRoom.java#L55)。
 
 从第 6 层起，部分普通层会在原本相邻但未直通的房间之间藏一条捷径。找到墙上的刻痕后可以搜查开门，之后可双向穿越，自动寻路也会计算新通道。捷径避开入口和阶梯所在房间。入口和已揭开的捷径都会记入本层路标，也可从地图直接寻路。设计参考 [原作的环形房间布局和暗门](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/levels/RegularLevel.java)。
 
@@ -132,7 +132,7 @@ python3 server.py --port 8767
 
 首次进入第 1、6、11 层时弹出天赋窗口，每组 3 选 1，也可以跳过。选择前可查看天赋对当前射程、命中上限、防御或耗能的影响，以及缺少的生效条件。确认或跳过后，该层不再提供天赋选择。重波节能需要先通过遗物解锁重波。
 
-第 3、8、13、18、23 层的遗物宝箱各提供一枚锻造核心，可将当前发射器强化至 +3。第一级和第三级各加 1 点伤害，第二级加 1 格基础射程。暗门和守关战提供刻印碎片，可装破甲、回音或凝滞刻印。每把发射器只保留当前刻印，扇形与回旋不能装回音。锻造与刻印可在背包的人物信息中操作，需要脱战，不消耗行动拍数。
+第 3、8、13、18、23 层的遗物宝箱各提供一枚锻造核心，可将当前发射器强化至 +3。第一级和第三级各加 1 点伤害，第二级加 1 格基础射程。刻印可在暗门、刺针库房、武器石像和守关战获得。每局的掉落顺序按种子随机决定，每种最多掉落一次。站在刻印所在格，脱战后通过「脚下物品」拾取并装备。每把发射器保留一个刻印，装备新的会替换旧的。扇形与回旋不能装回音。背包的人物信息可锻造并查看当前刻印。锻造和装备刻印不消耗行动拍数。
 
 后续构筑按[构筑与赐福脑暴](docs/BUILD_IDEAS.md)的最新版实现。功能落地并验证后，在原条目标注「已完成」。
 

@@ -405,10 +405,12 @@ class FloorTests(unittest.TestCase):
         go(g, 'charge')
         go(g, 'wave', direction)
         self.assertEqual(g.path_to(target), [direction, direction])
-        hp, shards = g.player['hp'], g.rune_shards
+        hp = g.player['hp']
         go(g, 'move', direction)
         go(g, 'move', direction)
-        self.assertEqual((g.player['hp'], g.rune_shards), (hp, shards + 1))
+        self.assertEqual(g.player['hp'], hp)
+        self.assertEqual(g.ground_runes_here()[0]['id'], 'cache')
+        go(g, 'equip_ground_rune', choice='cache')
         self.assertTrue(feature(g, 'cache')['used'])
 
     def test_special_vaults_use_existing_key_and_give_distinct_rewards(self):
