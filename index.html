@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#171f27"><title>波波攒 · 地牢试炼</title><link rel="stylesheet" href="./style.css"><script src="./art.js" defer></script><script src="./static-api.js" defer></script><script src="./app.js" defer></script><link rel="icon" href="data:,"></head>
+<body>
+<main class="shell">
+  <header class="hud">
+    <div id="hud-avatar" class="hud-avatar" aria-hidden="true"></div>
+    <div class="hud-location">
+      <h1 id="floor-label">波波攒</h1>
+      <p><span id="room-name">正在进入地牢</span><span id="floor-theme" class="hud-divider" hidden></span><span class="hud-divider">·</span><span id="turn">0</span> 拍</p>
+    </div>
+    <div class="hud-vitals" aria-label="旅人状态">
+      <div class="stat"><span>生命 <b id="hp">—</b></span><div id="hp-bar" class="pips health"></div></div>
+      <div class="stat"><span>能量 <b id="energy">—</b></span><div id="energy-bar" class="pips energy"></div></div>
+    </div>
+    <button id="open-journal" type="button" aria-haspopup="dialog">手记</button>
+  </header>
+
+  <div class="layout">
+    <section class="game-panel" aria-label="地牢地图与操作">
+      <div class="map-wrap">
+        <svg id="board" viewBox="0 0 780 780" role="group" aria-label="地牢格子地图"></svg>
+        <div id="map-toast" role="status"></div>
+        <div class="map-indicators"><span id="room-status">准备探索</span>
+          <div class="map-zoom" aria-label="地图视角与缩放">
+            <button id="view-toggle" type="button" aria-label="切换斜俯视地图" aria-pressed="false">平面</button>
+            <button id="zoom-out" type="button" aria-label="缩小地图">−</button>
+            <button id="zoom-reset" type="button" aria-label="恢复默认缩放">1×</button>
+            <button id="zoom-in" type="button" aria-label="放大地图">+</button>
+          </div>
+        </div>
+      </div>
+      <div id="condition-strip" aria-label="当前状态"></div>
+      <div class="feedback">
+        <p id="message" role="status" aria-live="polite">点击地面移动。</p>
+        <button id="stop-travel" hidden>停步 <span id="travel-steps"></span></button>
+        <button id="resume-travel" hidden>继续前往</button>
+        <button id="throw-lure" type="button" hidden>投掷 · 1 拍</button>
+        <button id="cancel-aim" hidden>取消瞄准</button>
+      </div>
+      <div id="shot-preview" aria-live="polite" hidden></div>
+      <div class="dock" aria-label="行动与交互">
+        <div class="actions" aria-label="战斗动作">
+          <button data-action="charge"><span class="action-glyph" aria-hidden="true">✦</span><span class="action-name">攒 <kbd>1</kbd></span><small>能量 +1</small></button>
+          <button data-action="wave" class="primary"><span class="action-glyph" aria-hidden="true">≋</span><span class="action-name">波 <kbd>2</kbd></span><small>消耗 1 · 伤害 1</small></button>
+          <button data-action="guard"><span class="action-glyph" aria-hidden="true">⬟</span><span class="action-name">防 <kbd>3</kbd></span><small>挡 1 伤</small></button>
+          <button data-action="reflect"><span class="action-glyph" aria-hidden="true">↱</span><span class="action-name">反弹 <kbd>5</kbd></span><small>消耗 1</small></button>
+          <button data-action="heavy" id="heavy" hidden><span class="action-glyph" aria-hidden="true">≋</span><span class="action-name">重波 <kbd>4</kbd></span><small>消耗 3 · 伤害 2</small></button>
+        </div>
+        <div class="utility">
+          <div class="dpad" aria-label="方向控制">
+            <button data-direction="left" aria-label="向左移动">←</button><button data-direction="up" aria-label="向上移动">↑</button><button data-direction="down" aria-label="向下移动">↓</button><button data-direction="right" aria-label="向右移动">→</button>
+          </div>
+          <div id="tactics" aria-label="场景交互"></div>
+          <button id="fill-energy" title="逐拍攒至能量满，遇险停下">攒满</button>
+          <div id="quick-items" aria-label="快捷道具"></div>
+          <button id="open-pack" aria-haspopup="dialog">背包</button>
+          <button id="inspect-cell" aria-pressed="false">查看 <kbd>I</kbd></button>
+          <button data-action="search" title="消耗一拍，查找邻近暗门及两格内的隐藏陷阱">搜查 <kbd>X</kbd></button>
+          <button id="toggle-map" aria-expanded="false" aria-controls="map-rail">地图</button>
+          <button id="exit" disabled hidden>下楼 ↗</button>
+        </div>
+      </div>
+    </section>
+    <aside id="map-rail" aria-label="楼层与敌人">
+      <section class="card map-card">
+        <div class="card-title">楼层地图 <span id="route"></span></div>
+        <svg id="minimap" shape-rendering="crispEdges" viewBox="0 0 280 200" role="img" aria-label="已探索区域小地图"></svg>
+        <div class="map-key" aria-label="地图图例"><span>视野内</span><span>已探索</span><span id="charted-key" hidden>卷轴测绘</span></div>
+        <details class="landmarks">
+          <summary>本层路标 <span id="landmark-count"></span></summary>
+          <div id="landmarks" class="landmark-list" aria-label="已知路标"></div>
+        </details>
+      </section>
+      <section class="card intent-card"><div class="card-title">敌人意图</div><div id="enemies"></div></section>
+    </aside>
+  </div>
+</main>
+<dialog id="cell-dialog" aria-labelledby="cell-title">
+  <h2 id="cell-title"></h2><ul id="cell-details"></ul>
+  <button class="primary close-dialog">返回地牢</button>
+</dialog>
+<dialog id="ground-dialog" aria-labelledby="ground-title">
+  <h2 id="ground-title">脚下的物品</h2>
+  <p>选择要拾取的物品，消耗一拍。</p>
+  <div id="ground-items" class="utility"></div>
+  <button id="ground-pick-all" type="button" hidden>拾取能装下的物品 · 1 拍</button>
+  <button id="ground-bag" type="button" hidden>背包已满 · 整理背包</button>
+  <button class="primary close-dialog">返回地牢</button>
+</dialog>
+<dialog id="condition-dialog" aria-labelledby="condition-title">
+  <h2 id="condition-title"></h2><p id="condition-description"></p>
+  <button class="primary close-dialog">返回地牢</button>
+</dialog>
+<dialog id="pack-dialog" aria-labelledby="pack-title">
+  <h2 id="pack-title">背包</h2>
+  <div class="pack-tabs" aria-label="背包面板">
+    <button data-pack-tab="items" aria-pressed="true">物品</button>
+    <button data-pack-tab="character" aria-pressed="false">人物信息</button>
+  </div>
+  <section data-pack-panel="items">
+    <p id="bag-count"></p>
+    <button id="drink-dew" type="button">饮用露珠</button>
+    <div id="bag-slots" class="bag-slots"></div>
+    <section id="bag-item-detail" class="bag-item-detail" aria-label="道具详情" hidden>
+      <b id="bag-item-name"></b><p id="bag-item-description"></p>
+      <div class="utility">
+        <button id="bag-use-item" type="button">使用 · 1 拍</button>
+        <button id="bag-plant-item" type="button" hidden>播种 · 1 拍</button>
+        <button id="bag-drop-item" type="button">放下 · 1 拍</button>
+      </div>
+    </section>
+    <div id="quick-item-settings" class="quick-item-setting" aria-label="快捷道具绑定">
+      <label>快捷道具 <kbd>Q</kbd> <select data-quick-bind="q"></select></label>
+      <label>快捷道具 <kbd>E</kbd> <select data-quick-bind="e"></select></label>
+    </div>
+    <p id="bag-relics"></p>
+    <details class="bag-item-detail"><summary>炼金</summary><div id="recipes"></div></details>
+    <p id="bag-feedback" role="status"></p>
+  </section>
+  <section data-pack-panel="character" hidden>
+    <div class="character-summary"><span id="character-avatar" class="class-avatar" aria-hidden="true"></span><div>
+      <h3 id="loadout-title"></h3><p id="character-vitals"></p>
+    </div></div>
+    <h3>已学天赋</h3><div id="talent-list"></div>
+    <details><summary>武器与改装</summary><div id="growth-weapon"></div><div id="loadout"></div><p id="growth-status" role="status"></p></details>
+    <details><summary>随身遗物 <small id="upgrade-count"></small></summary><div id="upgrades"></div></details>
+  </section>
+  <button class="primary close-dialog">返回地牢</button>
+</dialog>
+<dialog id="talent-dialog" aria-labelledby="talent-title">
+  <h2 id="talent-title">选择天赋</h2>
+  <p id="talent-instruction"></p>
+  <fieldset id="talent-options"><legend>本层天赋</legend></fieldset>
+  <p id="talent-feedback" role="status"></p>
+  <div class="result-actions"><button id="confirm-talents" class="primary" disabled>确认天赋</button><button id="skip-talents">跳过本次</button></div>
+</dialog>
+<dialog id="journal-dialog" aria-labelledby="journal-title">
+  <h2 id="journal-title">冒险手记</h2>
+  <div class="journal-meta"><span id="seed"></span><span id="saved">连接地牢中…</span></div>
+  <details class="landmarks" open>
+    <summary>本层路标</summary>
+    <div id="journal-landmark-list" class="landmark-list" aria-label="手记中的已知路标"></div>
+  </details>
+  <ol id="log"></ol>
+  <details id="history-panel">
+    <summary>历次冒险</summary>
+    <div id="run-history"></div>
+  </details>
+  <div class="result-actions"><button id="help">玩法指南 <kbd>?</kbd></button><button id="restart">新冒险</button><button class="primary close-dialog">返回地牢</button></div>
+</dialog>
+<dialog id="danger-dialog" aria-labelledby="danger-title"><h2 id="danger-title">这一步会坠落。</h2><p id="danger-description">目标格已开裂或塌陷，踩入会立即死亡。防御与护心无法抵挡坠落。</p><button id="confirm-fall">仍然踏入</button><button class="primary close-dialog">返回地牢</button></dialog>
+<dialog id="enemy-dialog" aria-labelledby="enemy-name"><div class="eyebrow">FIELD NOTES / 敌人档案</div><h2 id="enemy-name"></h2><div class="enemy-stats"><div>当前血量<strong id="enemy-hp"></strong></div><div>攻击力<strong id="enemy-attack"></strong></div><div>当前防御力<strong id="enemy-defense"></strong></div></div><h3>攻击方式</h3><p id="enemy-method"></p><p id="enemy-current"></p><p id="enemy-loot" hidden></p><p class="muted">防御力表示本拍可抵挡的伤害。查看信息不推进时间；关闭后可继续原来的瞄准。</p><button class="primary close-dialog">返回地牢</button></dialog>
+<dialog id="help-dialog"><div class="eyebrow">旅人手册</div><h2>先观察，再出招。</h2><p>每次有效行动推进一拍；思考、瞄准与查看说明都不耗时。</p><div class="help-grid"><div><b>01 / 看意图</b><p>敌人已锁定下拍动作。红格是攻击范围，虚线箭头是移动目标；攻击不会追踪你改方向。</p></div><div><b>02 / 攒 · 波 · 防</b><p>攒 +1 能量，上限 3。波沿四方向射程 4 格，伤害 1，遇墙停止。防抵挡本拍最多 1 点总伤害。实际挡住伤害后，下一次波或重波伤害 +1，不叠加；移动和攒可保留，发射即消耗（打空也消耗），过门和清场都保留。</p></div><div><b>03 / 用地形</b><p>方向键 / WASD 移动，或点击相邻格。点击已探索地面自动前往，遇敌或受伤会停；危险解除后可点「继续前往」。普通门可以沿途打开，关门挡视线和波。靠近带金色刻痕的墙时按 X 或点「搜查」，花一拍揭开暗门。看到「机关痕迹」时，搜查可揭露两格内可见的隐藏陷阱。接战时点击远处只走一步，避开已标出的攻击格。首次看到你的敌人会先警觉一拍。高草挡视线，可被踩倒或被双方的攻击打碎，有时会掉落露珠或种子。按 2 进入瞄准，再按方向键或点击射线空格出波；点击敌人查看信息，不消耗行动；Esc 取消。移动先结算，伤害同时生效。</p></div><div><b>04 / 走得更远</b><p>整层房间可来回行走，过门不重置任何资源；安全区域也能攒。泉水和宝箱只使用一次。每个区域的第四层需先清理封锁阶梯的守卫。每五层有守关战，第 26 层抵达终点祭坛即可通关。</p></div></div><p class="muted">敌人会跨门追击，失去视线后前往最后看见你的位置搜寻。泉水旁的钥匙能打开补给支路；点相邻锁门使用钥匙。背包初始有五个槽位，使用道具消耗一拍。</p><p class="muted">新冒险的职业决定波形。可在背包的「人物信息」中锻造、刻印和查看已学天赋。首次进入第 1、6、11 层时选择天赋。扇形射程 2，回旋下一拍返回，穿透能击中两人。短距强波伤害 +1、普通波耗能 2、射程减半；厚盾普通防消耗 1 能量、抵挡 2 伤。洞穴的破城守关者可拆脆墙，镜像守关者复制你的当前波形与强化。下拍范围均提前显示。双方同时归零视为失败。</p><button class="primary close-dialog">明白了，进入地牢</button></dialog>
+<dialog id="reward-dialog"><div class="eyebrow">A SMALL GIFT / 旅途馈赠</div><h2 id="reward-title">带上新的力量。</h2><p id="reward-description">选择一项，本次冒险持续生效。</p><div id="rewards"></div><button id="skip-reward">跳过本次奖励</button></dialog>
+<dialog id="result-dialog"><div class="eyebrow">EXPEDITION COMPLETE</div><h2 id="result-title"></h2><p id="result-description"></p><dl id="result-stats"></dl><div class="result-actions"><button id="retry" class="primary">同一地牢，再试一次</button><button id="new-seed">开始新的地牢</button><button class="close-dialog">查看最后局面</button></div></dialog>
+<dialog id="restart-dialog" aria-labelledby="class-title">
+  <h2 id="class-title">选择职业</h2>
+  <p id="class-note">职业决定本次冒险使用的发射器。</p>
+  <fieldset id="class-options"><legend>初始职业</legend></fieldset>
+  <div class="result-actions"><button id="confirm-restart" class="primary">开始新冒险</button><button class="close-dialog">返回地牢</button></div>
+</dialog>
+</body></html>
