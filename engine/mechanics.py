@@ -78,7 +78,7 @@ class ExpeditionMechanics(SideEncounters):
             tile.update(x=cell[0], y=cell[1], kind='fragile', stage=2)
             actor = next((actor for actor in [self.player, *self.enemies] if position(actor) == cell), None)
             if actor is not None:
-                self.resolve_fragile_actor('hero' if actor is self.player else actor['id'], actor, cell)
+                self.resolve_fragile_actor('hero' if actor is self.player else actor['id'], actor, None)
             else:
                 self.note('坠落陷阱打开，露出一处深坑。')
             return
@@ -296,7 +296,7 @@ class ExpeditionMechanics(SideEncounters):
                 if enemy['energy'] < self.action_cost(action):
                     enemy['intent'] = dict(action='charge', label='镜像攒能量', cells=[])
                     continue
-                damage = min(3 if self.depth < 25 else 4, self.wave_damage_before_defense(action))
+                damage = min(3 if self.depth < 25 else 4, self.wave_damage_before_defense(action, player_bonus=False))
                 cells = self.wave_paths(position(enemy), direction, self.weapon, self.mode, self.range_bonus)[0]
                 if player not in cells:
                     continue
@@ -443,6 +443,7 @@ class ExpeditionMechanics(SideEncounters):
         self._wave_landing = None
         self.falls = []
         self._touched_mirrors = set()
+        self._walked_this_turn = action == 'move' and position(self.player) != self._positions_before['hero']
         healed = self.player['hp'] - self._hp_before_action
         if healed > 0:
             self.record_status('healed', self.player, healed)
@@ -683,6 +684,8 @@ class ExpeditionMechanics(SideEncounters):
         self.run_stats['defeated'] += len(dead)
         for enemy in dead:
             self.note('击败' + enemy['name'] + '。')
+        pulled = self._anchor_chain_cast[0] if action == 'anchor_chain' else None
+        self.reward_sanity_kills(dead, outgoing, impacts, pulled)
         fell = {fall['id'] for fall in self.falls}
         for enemy in dead:
             if enemy['kind'] == 'boneburst' and enemy['id'] not in fell:
@@ -1033,20 +1036,25 @@ class ExpeditionMechanics(SideEncounters):
                 return
 
     def resolve_fragile_actor(self, ident, actor, previous):
-        tile = self.tile_at(position(actor))
+        cell = position(actor)
+        if cell == previous:
+            return
+        tile = self.tile_at(cell)
         if not tile or tile['kind'] != 'fragile':
             return
-        if previous != position(actor) and tile['stage'] < 2:
-            tile['stage'] += 1
-            self.note('地板出现裂缝，再次踩入会塌陷！' if tile['stage'] == 1 else '地板塌陷！')
-        if tile['stage'] == 2:
-            if ident == 'hero':
-                self._pending_fall = position(actor)
-                return
-            actor['hp'] = 0
-            self.falls.append(dict(id=ident, kind='hero' if ident == 'hero' else actor['kind'], cell=position(actor)))
-            self.record_status('fall', actor)
-            self.note(('你' if ident == 'hero' else actor['name']) + '坠入深渊。')
+        if not tile['stage']:
+            tile['stage'] = 2
+            self.note('脆弱地板塌陷，留下破洞。')
+            return
+        # Stage 1 in older saves was already stepped on and now behaves as an open pit.
+        tile['stage'] = 2
+        if ident == 'hero':
+            self._pending_fall = cell
+            return
+        actor['hp'] = 0
+        self.falls.append(dict(id=ident, kind=actor['kind'], cell=cell))
+        self.record_status('fall', actor)
+        self.note(actor['name'] + '坠入深渊。')
 
     def mechanic_state(self, known, visible):
         terrain = [deepcopy(t) for t in self.terrain_memory.values() if (t['x'], t['y']) in known]
