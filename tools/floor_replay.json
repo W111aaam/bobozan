@@ -1,0 +1,8007 @@
+[
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "echo"
+  },
+  {
+    "action": "forge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "refund"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "choose_talents",
+    "direction": null,
+    "choice": []
+  },
+  {
+    "action": "item",
+    "direction": null,
+    "choice": "heal"
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "heavy"
+  },
+  {
+    "action": "forge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "skip_reward",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "choose_talents",
+    "direction": null,
+    "choice": []
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "skip_reward",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "forge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "item",
+    "direction": null,
+    "choice": "heal"
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "heart"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "skip_reward",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "skip_reward",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "bag"
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "pierce"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  }
+]

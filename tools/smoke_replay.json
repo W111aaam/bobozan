@@ -1,0 +1,462 @@
+[
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "echo"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "refund"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "heal"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "choose",
+    "direction": null,
+    "choice": "heart"
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
+    "choice": null
+  }
+]
