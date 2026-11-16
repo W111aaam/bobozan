@@ -20,7 +20,7 @@ class GrassTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '正在燃烧'):
             game.path_to([4, 5])
         go(game, 'move', 'right')
-        self.assertEqual(game.player['hp'], 4)
+        self.assertEqual(game.player['hp'], 19)
         self.assertEqual(game.state()['fireCells'], [[4, 4]])
         go(game, 'guard')
         self.assertEqual(game.state()['fireCells'], [[4, 3]])
@@ -55,7 +55,7 @@ class GrassTests(unittest.TestCase):
         game = fixture.arena()
         grass = dict(x=4, y=5, kind='high_grass')
         game.terrain = [grass]
-        enemy = fixture.enemy(game, 5, 5, hp=3)
+        enemy = fixture.enemy(game, 5, 5, hp=8)
         self.assertTrue(game.walkable([4, 5]))
         self.assertFalse(game.has_sight([3, 5], [5, 5]))
         self.assertFalse(game.state()['enemies'])

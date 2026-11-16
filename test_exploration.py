@@ -124,7 +124,7 @@ class ExplorationTests(unittest.TestCase):
         self.assertFalse(tile['armed'])
         self.assertEqual(game.path_to([x+2,y]), ['right','right'])
         go(game,'move','right')
-        self.assertEqual(game.player['hp'],5)
+        self.assertEqual(game.player['hp'],20)
 
     def test_hidden_trap_is_private_until_search_then_saved_and_avoided(self):
         game, x, y = self.trap_arena()
@@ -240,10 +240,10 @@ class ExplorationTests(unittest.TestCase):
         game,x,y = self.trap_arena()
         game.terrain.append(dict(x=x+1, y=y, kind='trap', mechanism='dart', armed=True))
         go(game,'move','right')
-        self.assertEqual(game.player['hp'],4)
+        self.assertEqual(game.player['hp'],19)
         go(game,'move','left')
         go(game,'move','right')
-        self.assertEqual(game.player['hp'],4)
+        self.assertEqual(game.player['hp'],19)
 
     def test_alarm_reaches_room_enemies_out_of_sight(self):
         game,x,y = self.trap_arena()
@@ -368,7 +368,8 @@ class ExplorationTests(unittest.TestCase):
         game.inventory = ['ankh'] * (game.bag_capacity - 1) + ['grass_seed']
         game.features = [dict(id='box', kind='supply_choice', x=x, y=y, used=False)]
         go(game, 'open_supply')
-        self.assertEqual([choice['blocked'] for choice in game.state()['choices']], [True, False])
+        self.assertEqual({choice['id']: choice['blocked'] for choice in game.state()['choices']},
+                         {'echo_smoke': True, 'grass_seed': False, 'stride_launcher': False, 'sniper_launcher': False})
         with self.assertRaises(ValueError):
             go(game, 'choose', choice='echo_smoke')
         go(game, 'choose', choice='grass_seed')
@@ -376,14 +377,14 @@ class ExplorationTests(unittest.TestCase):
 
     def test_healing_potion_cures_poison_before_the_next_tick(self):
         game,_,_ = self.trap_arena()
-        game.player['hp'] = 3
+        game.player['hp'] = 11
         game.poisoned = True
         game.inventory = ['heal']
         go(game, 'item', choice='heal')
-        self.assertEqual(game.player['hp'],5)
+        self.assertEqual(game.player['hp'],20)
         self.assertFalse(game.poisoned)
         effects = {effect['kind']: effect['amount'] for effect in game.state()['effects']}
-        self.assertEqual(effects['healed'], 2)
+        self.assertEqual(effects['healed'], 9)
         self.assertIn('cured', effects)
 
     def test_throw_at_closed_door_lands_on_near_side(self):
@@ -471,7 +472,7 @@ class ExplorationTests(unittest.TestCase):
         game.inventory = ['smoke']
         enemy['intent'] = dict(action='wave', label='出波', cells=game.ray([x+4,y], 'left'))
         go(game, 'item', target, 'smoke')
-        self.assertEqual(game.player['hp'], 4)
+        self.assertEqual(game.player['hp'], 19)
         self.assertEqual(game.smoke_at(target), 3)
         self.assertNotIn('last_seen', enemy)
         self.assertIn([x,y], game.ray([x+4,y], 'left'))
@@ -491,7 +492,7 @@ class ExplorationTests(unittest.TestCase):
         game.player['energy'] = 2
         go(game, 'item', choice='recall')
         self.assertEqual([game.player['x'],game.player['y']], [x,y])
-        self.assertEqual(game.player['hp'], 5)
+        self.assertEqual(game.player['hp'], 20)
         self.assertEqual(game.player['energy'], 2)
         self.assertFalse(game.inventory)
 
@@ -538,7 +539,7 @@ class ExplorationTests(unittest.TestCase):
         go(game, 'search')
         self.assertIsNone(game.result)
         self.assertIsNone(game.defeat_cause)
-        self.assertEqual(game.player['hp'], 2)
+        self.assertEqual(game.player['hp'], 8)
         self.assertFalse(game.inventory)
         self.assertFalse(game.poisoned)
         game = FloorDungeon.restore(game.dump())
@@ -568,9 +569,9 @@ class ExplorationTests(unittest.TestCase):
         self.assertTrue(game.features[0]['used'])
         game = FloorDungeon.restore(game.dump())
         game.dew += 1
-        game.player['hp'] = 4
+        game.player['hp'] = 19
         go(game, 'drink_dew')
-        self.assertEqual(game.player['hp'], 5)
+        self.assertEqual(game.player['hp'], 20)
         self.assertEqual(game.dew, 1)
 
     def test_terror_preserves_locked_attack_and_forces_two_retreats(self):
@@ -579,7 +580,7 @@ class ExplorationTests(unittest.TestCase):
         enemy = game.add_enemy('bonepuppet', [x+1,y], 0, 2)
         enemy['intent'] = dict(action='melee', label='攻击', cells=[[x,y]])
         go(game, 'item', choice='terror')
-        self.assertEqual(game.player['hp'], 4)
+        self.assertEqual(game.player['hp'], 19)
         for remaining in (2, 1):
             self.assertEqual(enemy['fear'], remaining)
             self.assertIn('惊退', enemy['intent']['label'])
@@ -738,5 +739,5 @@ class ExplorationTests(unittest.TestCase):
         go(game, 'move', 'left')
         game.player['hp'] = 3
         go(game, 'move', 'right')
-        self.assertEqual(game.player['hp'], 5)
+        self.assertEqual(game.player['hp'], 9)
         self.assertIsNone(game.tile_at(target))

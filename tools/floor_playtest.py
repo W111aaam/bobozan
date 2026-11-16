@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from floor import FloorDungeon
 from dungeon import DIRS
 from test_floor import position, feature, center
-from layout import LAST_FLOOR
+from layout import LAST_FLOOR, LIGHT_VALUES
 
 
 def score(g,room):
@@ -52,7 +52,7 @@ def play(seed, last_depth=LAST_FLOOR):
         if g.talent_choice:
             act('choose_talents', c=[])
         if g.choices:
-            pref=['heal','echo','refund','heart','heavy','pierce','bag']
+            pref=['heal','echo','refund','heart','reflect','pierce','bag']
             key=next((k for k in pref if k in [c['id'] for c in g.choices]), None)
             if key:
                 act('choose',c=key)
@@ -141,9 +141,10 @@ def play(seed, last_depth=LAST_FLOOR):
             spring = next((feature for feature in g.features if feature['kind'] == 'shrine'), None)
             if spring and g.player['hp'] < g.max_hp:
                 walk(position(spring))
-            light = next((feature for feature in g.features if feature['id'] == 'light'), None)
-            if light and g.sanity <= 335 and not light['used']:
-                walk(position(light))
+            for light in g.features[:]:
+                if (not light['used'] and light['kind'] in LIGHT_VALUES and g.sanity <= 355
+                        and safe_step({position(light)})):
+                    walk(position(light))
             charge()
             if depth % 5 in (0, 4):
                 walk(center(g, 1))

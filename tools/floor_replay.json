@@ -86,21 +86,6 @@
   },
   {
     "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "left",
     "choice": null
   },
@@ -450,12 +435,7 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "reflect",
+    "action": "heavy",
     "direction": "left",
     "choice": null
   },
@@ -470,22 +450,27 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "left",
     "choice": null
   },
   {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
     "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
     "direction": "up",
     "choice": null
   },
@@ -687,41 +672,6 @@
   {
     "action": "charge",
     "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
     "choice": null
   },
   {
@@ -735,13 +685,43 @@
     "choice": null
   },
   {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "down",
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "down",
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "right",
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
     "choice": null
   },
   {
@@ -761,17 +741,7 @@
   },
   {
     "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
+    "direction": "down",
     "choice": null
   },
   {
@@ -1066,27 +1036,12 @@
   },
   {
     "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "left",
     "choice": null
   },
   {
     "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
     "choice": null
   },
   {
@@ -1101,192 +1056,12 @@
   },
   {
     "action": "move",
-    "direction": "down",
+    "direction": "up",
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
+    "action": "heavy",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "up",
     "choice": null
   },
   {
@@ -1316,26 +1091,146 @@
   },
   {
     "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
     "direction": "left",
     "choice": null
   },
   {
     "action": "move",
-    "direction": "up",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "right",
     "choice": null
   },
@@ -1422,136 +1317,6 @@
   {
     "action": "move",
     "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
     "choice": null
   },
   {
@@ -1570,11 +1335,6 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
     "action": "move",
     "direction": "up",
     "choice": null
@@ -1606,16 +1366,6 @@
   },
   {
     "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
     "direction": "up",
     "choice": null
   },
@@ -1630,7 +1380,12 @@
     "choice": null
   },
   {
-    "action": "reflect",
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
     "direction": "up",
     "choice": null
   },
@@ -1655,9 +1410,9 @@
     "choice": "refund"
   },
   {
-    "action": "item",
-    "direction": null,
-    "choice": "heal"
+    "action": "move",
+    "direction": "up",
+    "choice": null
   },
   {
     "action": "move",
@@ -1745,6 +1500,21 @@
     "choice": []
   },
   {
+    "action": "item",
+    "direction": null,
+    "choice": "heal"
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "charge",
     "direction": null,
     "choice": null
@@ -1895,12 +1665,7 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
+    "action": "heavy",
     "direction": "up",
     "choice": null
   },
@@ -1962,31 +1727,6 @@
   {
     "action": "move",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
     "choice": null
   },
   {
@@ -1995,7 +1735,12 @@
     "choice": null
   },
   {
-    "action": "move",
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "heavy",
     "direction": "left",
     "choice": null
   },
@@ -2005,13 +1750,8 @@
     "choice": null
   },
   {
-    "action": "reflect",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
+    "action": "charge",
+    "direction": null,
     "choice": null
   },
   {
@@ -2020,22 +1760,12 @@
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "right",
+    "action": "guard",
+    "direction": null,
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "charge",
+    "action": "guard",
     "direction": null,
     "choice": null
   },
@@ -2045,7 +1775,12 @@
     "choice": null
   },
   {
-    "action": "wave",
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
     "direction": "up",
     "choice": null
   },
@@ -2057,6 +1792,26 @@
   {
     "action": "move",
     "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "guard",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
     "choice": null
   },
   {
@@ -2281,67 +2036,12 @@
   },
   {
     "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
     "direction": "right",
     "choice": null
   },
   {
     "action": "move",
     "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
     "choice": null
   },
   {
@@ -2415,33 +2115,8 @@
     "choice": null
   },
   {
-    "action": "wave",
+    "action": "heavy",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
     "choice": null
   },
   {
@@ -2450,6 +2125,11 @@
     "choice": null
   },
   {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
     "action": "wave",
     "direction": "left",
     "choice": null
@@ -2472,6 +2152,36 @@
   {
     "action": "move",
     "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
     "choice": null
   },
   {
@@ -2617,7 +2327,7 @@
   {
     "action": "choose",
     "direction": null,
-    "choice": "heavy"
+    "choice": "reflect"
   },
   {
     "action": "forge",
@@ -2630,6 +2340,11 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "left",
     "choice": null
@@ -2706,106 +2421,6 @@
   },
   {
     "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "reflect",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "left",
     "choice": null
   },
@@ -2862,296 +2477,11 @@
   {
     "action": "move",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "guard",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
     "choice": null
   },
   {
     "action": "heavy",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
     "choice": null
   },
   {
@@ -3161,6 +2491,26 @@
   },
   {
     "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
     "direction": "down",
     "choice": null
   },
@@ -3171,7 +2521,42 @@
   },
   {
     "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "heavy",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
     "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
     "choice": null
   },
   {
@@ -3271,32 +2656,12 @@
   },
   {
     "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
     "direction": "up",
     "choice": null
   },
   {
     "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
     "choice": null
   },
   {
@@ -3945,8 +3310,8 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "right",
+    "action": "charge",
+    "direction": null,
     "choice": null
   },
   {
@@ -3955,22 +3320,7 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "guard",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
+    "action": "heavy",
     "direction": "right",
     "choice": null
   },
@@ -3985,13 +3335,8 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
+    "action": "move",
+    "direction": "up",
     "choice": null
   },
   {
@@ -4341,17 +3686,12 @@
   },
   {
     "action": "move",
-    "direction": "right",
+    "direction": "up",
     "choice": null
   },
   {
-    "action": "heavy",
+    "action": "wave",
     "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
     "choice": null
   },
   {
@@ -4360,23 +3700,13 @@
     "choice": null
   },
   {
-    "action": "heavy",
+    "action": "wave",
     "direction": "right",
     "choice": null
   },
   {
     "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
     "choice": null
   },
   {
@@ -4460,8 +3790,8 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
+    "action": "move",
+    "direction": "up",
     "choice": null
   },
   {
@@ -4515,13 +3845,18 @@
     "choice": null
   },
   {
-    "action": "heavy",
+    "action": "wave",
     "direction": "up",
     "choice": null
   },
   {
-    "action": "guard",
-    "direction": null,
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
     "choice": null
   },
   {
@@ -4542,6 +3877,16 @@
   {
     "action": "charge",
     "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
     "choice": null
   },
   {
@@ -4570,23 +3915,8 @@
     "choice": null
   },
   {
-    "action": "heavy",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
     "action": "wave",
-    "direction": "up",
+    "direction": "down",
     "choice": null
   },
   {
@@ -4596,7 +3926,7 @@
   },
   {
     "action": "move",
-    "direction": "up",
+    "direction": "down",
     "choice": null
   },
   {
@@ -4675,16 +4005,6 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
     "action": "move",
     "direction": "up",
     "choice": null
@@ -4812,20 +4132,15 @@
   {
     "action": "move",
     "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
     "choice": null
   },
   {
     "action": "heavy",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "reflect",
     "direction": "left",
     "choice": null
   },
@@ -5445,6 +4760,11 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "down",
     "choice": null
@@ -5645,12 +4965,7 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
+    "action": "heavy",
     "direction": "left",
     "choice": null
   },
@@ -5695,11 +5010,6 @@
     "choice": null
   },
   {
-    "action": "reflect",
-    "direction": "left",
-    "choice": null
-  },
-  {
     "action": "move",
     "direction": "right",
     "choice": null
@@ -5995,23 +5305,28 @@
     "choice": null
   },
   {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
     "action": "heavy",
     "direction": "left",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "left",
+    "direction": "up",
     "choice": null
   },
   {
     "action": "move",
     "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
     "choice": null
   },
   {
@@ -6105,6 +5420,11 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "up",
     "choice": null
@@ -6167,271 +5487,6 @@
   {
     "action": "wave",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "heavy",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "guard",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "heavy",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "skip_reward",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "exit",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
     "choice": null
   },
   {
@@ -6441,27 +5496,312 @@
   },
   {
     "action": "wave",
-    "direction": "left",
+    "direction": "right",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "left",
+    "direction": "right",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "wave",
-    "direction": "left",
+    "direction": "up",
     "choice": null
   },
   {
     "action": "move",
     "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "skip_reward",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "left",
     "choice": null
   },
   {
@@ -6700,7 +6040,7 @@
     "choice": null
   },
   {
-    "action": "heavy",
+    "action": "wave",
     "direction": "up",
     "choice": null
   },
@@ -6715,7 +6055,7 @@
     "choice": null
   },
   {
-    "action": "wave",
+    "action": "heavy",
     "direction": "up",
     "choice": null
   },
@@ -6881,22 +6221,12 @@
   },
   {
     "action": "move",
-    "direction": "down",
+    "direction": "up",
     "choice": null
   },
   {
     "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
+    "direction": "up",
     "choice": null
   },
   {
@@ -6912,6 +6242,46 @@
   {
     "action": "move",
     "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
     "choice": null
   },
   {
@@ -7272,11 +6642,6 @@
   {
     "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
     "choice": null
   },
   {
@@ -7526,12 +6891,17 @@
   },
   {
     "action": "move",
-    "direction": "left",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "reflect",
+    "direction": "right",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "right",
+    "direction": "up",
     "choice": null
   },
   {
@@ -7557,16 +6927,6 @@
   {
     "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
     "choice": null
   },
   {

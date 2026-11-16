@@ -56,7 +56,7 @@ class FloorTests(unittest.TestCase):
         g.inventory.append('heal')
         g = FloorDungeon.restore(g.dump())
         go(g, 'ascend')
-        self.assertEqual((g.depth, list(position(g.player)), g.sanity), (1, upper, 448))
+        self.assertEqual((g.depth, list(position(g.player)), g.sanity), (1, upper, 449))
         self.assertTrue(feature(g, 'key')['used'])
         self.assertFalse(g.locked)
         self.assertEqual((g.keys, g.enemies[0]['hp']), (1, 1))
@@ -72,7 +72,7 @@ class FloorTests(unittest.TestCase):
             g.path_to([x+1, y])
         self.assertEqual(g.path_to([x+1, y], True), ['right'])
         go(g, 'move', 'right')
-        self.assertEqual((g.result, g.depth, g.player['hp'], g.sanity), (None, 2, 3, 449))
+        self.assertEqual((g.result, g.depth, g.player['hp'], g.sanity), (None, 2, 12, 450))
         target = position(g.player)
         self.assertNotIn((g.tile_at(target) or {}).get('kind'), ('trap', 'fragile'))
         self.assertTrue(g.walkable(target))
@@ -82,10 +82,11 @@ class FloorTests(unittest.TestCase):
 
     def test_corrosion_ticks_and_light_refills_sanity(self):
         g = FloorDungeon(13)
-        g.sanity = 151
+        g.sanity = 100
+        g.turn = 1
         g.enemies = []
         go(g, 'guard')
-        self.assertEqual(g.sanity, 150)
+        self.assertEqual(g.sanity, 99)
         self.assertGreater(len(g.corruption_rooms), 0)
         old_ids = [enemy['id'] for enemy in g.enemies]
         g = FloorDungeon.restore(g.dump())
@@ -94,23 +95,63 @@ class FloorTests(unittest.TestCase):
         g.sanity = 1
         g.player['energy'] = 0
         go(g, 'charge')
-        self.assertEqual((g.sanity, g.player['hp']), (0, 4))
-        g.corrosion = 115
+        self.assertEqual((g.sanity, g.player['hp']), (0, 19))
+        g.corrosion = 980
         go(g, 'guard')
-        self.assertEqual(g.player['hp'], 3)
+        self.assertEqual(g.player['hp'], 18)
         x, y = position(g.player)
         g.features.append(dict(id='test-light', kind='light_wisp', x=x, y=y, used=False))
         go(g, 'guard')
-        self.assertEqual((g.sanity, g.player['hp'], g.corrosion), (64, 3, 0))
+        self.assertEqual((g.sanity, g.player['hp'], g.corrosion), (89, 18, 0))
         self.assertEqual(g.state()['lightBlessings'], {'light_wisp': 65})
         self.assertNotIn('test-light', [f['id'] for f in g.state()['features']])
+
+    def test_sanity_can_support_long_exploration_before_corrosion(self):
+        game = FloorDungeon(0, 'straight')
+        for turn in range(1, 900):
+            game.turn = turn
+            game.tick_sanity()
+        self.assertEqual((game.sanity, game.player['hp']), (1, 20))
+        game.turn = 900
+        game.tick_sanity()
+        self.assertEqual((game.sanity, game.player['hp']), (0, 19))
+        for turn in range(901, 950):
+            game.turn = turn
+            game.tick_sanity()
+        self.assertEqual(game.player['hp'], 19)
+        game.turn = 950
+        game.tick_sanity()
+        self.assertEqual(game.player['hp'], 18)
+
+    def test_old_combat_values_migrate_once_across_current_and_saved_floors(self):
+        game = FloorDungeon(0, 'straight')
+        enemy = game.enemies[0]
+        enemy.update(hp=1, maxHp=3, intent=dict(action='melee', label='冲撞 · 2伤', damage=2, cells=[]))
+        game.returning = [dict(owner='enemy', cells=[], damage=2)]
+        del game.floor_balance_version
+        game.change_floor(2, 'down')
+        current = game.enemies[0]
+        current.update(hp=1, maxHp=3)
+        saved = game.dump()
+        saved.pop('floor_balance_version')
+        saved['player']['hp'] = 3
+        saved['corrosion'] = 60
+        restored = FloorDungeon.restore(saved)
+        self.assertEqual((restored.player['hp'], restored.corrosion), (12, 500))
+        self.assertEqual(restored.enemies[0]['hp'], (current['maxHp'] - 1 + restored.enemies[0]['maxHp']) // 3)
+        self.assertEqual(FloorDungeon.restore(restored.dump()).dump(), restored.dump())
+        restored.change_floor(1, 'up')
+        enemy = restored.enemies[0]
+        self.assertEqual((enemy['maxHp'], enemy['hp']), (8, 3))
+        self.assertEqual((enemy['intent']['damage'], restored.returning[0]['damage']), (5, 6))
+        self.assertEqual(restored.player['hp'], 12)
 
     def test_ordinary_floors_generate_real_loot_and_do_not_spawn_empty_features(self):
         for seed in range(8):
             for depth in (1, 2, 3, 4, 7, 12, 19, 24):
                 generated = generate_layout(seed, depth)
                 self.assertFalse({'materials', 'dry_spring'} & {f['kind'] for f in generated['features']})
-                self.assertTrue(any(f['id'] == 'light' for f in generated['features']))
+                self.assertFalse(any(f['kind'].startswith('light_') for f in generated['features']))
                 self.assertGreaterEqual(sum(t['kind'] == 'trap' for t in generated['terrain']), 2)
                 self.assertGreaterEqual(sum(t['kind'] == 'high_grass' for t in generated['terrain']), 8)
     def test_loop_and_all_objectives_reachable(self):
@@ -188,18 +229,18 @@ class FloorTests(unittest.TestCase):
         g = FloorDungeon(0)
         g.depth = 10
         g.enter_room()
-        self.assertEqual(g.max_hp, 6)
-        g.player['hp'] = 5
+        self.assertEqual(g.max_hp, 25)
+        g.player['hp'] = 18
         g.depth = 11
         g.enter_room()
-        self.assertEqual((g.player['hp'], g.max_hp), (5, 7))
-        self.assertEqual(g.wave_damage_before_defense('wave'), 1)
+        self.assertEqual((g.player['hp'], g.max_hp), (23, 30))
+        self.assertEqual(g.wave_damage_before_defense('wave'), 8)
         g = FloorDungeon.restore(g.dump())
         go(g, 'choose_talents', choice=[])
         g.inventory = ['heal']
         go(g, 'item', choice='heal')
-        self.assertEqual(g.state()['maxHp'], 7)
-        self.assertEqual(g.player['hp'], 7)
+        self.assertEqual(g.state()['maxHp'], 30)
+        self.assertEqual(g.player['hp'], 30)
 
     def test_campaign_has_twenty_regular_floors_five_arenas_and_final_altar(self):
         g = FloorDungeon(0)
@@ -228,7 +269,7 @@ class FloorTests(unittest.TestCase):
         go(g, 'charge'); go(g, 'charge')
         g.counter = True
         go(g, 'move', 'right'); go(g, 'move', 'left')
-        self.assertEqual((g.player['energy'], g.player['hp'], g.room), (2, 5, 0))
+        self.assertEqual((g.player['energy'], g.player['hp'], g.room), (2, 20, 0))
         self.assertTrue(g.counter)
 
     def test_persisted_enemy_and_rewards_do_not_reset(self):
@@ -261,10 +302,11 @@ class FloorTests(unittest.TestCase):
         g.enter_room()
         x, y = position(feature(g, 'spring'))
         place(g, (x-1, y))
-        g.player['hp'] = 4
+        g.player['hp'] = 17
         go(g, 'move', 'right')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
         go(g, 'move', 'left'); go(g, 'move', 'right')
+        self.assertEqual(g.player['hp'], 20)
         self.assertFalse(g.choices)
 
     def test_fog_filters_enemies_geometry_and_features(self):
@@ -375,7 +417,7 @@ class FloorTests(unittest.TestCase):
             go(g, 'exit')
         g.enemies = []
         g.finish_action()
-        self.assertIn('heavy', [choice['id'] for choice in g.choices])
+        self.assertIn('reflect', [choice['id'] for choice in g.choices])
         go(g, 'skip_reward')
         go(g, 'exit')
         self.assertEqual(g.depth, 6)
@@ -436,7 +478,7 @@ class FloorTests(unittest.TestCase):
                 g.player['hp'] = 3
                 for step in route(g, target):
                     go(g, 'move', step)
-                self.assertEqual(g.player['hp'], 5)
+                self.assertEqual(g.player['hp'], 9)
                 self.assertIsNone(g.tile_at(target))
                 g = FloorDungeon.restore(g.dump())
                 g.player['hp'] = 3
@@ -471,11 +513,11 @@ class FloorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             go(g, 'open_supply')
         place(g, position(box))
-        expected = ['smoke', 'lure']
+        expected = ['smoke', 'lure', 'stride_launcher', 'sniper_launcher']
         self.assertEqual([item['id'] for item in g.state()['supplyOptions']], expected)
         g.inventory = ['ankh'] * g.bag_capacity
         go(g, 'open_supply')
-        self.assertTrue(all(entry['blocked'] for entry in g.state()['choices']))
+        self.assertEqual([entry['blocked'] for entry in g.state()['choices']], [True, True, False, False])
         before = g.dump()
         with self.assertRaises(ValueError):
             go(g, 'choose', choice='smoke')
@@ -547,7 +589,7 @@ class FloorTests(unittest.TestCase):
         self.assertNotIn('last_seen', enemy)
         go(g, 'move', direction)
         self.assertEqual(enemy['intent']['action'], 'notice')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
         # Leave the door before the enemy attacks. It pursues the last seen
         # doorway and opens the same door on arrival.
         reverse = next(k for k, v in DIRS.items() if v == (-dx, -dy))

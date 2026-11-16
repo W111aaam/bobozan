@@ -21,7 +21,8 @@ def chapter(depth):
 RELIC_FLOORS = (3, 8, 13, 18, 23)
 HEAL_FLOORS = (1, 7, 12, 17, 22)
 SPRING_FLOORS = (2, 9, 14, 19, 24)
-LIGHT_VALUES = {'light_wisp': 65, 'light_soul': 105, 'light_radiant': 155}
+# Sanity restored and blessing duration in action beats.
+LIGHT_VALUES = {'light_wisp': (90, 65), 'light_soul': (180, 105), 'light_radiant': (300, 155)}
 
 
 def generate_layout(seed, depth):
@@ -174,15 +175,6 @@ def generate_layout(seed, depth):
     if depth % 5 == 4:
         x, y = centers[2]
         features.append(dict(id='recall', kind='recall', x=x, y=y+1, used=False))
-    # One light ration along the loop, with occasional richer reserves in side rooms.
-    light_rng = Random(seed + depth * 23719)
-    light_room = light_rng.choice([ident for ident in ring if roles[ident] in ('combat', 'standard')])
-    lx, ly = centers[light_room]
-    features.append(dict(id='light', kind='light_soul', x=lx, y=ly, used=False))
-    if depth % 5 == 4:
-        lx, ly = centers[2]
-        features.append(dict(id='extra-light', kind=light_rng.choice(('light_wisp', 'light_radiant')),
-                             x=lx, y=ly, used=False))
     terrain = []
     rare_room = Random(seed + depth * 7309).randrange(10) == 0
     annex = 'store'

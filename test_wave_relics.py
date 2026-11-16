@@ -11,6 +11,52 @@ class WaveRelicTests(unittest.TestCase):
         self.fixture = test_mechanics.ExpeditionMechanicsTests()
         self.game = self.fixture.arena()
 
+    def test_defense_forecast_compares_guard_and_charge_without_spending_a_turn(self):
+        game = self.game
+        game.player['energy'] = 1
+        self.fixture.enemy(game, 4, 5, intent=dict(action='melee', cells=[[3, 5]], damage=5))
+        self.fixture.enemy(game, 2, 5, intent=dict(action='wave', cells=[[3, 5]],
+                                                rune='shatter', damage=1))
+        before = game.dump()
+        results = [game.preview_details(action, None) for action in ('guard', 'charge')]
+        self.assertEqual([(result['blocked'], result['damage']) for result in results], [(4, 2), (0, 6)])
+        self.assertEqual(game.dump(), before)
+        go(game, 'guard')
+        self.assertEqual(game.player['hp'], 18)
+
+    def test_defense_forecast_does_not_expose_hidden_damage_or_guard_budget(self):
+        game = self.game
+        self.fixture.enemy(game, 11, 5, name='隐藏敌人', intent=dict(action='area', cells=[[3, 5]], damage=3))
+        self.fixture.enemy(game, 4, 5, intent=dict(action='melee', cells=[[3, 5]], damage=1))
+        preview = game.preview_details('guard', None)
+        self.assertEqual((preview['blocked'], preview['damage']), (1, 0))
+        self.assertNotIn('隐藏敌人', str(preview))
+        self.assertEqual(preview['received'], [])
+
+    def test_defense_forecast_tests_step_against_the_resolved_attack_and_contested_moves(self):
+        game = self.game
+        self.fixture.enemy(game, 4, 5, intent=dict(action='melee', cells=[[3, 5]], damage=2))
+        self.fixture.enemy(game, 2, 4, intent=dict(action='move', target=[3, 4], cells=[]))
+        before = game.dump()
+        up = game.preview_details('move', 'up')
+        down = game.preview_details('move', 'down')
+        self.assertEqual((up['stepOutcome'], up['damage']), ('blocked', 2))
+        self.assertEqual((down['stepOutcome'], down['damage']), ('moved', 0))
+        self.assertEqual(game.dump(), before)
+        go(game, 'move', 'down')
+        self.assertEqual((game.player['x'], game.player['y'], game.player['hp']), (3, 6, 20))
+
+    def test_step_forecast_reports_known_holes_without_revealing_hidden_traps(self):
+        game = self.game
+        game.terrain.extend([
+            dict(x=3, y=4, kind='fragile', stage=1),
+            dict(x=3, y=6, kind='trap', mechanism='fall', armed=True, hidden=True),
+        ])
+        up = game.preview_details('move', 'up')
+        down = game.preview_details('move', 'down')
+        self.assertEqual((up['stepOutcome'], down['stepOutcome']), ('fall', 'moved'))
+        self.assertEqual((game.depth, game.turn), (1, 0))
+
     def test_anchor_chain_reward_pulls_enemy_for_one_turn_and_recharges_next_floor(self):
         game = self.game
         game.upgrades = [key for key in game.upgrade_catalog if key != 'anchor_chain']
@@ -48,7 +94,7 @@ class WaveRelicTests(unittest.TestCase):
             go(game, 'anchor_chain', [4, 4])
         self.assertEqual(game.dump(), snapshot)
         go(game, 'anchor_chain', [3, 8])
-        self.assertEqual((game.player['x'], game.player['y'], game.player['hp']), (3, 8, 5))
+        self.assertEqual((game.player['x'], game.player['y'], game.player['hp']), (3, 8, 20))
         self.assertEqual(enemy['hp'], 3)
         effect = next(effect for effect in game.effects if effect['kind'] == 'anchor_chain')
         self.assertEqual(effect['cells'], [[3, 6], [3, 7], [3, 8]])
@@ -113,14 +159,14 @@ class WaveRelicTests(unittest.TestCase):
         game.upgrades = ['echo']
         game.choices = [dict(id=key, name=game.upgrade_catalog[key][0],
                              description=game.upgrade_catalog[key][1])
-                        for key in ('bag', 'pierce', 'heavy')]
+                        for key in ('bag', 'pierce', 'reflect')]
         saved = game.dump()
         choices = {choice['id']: choice['preview'] for choice in game.state()['choices']}
         self.assertEqual(game.dump(), saved)
         self.assertEqual(choices['bag']['stats'][0], dict(label='能量上限', before=4, after=5))
         self.assertEqual(choices['bag']['combos'][0]['missing'], [])
-        self.assertEqual(choices['pierce']['combos'][0]['missing'], ['重波'])
-        self.assertEqual([stat['after'] for stat in choices['heavy']['stats']], [2, 3])
+        self.assertEqual(choices['pierce']['combos'][0]['missing'], [])
+        self.assertEqual(choices['reflect']['stats'], [dict(label='反弹耗能', after='1 能量')])
         go(game, 'choose', choice='bag')
         self.assertEqual(game.cap, choices['bag']['stats'][0]['after'])
         self.assertTrue(next(build for build in game.builds() if build['name'] == '蓄能')['active'])
@@ -129,11 +175,11 @@ class WaveRelicTests(unittest.TestCase):
         game = self.game
         game.upgrades = ['double', 'parallel', 'burn']
         self.fixture.enemy(game, 4, 5, hp=1)
-        second = self.fixture.enemy(game, 6, 5, hp=3)
-        side = self.fixture.enemy(game, 5, 6, hp=3)
+        second = self.fixture.enemy(game, 6, 5, hp=9)
+        side = self.fixture.enemy(game, 5, 6, hp=9)
         go(game, 'wave', 'right')
         self.assertEqual(game.player['energy'], 2)
-        self.assertEqual((second['hp'], side['hp']), (2, 2))
+        self.assertEqual((second['hp'], side['hp']), (6, 4))
         self.assertNotIn('burning', second)
         self.assertNotIn('burning', side)
 
@@ -160,7 +206,7 @@ class WaveRelicTests(unittest.TestCase):
                 if blocked is not None:
                     game.walls = [[3, blocked]]
                     game._wall_cells = {(3, blocked)}
-                foes = {y: self.fixture.enemy(game, 5, y, hp=4, name=str(y),
+                foes = {y: self.fixture.enemy(game, 5, y, hp=10, name=str(y),
                                               intent=dict(action='wait', cells=[]))
                         for y in (4, 5, 6)}
                 expected = [[5, y] for y in foes if y != blocked]
@@ -171,13 +217,13 @@ class WaveRelicTests(unittest.TestCase):
                 go(game, 'wave', 'right')
                 self.assertEqual(game.player['energy'], 2)
                 self.assertEqual({y: enemy['hp'] for y, enemy in foes.items()},
-                                 {y: 4 if y == blocked else 3 for y in foes})
+                                 {y: 10 if y == blocked else 4 if y == 5 else 5 for y in foes})
 
     def test_impact_pushes_enemy_into_fragile_floor(self):
         game = self.game
         game.upgrades = ['impact']
         game.terrain = [dict(x=6, y=5, kind='fragile', stage=1)]
-        enemy = self.fixture.enemy(game, 5, 5, hp=4)
+        enemy = self.fixture.enemy(game, 5, 5, hp=10)
         preview = game.preview_details('wave', 'right')
         self.assertIn('ram被推入深渊', preview['events'])
         go(game, 'wave', 'right')
@@ -189,9 +235,9 @@ class WaveRelicTests(unittest.TestCase):
         game.upgrades = ['gate_shield', 'parallel']
         go(game, 'guard')
         self.assertFalse(game.state()['gateShieldReady'])
-        attacker = self.fixture.enemy(game, 5, 5, hp=7,
+        attacker = self.fixture.enemy(game, 5, 5, hp=24,
                                       intent=dict(action='melee', cells=[[3, 5]]))
-        self.fixture.enemy(game, 5, 6, hp=7)
+        self.fixture.enemy(game, 5, 6, hp=24)
         go(game, 'guard')
         self.assertTrue(game.state()['gateShieldReady'])
         game = FloorDungeon.restore(game.dump())
@@ -243,7 +289,7 @@ class WaveRelicTests(unittest.TestCase):
                 self.assertIn([2, 4], preview['cells'])
                 self.assertEqual([2, 8] in preview['cells'], not wall)
                 go(game, 'wave', 'right')
-                self.assertEqual((north['hp'], south['hp']), (3, 4 if wall else 3))
+                self.assertEqual((north['hp'], south['hp']), (1, 4 if wall else 1))
                 self.assertEqual(sum(fx['kind'] == 'mirror_split' for fx in game.effects), 1 if wall else 2)
                 self.assertEqual(game.player['energy'], 2)
 
@@ -268,7 +314,7 @@ class WaveRelicTests(unittest.TestCase):
     def test_burn_ticks_for_two_later_actions(self):
         game = self.game
         game.upgrades = ['burn']
-        enemy = self.fixture.enemy(game, 6, 5, hp=5)
+        enemy = self.fixture.enemy(game, 6, 5, hp=10)
         go(game, 'wave', 'right')
         self.assertEqual((enemy['hp'], enemy['burning']), (4, 2))
         go(game, 'guard')
@@ -279,7 +325,7 @@ class WaveRelicTests(unittest.TestCase):
     def test_shallow_water_extinguishes_existing_and_new_burns(self):
         game = self.game
         game.upgrades = ['burn', 'impact']
-        enemy = self.fixture.enemy(game, 5, 5, hp=5)
+        enemy = self.fixture.enemy(game, 5, 5, hp=10)
         game.terrain = [dict(x=6, y=5, kind='water')]
         go(game, 'wave', 'right')
         self.assertEqual((enemy['x'], enemy['hp']), (6, 4))
@@ -294,7 +340,7 @@ class WaveRelicTests(unittest.TestCase):
     def test_freeze_cancels_one_movement_after_two_hits(self):
         game = self.game
         game.upgrades = ['freeze']
-        enemy = self.fixture.enemy(game, 6, 5, hp=5, last_seen=[3, 5])
+        enemy = self.fixture.enemy(game, 6, 5, hp=18, last_seen=[3, 5])
         go(game, 'wave', 'right')
         self.assertEqual(enemy['frost_stacks'], 1)
         go(game, 'wave', 'right')
@@ -307,6 +353,7 @@ class WaveRelicTests(unittest.TestCase):
 
     def test_preview_reports_visible_damage_and_reflection_without_leaking_hidden_sources(self):
         game = self.game
+        game.upgrades.append('reflect')
         self.fixture.enemy(game, 5, 5, intent=dict(action='wave', cells=[[4, 5], [3, 5]]))
         self.fixture.enemy(game, 12, 5, intent=dict(action='area', cells=[[3, 5]], damage=2))
         before = game.dump()
@@ -316,7 +363,24 @@ class WaveRelicTests(unittest.TestCase):
         defense = game.preview_details('reflect', 'right')
         self.assertEqual(defense['received'], [])
         self.assertEqual(defense['reflected'], 1)
+        self.assertEqual(defense['hitSources'], {'reflection': [{'name': 'ram', 'damage': 1}]})
         self.assertEqual(game.dump(), before)
+
+    def test_preview_breaks_out_new_wave_return_and_ongoing_fire_damage(self):
+        game = self.game
+        target = self.fixture.enemy(game, 5, 5, name='目标', hp=11, burning=1)
+        game.ground_fire = [dict(x=5, y=5, spread=0)]
+        game.returning = [dict(owner='hero', cells=[[5, 5], [4, 5]], damage=1, pierce=1)]
+        before = game.dump()
+        preview = game.preview_details('wave', 'right')
+        self.assertEqual(preview['hitSources'], {
+            source: [{'name': '目标', 'damage': 6 if source == 'wave' else 1}] for source in ('wave', 'return', 'burn', 'groundFire')
+        })
+        self.assertEqual(preview['hits'], [{'name': '目标', 'damage': 9}])
+        self.assertNotIn('wave', game.preview_details('wave', 'left')['hitSources'])
+        self.assertEqual(game.dump(), before)
+        go(game, 'wave', 'right')
+        self.assertEqual(target['hp'], 2)
 
     def test_blink_lands_past_enemy_and_resolves_attack_at_destination(self):
         game = self.game
@@ -328,4 +392,4 @@ class WaveRelicTests(unittest.TestCase):
         self.assertEqual(preview['received'], [dict(damage=2, name='ram')])
         self.assertEqual(game.dump(), before)
         go(game, 'wave', 'right')
-        self.assertEqual((game.player['x'], game.player['y'], game.player['hp']), (7, 5, 3))
+        self.assertEqual((game.player['x'], game.player['y'], game.player['hp']), (7, 5, 18))

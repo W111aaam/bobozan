@@ -2,7 +2,10 @@
 from random import Random
 
 from dungeon import DIRS
-from enemy_design import ENEMY_LOOT, FIXED_ENEMY_LOOT
+from enemy_design import ENEMY_LOOT, FIXED_ENEMY_LOOT, enemy_health
+
+# Percentages are absolute outcomes in the same roll as ordinary supplies.
+LIGHT_LOOT = {'light_wisp': 13, 'light_soul': 9, 'light_radiant': 3}
 
 
 def cell(actor):
@@ -201,7 +204,7 @@ class SideEncounters:
                 if not self.ignite_grass(target):
                     self.effects.append(dict(kind='burn', cells=[target]))
                 if cell(self.player) == target:
-                    hits.append((1, enemy, {}))
+                    hits.append((intent.get('damage', 1), enemy, {}))
 
     def resolve_side_hit(self, enemy, intent):
         if intent.get('steals') and self.player['energy'] and not enemy.get('stolen'):
@@ -231,7 +234,7 @@ class SideEncounters:
 
     def enemy_loot_chance(self, enemy):
         kind = enemy['kind']
-        if not enemy.get('regular_loot') or kind not in ENEMY_LOOT:
+        if not self.enemy_random_loot_eligible(enemy) or kind not in ENEMY_LOOT:
             return 0
         count = getattr(self, 'enemy_loot_count', 0)
         if count >= 2:
@@ -242,17 +245,31 @@ class SideEncounters:
             return 0
         return chance // 2 if count else chance
 
+    def enemy_random_loot_eligible(self, enemy):
+        return (bool(enemy.get('regular_loot')) and enemy['kind'] not in FIXED_ENEMY_LOOT
+                and not enemy.get('stolen') and 'summoner' not in enemy
+                and enemy['kind'] not in ('bonepuppet', 'broodling') and enemy.get('name') != '分裂子群')
+
+    def enemy_light_chances(self, enemy):
+        if not self.enemy_random_loot_eligible(enemy):
+            return dict.fromkeys(LIGHT_LOOT, 0)
+        return LIGHT_LOOT.copy()
+
     def roll_enemy_loot(self, enemy):
         chance = self.enemy_loot_chance(enemy)
-        if not chance:
-            return None
-        if Random(self.seed + self.depth * 71993 + enemy['id'] * 1103).randrange(100) >= chance:
-            return None
-        self.enemy_loot_count = getattr(self, 'enemy_loot_count', 0) + 1
-        _, item = ENEMY_LOOT[enemy['kind']]
-        if item == 'kit':
-            self.enemy_heal_region = (self.depth - 1) // 5
-        return item
+        roll = Random(self.seed + self.depth * 71993 + enemy['id'] * 1103).randrange(100)
+        if roll < chance:
+            self.enemy_loot_count = getattr(self, 'enemy_loot_count', 0) + 1
+            _, item = ENEMY_LOOT[enemy['kind']]
+            if item == 'kit':
+                self.enemy_heal_region = (self.depth - 1) // 5
+            return item
+        roll -= chance
+        for kind, weight in self.enemy_light_chances(enemy).items():
+            if roll < weight:
+                return kind
+            roll -= weight
+        return None
 
     def finish_side_enemies(self, outgoing, dead):
         fallen = {fall['id'] for fall in self.falls}
@@ -261,12 +278,8 @@ class SideEncounters:
                 continue
             drop = ('stolen_energy' if enemy.get('stolen') else
                     FIXED_ENEMY_LOOT.get(enemy['kind']) or self.roll_enemy_loot(enemy))
-            if (not drop and enemy['kind'] == 'canalfish' and not getattr(self, 'light_enemy_drop', False)
-                    and Random(f'{self.seed}:{self.depth}:{enemy["id"]}:light').randrange(4) == 0):
-                self.light_enemy_drop = True
-                drop = 'light_wisp'
             if drop == 'rune_shard':
-                self.drop_rune(f'drop-{enemy["id"]}', cell(enemy))
+                self.drop_rune(f'drop-{enemy["id"]}', cell(enemy), fallback='light_wisp')
             elif drop:
                 x,y = cell(enemy)
                 self.features.append(dict(id=f'drop-{enemy["id"]}', kind=drop, x=x, y=y, used=False))
@@ -290,7 +303,7 @@ class SideEncounters:
                 self.note('召唤点被占，召唤失败。')
                 continue
             kind = 'bonepuppet' if enemy['kind'] == 'bonesummoner' else 'broodling'
-            child = self.add_enemy(kind, target, enemy['home'], 1, summoner=enemy['id'])
+            child = self.add_enemy(kind, target, enemy['home'], enemy_health(kind, self.depth), summoner=enemy['id'])
             enemy['broods'] = enemy.get('broods', 0) + 1
             self.effects.append(dict(kind='split', cells=[target]))
             self.note(enemy['name'] + '召出了' + child['name'] + '。')

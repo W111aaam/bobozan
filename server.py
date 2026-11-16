@@ -167,11 +167,12 @@ class Handler(LegacyHandler):
             elif self.path == '/api/preview':
                 if data.get('version') != game.version:
                     raise ValueError('局面已更新，请重新瞄准。')
-                return self.reply(200, game.preview_details(data.get('action'), data.get('direction')))
+                return self.reply(200, game.preview_details(data.get('action'), data.get('direction'), data.get('choice')))
             elif self.path == '/api/path':
                 if data.get('version') != game.version:
                     raise ValueError('局面已更新，请重新选择。')
-                return self.reply(200, {'path': game.path_to(data.get('target'), data.get('stepOnTrap')), 'version': game.version})
+                return self.reply(200, game.path_details(data.get('target'), data.get('stepOnTrap'),
+                                                        forecast=data.get('forecast') is True))
             elif self.path == '/api/action':
                 game.act(data.get('action'), data.get('direction'), data.get('version'), data.get('choice'))
             else:

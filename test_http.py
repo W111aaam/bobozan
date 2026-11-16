@@ -74,6 +74,8 @@ class HTTPTests(unittest.TestCase):
         a=self.call();a=self.call('reset',dict(version=a['version'],seed=0))
         response=self.call('path',dict(version=a['version'],target=[a['player']['x']+1,a['player']['y']]))
         self.assertEqual(response['path'],['right'])
+        response=self.call('path',dict(version=a['version'],target=[a['player']['x']+1,a['player']['y']],forecast=True))
+        self.assertEqual(response['sanityForecast']['end'],a['sanity'])
         self.assertEqual(self.call(),a)
 
     def test_legacy_save_is_not_overwritten(self):

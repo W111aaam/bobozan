@@ -53,6 +53,7 @@ class SideEncounterTests(unittest.TestCase):
     def test_hook_pulls_only_when_unblocked(self):
         for action, direction, x in (('guard',None,3), ('reflect','right',3), ('charge',None,4)):
             g = self.arena()
+            g.upgrades.append('reflect')
             self.enemy(g,'magnetguard',6,5,energy=1)
             go(g, action, direction)
             self.assertEqual(g.player['x'], x)
@@ -70,7 +71,7 @@ class SideEncounterTests(unittest.TestCase):
         self.assertIsNone(g.tile_at([3,5]))
 
     def test_poison_ticks_once_and_guard_can_prevent_application(self):
-        for first, expected in (('guard',5), ('charge',3)):
+        for first, expected in (('guard',20), ('charge',16)):
             g = self.arena()
             self.enemy(g,'webspinner',6,5,web_laid=True,energy=1)
             go(g, first)
@@ -102,7 +103,7 @@ class SideEncounterTests(unittest.TestCase):
         self.assertIn([6,4],e['intent']['cells'])
 
     def test_electric_wave_warns_and_conducts_only_through_connected_water(self):
-        for action, expected_hp in [('charge', 4), ('guard', 5), ('move', 5)]:
+        for action, expected_hp in [('charge', 17), ('guard', 20), ('move', 20)]:
             with self.subTest(action=action):
                 g = self.arena()
                 g.player.update(x=6, y=6)
@@ -125,7 +126,7 @@ class SideEncounterTests(unittest.TestCase):
         g.update_visibility()
         self.assertIn([6, 6], g.state()['dangerCells'])
         go(g, 'item', [6, 5], 'frost_smoke')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
         self.assertFalse(g.movement_locked())
         self.assertEqual(g.conducted_water([[6, 5]]), [])
 
@@ -150,7 +151,7 @@ class SideEncounterTests(unittest.TestCase):
         self.assertEqual(g.dump(), before)
         go(g, 'wave', 'right')
         self.assertNotIn('ice_until', g.tile_at([7, 6]))
-        self.assertEqual(g.player['hp'], 4)
+        self.assertEqual(g.player['hp'], 17)
 
     def test_frozen_water_does_not_stop_a_direct_electric_hit(self):
         g = self.arena()
@@ -160,20 +161,21 @@ class SideEncounterTests(unittest.TestCase):
         self.enemy(g, 'elementcore', 3, 5, element='spark', energy=1)
         g.update_visibility()
         go(g, 'item', [5, 5], 'frost_smoke')
-        self.assertEqual(g.player['hp'], 4)
+        self.assertEqual(g.player['hp'], 17)
         self.assertEqual(g.conducted_water([[5, 5]]), [])
 
     def test_reflected_electric_wave_conducts_and_hits_once_per_enemy(self):
         g = self.arena()
+        g.upgrades.append('reflect')
         g.player.update(x=6, y=5)
         g.terrain = [dict(x=x, y=y, kind='water') for x, y in [(3, 5), (4, 5), (5, 5), (5, 6)]]
-        core = self.enemy(g, 'elementcore', 3, 5, element='spark', energy=1)
-        target = self.enemy(g, 'bonepuppet', 5, 6, hp=2)
+        core = self.enemy(g, 'elementcore', 3, 5, element='spark', energy=1, hp=8)
+        target = self.enemy(g, 'bonepuppet', 5, 6, hp=5)
         target['intent'] = dict(action='wait', label='休整', cells=[])
         go(g, 'reflect', 'left')
-        self.assertEqual(g.player['hp'], 5)
-        self.assertEqual(core['hp'], 2)
-        self.assertEqual(target['hp'], 1)
+        self.assertEqual(g.player['hp'], 20)
+        self.assertEqual(core['hp'], 5)
+        self.assertEqual(target['hp'], 2)
 
     def test_statue_inscription_and_reward(self):
         g = self.arena()
@@ -188,7 +190,7 @@ class SideEncounterTests(unittest.TestCase):
     def test_dormant_statue_can_be_scouted_and_revisited_before_engaging(self):
         g = self.arena()
         g.talent_milestones = [1]
-        e = self.enemy(g, 'armedidol', 5, 5, hp=3, emitter='straight', inscription='frost')
+        e = self.enemy(g, 'armedidol', 5, 5, hp=11, emitter='straight', inscription='frost')
         g.update_visibility()
         self.assertEqual(g.state()['statueLandmarks'],
                          [dict(x=5, y=5, emitter='straight', inscription='frost')])
@@ -206,7 +208,7 @@ class SideEncounterTests(unittest.TestCase):
         g.player.update(x=4, y=5)
         g.update_visibility()
         go(g, 'wave', 'right')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
         self.assertFalse(g.enemies[0].get('dormant'))
         self.assertFalse(g.state()['statueLandmarks'])
         self.assertEqual(g.enemies[0]['intent']['action'], 'notice')
@@ -223,7 +225,7 @@ class SideEncounterTests(unittest.TestCase):
 
     def test_mimic_reveals_from_a_ranged_hit(self):
         g = self.arena()
-        e = self.enemy(g,'chestmimic',6,5)
+        e = self.enemy(g,'chestmimic',6,5,hp=11)
         g.update_visibility()
         self.assertEqual(g.state()['enemies'][0]['name'],'可疑的宝箱')
         go(g,'wave','right')

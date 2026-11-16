@@ -60,7 +60,9 @@ class RegionalEnemyTests(unittest.TestCase):
         g.depth = 11
         winners = [ident for ident in range(200)
                    if Random(g.seed + g.depth * 71993 + ident * 1103).randrange(100) < 15]
-        first, second, third, fourth, fifth = winners[:5]
+        first, third, fourth = winners[:3]
+        second, fifth = [ident for ident in range(200)
+                         if Random(g.seed + g.depth * 71993 + ident * 1103).randrange(100) >= 25][:2]
 
         def enemy(ident, kind, eligible=True):
             return dict(id=ident, kind=kind, x=5, y=5, regular_loot=eligible)
@@ -85,10 +87,41 @@ class RegionalEnemyTests(unittest.TestCase):
         bat = g.enemies[0]
         self.assertIn('掉落概率 9%', g.state()['enemies'][0]['lootHint'])
         bat['id'] = next(ident for ident in range(200)
-                         if 9 <= Random(g.seed + g.depth * 71993 + ident * 1103).randrange(100) < 18)
-        self.assertIsNone(g.roll_enemy_loot(bat))
+                         if Random(g.seed + g.depth * 71993 + ident * 1103).randrange(100) == 9)
+        self.assertEqual(g.roll_enemy_loot(bat), 'light_wisp')
+        self.assertEqual(g.enemy_loot_count, 1)
         g.enemy_loot_count = 2
         self.assertIn('已达掉落上限', g.state()['enemies'][0]['lootHint'])
+
+    def test_fixed_light_chances_match_drop_rolls_and_inspection_at_any_sanity(self):
+        g = self.arena()
+        enemy = self.enemy(g, 'rushcrab', 4, 5, regular_loot=True)
+
+        def roll_for(ident):
+            return Random(g.seed + g.depth * 71993 + ident * 1103).randrange(100)
+
+        ids_by_roll = {}
+        for ident in range(2000):
+            ids_by_roll.setdefault(roll_for(ident), ident)
+        kinds = ('light_wisp', 'light_soul', 'light_radiant')
+        expected = (13, 9, 3)
+        for sanity in (450, 100, 99, 0):
+            g.sanity = sanity
+            actual = g.state()['enemies'][0]['lightLoot']
+            self.assertEqual(actual, dict(zip(kinds, expected)))
+            drops = []
+            for roll in range(100):
+                enemy['id'] = ids_by_roll[roll]
+                g.enemy_loot_count = 0
+                drops.append(g.roll_enemy_loot(enemy))
+            self.assertEqual(tuple(drops.count(kind) for kind in kinds), expected)
+            self.assertEqual(drops.count('dew'), 30)
+        g.enemy_loot_count = 2
+        enemy['id'] = ids_by_roll[0]
+        self.assertEqual(g.roll_enemy_loot(enemy), 'light_wisp')
+        enemy['summoner'] = 5
+        self.assertIsNone(g.roll_enemy_loot(enemy))
+        self.assertEqual(g.enemy_light_chances(enemy), dict.fromkeys(kinds, 0))
 
     def test_patrol_stays_in_room_and_yields_to_alert(self):
         g = FloorDungeon(0)
@@ -165,40 +198,41 @@ class RegionalEnemyTests(unittest.TestCase):
         # Give the lethal shot the opening created by a previous dodge.
         g.enemies[0]['intent'] = dict(action='wait', label='空档', cells=[])
         go(g, 'wave', 'right')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
         self.assertIn([3, 5], g.state()['dangerCells'])
         loaded = FloorDungeon.restore(json.loads(json.dumps(g.dump())))
         self.assertEqual(loaded.state()['dangerCells'], g.state()['dangerCells'])
         go(loaded, 'guard')
         self.assertTrue(loaded.counter)
-        self.assertEqual(loaded.player['hp'], 5)
+        self.assertEqual(loaded.player['hp'], 20)
         self.assertFalse(loaded.state()['dangerCells'])
         go(g, 'move', 'up')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
 
     def test_split_conserves_remaining_health_and_is_once_only(self):
         g = self.arena()
-        parent = self.enemy(g, 'splitcloud', 4, 5)
+        parent = self.enemy(g, 'splitcloud', 4, 5, hp=24)
         go(g, 'wave', 'right')
         child = next(e for e in g.enemies if e is not parent)
-        self.assertEqual((parent['hp'], child['hp']), (2, 1))
+        self.assertEqual((parent['hp'], child['hp']), (14, 4))
         self.assertNotEqual(parent['id'], child['id'])
         go(g, 'wave', 'right')
         self.assertEqual(len(g.enemies), 2)
 
     def test_blocking_bite_prevents_healing(self):
         g = self.arena()
-        bat = self.enemy(g, 'drainbat', 4, 5, hp=1)
+        bat = self.enemy(g, 'drainbat', 4, 5, hp=1, maxHp=8)
         go(g, 'guard')
-        self.assertEqual((g.player['hp'], bat['hp']), (5, 1))
+        self.assertEqual((g.player['hp'], bat['hp']), (20, 1))
         go(g, 'charge')
-        self.assertEqual((g.player['hp'], bat['hp']), (4, 2))
+        self.assertEqual((g.player['hp'], bat['hp']), (17, 3))
 
     def test_drain_requires_unblocked_damage(self):
-        for action, direction, hp, energy in (('guard', None, 5, 2), ('reflect', 'right', 5, 1),
-                                                ('charge', None, 4, 2)):
+        for action, direction, hp, energy in (('guard', None, 20, 2), ('reflect', 'right', 20, 1),
+                                                ('charge', None, 17, 2)):
             with self.subTest(action=action):
                 g = self.arena()
+                g.upgrades.append('reflect')
                 self.enemy(g, 'nullmage', 5, 5, energy=1)
                 go(g, action, direction)
                 self.assertEqual((g.player['hp'], g.player['energy']), (hp, energy))
@@ -212,7 +246,7 @@ class RegionalEnemyTests(unittest.TestCase):
         self.assertEqual(eye['intent']['cells'], line)
         go(g, 'guard')
         self.assertEqual(eye['intent']['action'], 'wait')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
 
     def test_leap_uses_shared_collision_and_freeze(self):
         g = self.arena()
@@ -232,7 +266,7 @@ class RegionalEnemyTests(unittest.TestCase):
         self.assertEqual(ripper['x'], 4)
         self.assertIn([3, 5], ripper['intent']['cells'])
         go(g, 'move', 'up')
-        self.assertEqual(g.player['hp'], 5)
+        self.assertEqual(g.player['hp'], 20)
 
     def test_closed_door_blocks_special_movement_and_long_beam(self):
         for kind in ('blinkgolem', 'siegeeye', 'rushcrab'):
