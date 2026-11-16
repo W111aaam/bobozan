@@ -1510,16 +1510,6 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
-    "action": "charge",
-    "direction": null,
-    "choice": null
-  },
-  {
     "action": "move",
     "direction": "right",
     "choice": null
@@ -1735,18 +1725,13 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
+    "action": "move",
+    "direction": "right",
     "choice": null
   },
   {
     "action": "heavy",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
     "choice": null
   },
   {
@@ -2030,7 +2015,22 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "left",
+    "choice": null
+  },
+  {
     "action": "wave",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "move",
     "direction": "right",
     "choice": null
   },
@@ -2110,13 +2110,18 @@
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "right",
+    "action": "guard",
+    "direction": null,
     "choice": null
   },
   {
     "action": "heavy",
     "direction": "left",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "right",
     "choice": null
   },
   {
@@ -2150,13 +2155,13 @@
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "down",
+    "action": "charge",
+    "direction": null,
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "right",
+    "action": "charge",
+    "direction": null,
     "choice": null
   },
   {
@@ -2176,7 +2181,7 @@
   },
   {
     "action": "move",
-    "direction": "left",
+    "direction": "down",
     "choice": null
   },
   {
@@ -2485,13 +2490,8 @@
     "choice": null
   },
   {
-    "action": "guard",
-    "direction": null,
-    "choice": null
-  },
-  {
     "action": "move",
-    "direction": "right",
+    "direction": "left",
     "choice": null
   },
   {
@@ -2500,13 +2500,18 @@
     "choice": null
   },
   {
-    "action": "wave",
-    "direction": "up",
+    "action": "move",
+    "direction": "left",
     "choice": null
   },
   {
     "action": "wave",
-    "direction": "up",
+    "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "right",
     "choice": null
   },
   {
@@ -2515,8 +2520,8 @@
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "down",
+    "action": "charge",
+    "direction": null,
     "choice": null
   },
   {
@@ -2530,8 +2535,8 @@
     "choice": null
   },
   {
-    "action": "charge",
-    "direction": null,
+    "action": "move",
+    "direction": "right",
     "choice": null
   },
   {
@@ -2542,21 +2547,6 @@
   {
     "action": "move",
     "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
     "choice": null
   },
   {
@@ -6221,12 +6211,22 @@
   },
   {
     "action": "move",
-    "direction": "up",
+    "direction": "down",
     "choice": null
   },
   {
     "action": "move",
-    "direction": "up",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "down",
     "choice": null
   },
   {
@@ -6242,46 +6242,6 @@
   {
     "action": "move",
     "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "left",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "down",
     "choice": null
   },
   {
@@ -6650,6 +6610,11 @@
     "choice": null
   },
   {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
     "action": "move",
     "direction": "down",
     "choice": null
@@ -6886,17 +6851,22 @@
   },
   {
     "action": "wave",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "reflect",
     "direction": "right",
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
+    "choice": null
+  },
+  {
+    "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "wave",
+    "direction": "up",
     "choice": null
   },
   {
@@ -6907,6 +6877,11 @@
   {
     "action": "skip_reward",
     "direction": null,
+    "choice": null
+  },
+  {
+    "action": "move",
+    "direction": "up",
     "choice": null
   },
   {

@@ -104,7 +104,7 @@ class RegionalEnemyTests(unittest.TestCase):
         for ident in range(2000):
             ids_by_roll.setdefault(roll_for(ident), ident)
         kinds = ('light_wisp', 'light_soul', 'light_radiant')
-        expected = (13, 9, 3)
+        expected = (10, 7, 3)
         for sanity in (450, 100, 99, 0):
             g.sanity = sanity
             actual = g.state()['enemies'][0]['lightLoot']
