@@ -2,7 +2,7 @@
 from random import Random
 
 from dungeon import DIRS
-from enemy_design import ENEMY_LOOT, FIXED_ENEMY_LOOT, enemy_health
+from enemy_design import BOSS_KINDS, ENEMY_LOOT, FIXED_ENEMY_LOOT, enemy_health
 
 # Percentages are absolute outcomes in the same roll as ordinary supplies.
 LIGHT_LOOT = {'light_wisp': 10, 'light_soul': 7, 'light_radiant': 3}
@@ -274,6 +274,9 @@ class SideEncounters:
     def finish_side_enemies(self, outgoing, dead):
         fallen = {fall['id'] for fall in self.falls}
         for enemy in dead:
+            if enemy['kind'] in BOSS_KINDS:
+                self.drop_boss_rewards(self.rooms_data[enemy['home']])
+                continue
             if enemy['id'] in fallen:
                 continue
             drop = ('stolen_energy' if enemy.get('stolen') else

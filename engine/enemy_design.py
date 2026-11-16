@@ -51,6 +51,7 @@ REINFORCEMENTS = (
 
 # Percentage chance and terrain feature to drop. Limited separately from room rewards.
 FIXED_ENEMY_LOOT = {'armedidol': 'rune_shard', 'chestmimic': 'kit'}
+BOSS_KINDS = ('boss', 'breaker', 'mirrorboss')
 ENEMY_LOOT = {
     'ram': (20, 'lure_cache'), 'slipsnake': (30, 'grass_seed'),
     'rushcrab': (30, 'dew'), 'charger': (25, 'smoke'),
@@ -87,7 +88,7 @@ SIDE_ENCOUNTERS = (
 
 def enemy_health(kind, depth, boss_arena=False):
     region = min(4, (depth - 1) // 5)
-    if kind in ('boss', 'breaker', 'mirrorboss'):
+    if kind in BOSS_KINDS:
         return (36, 48, 60, 72, 84)[region]
     if kind in ('bonepuppet', 'broodling'):
         return 4 + region

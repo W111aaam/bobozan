@@ -122,7 +122,7 @@ const LIGHT_INFO={
 };
 const FEATURE_NAMES={chest:'遗物宝箱',materials:'空补给箱',supply_choice:'战术补给箱',shrine:'疗愈泉水',dry_spring:'干涸泉水',key:'钥匙',kit:'药剂',cache:'战术补给',
  lure_cache:'诱饵',smoke:'烟雾弹',wonder:'镜间奇遇',dew:'露珠',grass_seed:'响草种子',sun_seed:'阳草种子',chart:'测绘卷轴',recall:'回程卷轴',ankh:'护命符',terror:'惊退卷轴',
- echo_smoke:'响雾弹',stolen_energy:'被偷走的能量',rune:'刻印'};
+ echo_smoke:'响雾弹',stolen_energy:'被偷走的能量',rune:'刻印',forge_core:'锻造核心'};
 function emptyChest(feature){
  return feature.kind==='materials'||(feature.used&&(
   ['chest','cache','supply_choice'].includes(feature.kind)
