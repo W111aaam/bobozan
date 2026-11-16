@@ -335,6 +335,7 @@ const art = (() => {
   kit:['..........','...1111...','...1441...','..133331..','..134431..','..134431..','..133331..','...1111...','..........'],
   lure_cache:['......55..','...61...5.','...661....','...141..5.','..14321...','..14321...','.1443321..','.1332221..','..11211...','....1.....'],
   wonder:['..........','....4.....','...434....','.4433344..','..43334...','...434....','....4.....','..........','..........'],
+  rune:['..........','...1111...','..132341..','.13344341.','.13432431.','.13244431.','.13324321.','..122231..','...1111...','..........'],
   stairs:['..........','....1111..','....1441..','...14431..','..144331..','.1443331..','.1443331..','.1111111..','..........'],
   up_stairs:['..........','....44....','...4444...','..441144..','....44....','....44....','..111111..','.14444441.','.11111111.','..........'],
   high_grass:['......4...','4..4..4...','34.34.3..4','33.33.3343','2342334333','.234333343','.23232332.','..2222222.','..111111..'],
@@ -353,7 +354,8 @@ const art = (() => {
   shrine:[ink,'#49657c','#75bed1','#b5f4ee',eye],dry_spring:[ink,'#49403e','#88776a','#bbaa8b',eye],
   light_wisp:[ink,'#497c9d','#8fe5eb','#e2ffff'],light_soul:[ink,'#96703e','#edc665','#fff3b4'],
   light_radiant:[ink,'#925275','#f297b7','#ffe0dd'],up_stairs:[ink,'#5f684f','#8f9d68','#c7dfa4'],kit:[ink,'#81425a','#ce6480','#ffc7bd',eye],
-  wonder:[ink,'#685082','#bd8bef','#f7d0ff',eye],lure_cache:[ink,'#907044','#d19b51','#ffe0a0','#f6c878','#c46a64']};
+  wonder:[ink,'#685082','#bd8bef','#f7d0ff',eye],rune:[ink,'#665080','#a181bc','#f6d9ff'],
+  lure_cache:[ink,'#907044','#d19b51','#ffe0a0','#f6c878','#c46a64']};
  const inventorySprites={
   heal:['kit'],lure:['lure_cache'],ankh:['ankh',[ink,'#805e42','#bd955f','#ffe0a0']],
   smoke:['smoke',[ink,'#536874','#91a9b4','#d9f1ef']],
@@ -487,7 +489,7 @@ const art = (() => {
   return `<svg class="item-icon" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${itemPixels(id)}</svg>`;
  }
  function prop(kind,x,y,used=false,item=null){
-  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew',rune:'wonder'})[kind]||kind;
+  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew'})[kind]||kind;
   const sprite=used&&key==='chest'?'open_chest':used&&key==='shrine'?'dry_spring':key;
   if(!items[sprite])return '';
   if(!cache.has(sprite))cache.set(sprite,pixels(items[sprite],itemColors[sprite]||props));
@@ -648,7 +650,7 @@ const art = (() => {
     <polyline points="${points}" stroke="#e0f5dc" stroke-width="2"/>
    </g>`;
   }
-  const beam=['wave','return','laser','mirror_split'].includes(fx.kind);
+  const beam=['wave','return','tide_return','laser','mirror_split'].includes(fx.kind);
   if(beam){
    const cells=fx.origin?[fx.origin,...fx.cells]:fx.cells;
    const parts=[];let d='';
@@ -658,13 +660,14 @@ const art = (() => {
    }
    for(const [i,[x,y]] of cells.entries()){
     const prev=cells[i-1];
-    const near=prev&&Math.abs(x-prev[0])+Math.abs(y-prev[1])===1;
+    const near=prev&&(fx.kind==='tide_return'?Math.max(Math.abs(x-prev[0]),Math.abs(y-prev[1]))===1:
+     Math.abs(x-prev[0])+Math.abs(y-prev[1])===1);
     if(!fx.spread||!fx.origin)d+=`${near?'L':'M'}${x*60+30} ${y*60+30}`;
     if(i>0||!fx.origin)parts.push(`<path d="M${x*60+26} ${y*60+26}h8v8h-8z" fill="#fff6d4"/>`);
    }
    const split=fx.kind==='mirror_split';
-   const beamColor=split?'#b4b4ff':tint;
-   return `<g class="fx beam-fx" pointer-events="none"><path d="${d}" stroke="${beamColor}" stroke-width="${split?12:21}" opacity=".22" fill="none"/><path d="${d}" stroke="${beamColor}" stroke-width="${split?6:10}" fill="none"/><path d="${d}" stroke="#fff9e1" stroke-width="3" fill="none"/>${parts.join('')}</g>`;
+   const beamColor=split?'#b4b4ff':fx.kind==='tide_return'?'#b5a2fb':tint;
+   return `<g class="fx beam-fx" ${fx.kind==='tide_return'?'data-tide-effect':''} pointer-events="none"><path d="${d}" stroke="${beamColor}" stroke-width="${split?12:21}" opacity=".22" fill="none"/><path d="${d}" stroke="${beamColor}" stroke-width="${split?6:10}" fill="none"/><path d="${d}" stroke="#fff9e1" stroke-width="3" fill="none"/>${parts.join('')}</g>`;
   }
   return fx.cells.map(([x,y])=>`<g transform="translate(${x*60+30},${y*60+30})" pointer-events="none"><g class="fx pulse-fx" fill="none" stroke="${tint}" stroke-width="4"><path d="M-21 -12l9-9h24l9 9v24l-9 9h-24l-9-9z"/><path d="M-7 0h14m-7-7v14"/></g></g>`).join('');
  }

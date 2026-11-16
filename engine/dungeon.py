@@ -20,13 +20,22 @@ LAYOUTS = [ [(3,3),(5,3),(3,5),(5,5)], [(3,2),(3,3),(5,5),(5,6)],
 
 class Dungeon:
     upgrade_catalog = UPGRADES
+    movement_actions = ('move',)
+    movement_directions = DIRS
+
+    def can_step(self, start, destination):
+        return self.walkable(destination)
+
+    @property
+    def heavy_available(self):
+        return 'heavy' in self.upgrades
 
     def __init__(self, seed=None):
         self.seed = randbelow(1_000_000) if seed is None else seed
         self.version = 1
         self.room = 0
         self.turn = 0
-        self.player = dict(x=1, y=7, hp=6, energy=0)
+        self.player = dict(x=1, y=7, hp=self.max_hp, energy=0)
         self.upgrades = []
         self.log = []
         self.result = None
@@ -184,22 +193,24 @@ class Dungeon:
             return
         if action not in ('move','charge','wave','guard','heavy',*self.extra_actions):
             raise ValueError('未知动作。')
-        if action in ('move','wave','heavy') and direction not in DIRS:
+        if ((action in self.movement_actions and direction not in self.movement_directions)
+                or (action in ('wave', 'heavy') and direction not in DIRS)):
             raise ValueError('请先选择方向。')
         if self.restrict_safe_actions() and self.cleared and action != 'move':
             raise ValueError('这里很安全，请探索房间或走向出口。')
         cost = self.action_cost(action)
-        if action=='heavy' and 'heavy' not in self.upgrades:
+        if action=='heavy' and not self.heavy_available:
             raise ValueError('尚未获得重波。')
         if action in ('wave','heavy') and self.player['energy'] < cost:
             raise ValueError('能量不足，先攒一下。')
         if action=='charge' and self.player['energy']>=self.cap:
             raise ValueError('能量已满。')
         destination = [self.player['x'],self.player['y']]
-        if action=='move':
-            dx,dy=DIRS[direction]
+        if action in self.movement_actions:
+            dx,dy=self.movement_directions[direction]
             destination=[destination[0]+dx,destination[1]+dy]
-            if not self.walkable(destination) or any([e['x'],e['y']]==destination for e in self.enemies):
+            if not self.can_step((self.player['x'], self.player['y']), destination) or any(
+                    [e['x'],e['y']]==destination for e in self.enemies):
                 raise ValueError('这格被阻挡了，不消耗行动。')
         self.prepare_action(action, choice)
         self.effects=[]
@@ -207,7 +218,7 @@ class Dungeon:
         # All destinations are locked before moving; occupied-at-start and contested cells block movement.
         occupied = {(e['x'],e['y']) for e in self.enemies} | {(self.player['x'],self.player['y'])}
         targets = [e['intent']['target'] for e in self.enemies if e['intent']['action']=='move']
-        if action=='move':
+        if action in self.movement_actions:
             self.note(f'第 {self.turn} 拍 · 调整站位。')
             targets.append(destination)
             if targets.count(destination)==1:

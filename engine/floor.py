@@ -7,32 +7,37 @@ import re
 import zlib
 from dungeon import Dungeon, DIRS, NAMES, UPGRADES
 from mechanics import ExpeditionMechanics, PROFILES, position
-from enemy_design import ENEMY_DESIGNS, ENEMY_LOOT, FIXED_ENEMY_LOOT, REINFORCEMENTS, enemy_health, enemy_attack_bonus
-from growth import Growth, CLASSES, RUNES, TALENT_FLOORS, BAG_RELICS
+from enemy_design import ENEMY_DESIGNS, ENEMY_LOOT, FIXED_ENEMY_LOOT, REINFORCEMENTS, enemy_health, enemy_damage, enemy_attack_bonus
+from growth import Growth, CLASSES, RUNES, TALENT_FLOORS, BAG_RELICS, STRIDE_LAUNCHER, BARRIER_FAN, LAUNCHERS
 from layout import LAST_FLOOR, LIGHT_VALUES, REGIONS, ROOM_LABELS, RELIC_FLOORS, SPRING_FLOORS, chapter, generate_layout
 
 DEW_CAPACITY = 3
+DEW_HEAL = 2
+SPRING_HEAL = 6
 HISTORY_LIMIT = 20
 SANITY_MAX = 450
-SANITY_LOW = 150
-KILL_SANITY = 20
+SANITY_LOW = 99
+SANITY_TURNS_PER_POINT = 2
+CORROSION_DAMAGE_THRESHOLD = 1000
 LIGHT_HEAL_STEPS = 50
+LIGHT_HEAL_AMOUNT = 3
+BALANCE_VERSION = 1
 LIGHT_NAMES = {'light_wisp': '微光', 'light_soul': '圣光', 'light_radiant': '辉光'}
-FLOOR_FIELDS = ('floor_version', 'width', 'height', 'walls', 'doors', 'rooms_data', 'lock',
+FLOOR_FIELDS = ('floor_version', 'floor_balance_version', 'width', 'height', 'walls', 'doors', 'rooms_data', 'lock',
                 'lock_style', 'floor_theme', 'secret_doors', 'shortcut_doors', 'features', 'terrain',
                 'rare_room', 'exit', 'recall_cell', 'keys', 'locked', 'enemies', 'enemy_serial',
                 'returning', 'bonebursts', 'ground_fire', 'smoke', 'smoke_clouds', 'visible',
                 'explored', 'mapped', 'terrain_memory', 'discovered_features', 'secret_clues',
-                'seen_statues', 'enemy_loot_count', 'echo_charges', 'corruption_rooms', 'light_enemy_drop')
+                'seen_statues', 'enemy_loot_count', 'echo_charges', 'corruption_rooms')
 
 ITEMS = {
     'terror': ('惊退卷轴', '让视野内可惊退的敌人接下来两拍尝试远离你。守关者、伪装宝箱、产巢和沟渠鱼免疫。'),
-    'ankh': ('护命符', '放在背包里，受到致命伤时自动消耗，回复至 2 生命并解除中毒与霜冻。坠落时不会触发。'),
+    'ankh': ('护命符', '放在背包里，受到致命伤时自动消耗，回复至最大生命的 40%（向上取整），并解除中毒与霜冻。坠落时不会触发。'),
     'recall': ('回程卷轴', '消耗一拍，传送到本层入口。入口有敌人或站位不安全时无法使用。'),
     'chart': ('测绘卷轴', '显示本层已连通的房间、门和阶梯。不会扩大视野或揭开未发现的暗门。'),
-    'sun_seed': ('阳草种子', '种下阳草。受伤时踩上可恢复 2 生命，敌人踩上会毁掉它。'),
+    'sun_seed': ('阳草种子', '种下阳草。受伤时踩上可恢复 6 生命，敌人踩上会毁掉它。'),
     'grass_seed': ('响草种子', '可投作诱饵，也能种下缠根。敌人踩上缠根后，下拍无法移动。'),
-    'heal': ('疗愈药剂', '恢复 2 生命并解除当前中毒。'),
+    'heal': ('疗愈药剂', '恢复最多 45% 最大生命（向上取整），并解除当前中毒。'),
     'frost_smoke': ('凝霜雾弹', '投出持续三拍的烟雾。爆开时扑灭范围内的地火，限制敌人的下拍移动，并冰封浅水两拍。'),
     'echo_smoke': ('响雾弹', '投出持续三拍的烟雾，同时吸引附近敌人调查落点。'),
     'smoke': ('烟雾弹', '投出一团持续三拍的烟雾。烟雾挡视线，能量波可以穿过。'),
@@ -55,9 +60,8 @@ SOUND_ITEMS = ('lure', 'grass_seed', 'echo_smoke')
 
 FLOOR_UPGRADES = {
     'echo': '每成功攒三次，第三次额外获得 1 能量。',
-    'heart': '每个区域首次有效格挡回复 1 生命。',
+    'heart': '每个区域首次有效格挡最多回复 4 生命。',
     'bag': '能量上限提高 1。',
-    'heavy': '解锁重波，可以在战斗操作栏使用。',
     'pierce': '让直线波贯穿目标，并使飞雷神进入后续遗物候选池。',
 }
 
@@ -79,9 +83,17 @@ ACTIVE_RELICS = {
 }
 
 
+DIAGONALS = {'up-left': (-1, -1), 'up-right': (1, -1), 'down-left': (-1, 1), 'down-right': (1, 1)}
+
+
 class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
-    upgrade_catalog = {**UPGRADES, **WAVE_RELICS, **ACTIVE_RELICS}
-    extra_actions = ('item', 'unlock', 'reflect', 'equip', 'tune', 'search', 'drop', 'pickup',
+    upgrade_catalog = {
+        **{key: value for key, value in UPGRADES.items() if key != 'heavy'},
+        'reflect': ('反弹', '解锁反弹防御。消耗 1 能量，将本拍第一发可反弹的波转向。'),
+        **WAVE_RELICS, **ACTIVE_RELICS,
+    }
+    movement_actions = ('move', 'dodge')
+    extra_actions = ('item', 'unlock', 'reflect', 'equip', 'tune', 'search', 'drop', 'pickup', 'dodge',
                      'drink_dew', 'craft', 'plant', *ACTIVE_RELICS)
 
     def __init__(self, seed=None, hero_class=None):
@@ -99,6 +111,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.result_archived = False
         self.defeat_cause = None
         self.floor_snapshots = {}
+        self.rune_landmarks = {}
         self.sanity = SANITY_MAX
         self.corrosion = 0
         self.light_blessings = {}
@@ -111,6 +124,13 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
     @classmethod
     def restore(cls, data):
         game = super().restore(data)
+        game.dodge_ready_turn = getattr(game, 'dodge_ready_turn', 0)
+        game.upgrades = list(dict.fromkeys('reflect' if upgrade == 'heavy' else upgrade for upgrade in game.upgrades))
+        for choice in game.choices:
+            if choice['id'] == 'heavy':
+                choice.update(id='reflect', name=cls.upgrade_catalog['reflect'][0],
+                              description=cls.upgrade_catalog['reflect'][1])
+        game.__dict__.pop('preview_hits', None)
         game.heart_region = getattr(game, 'heart_region', None)
         old_gate_shield = game.__dict__.pop('gate_shield', None)
         game.gate_shield_ready = getattr(game, 'gate_shield_ready', old_gate_shield == 'ready')
@@ -126,6 +146,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         game.floor_snapshots = getattr(game, 'floor_snapshots', {})
         game.sanity = getattr(game, 'sanity', SANITY_MAX)
         game.corrosion = getattr(game, 'corrosion', 0)
+        if 'floor_balance_version' not in data:
+            old_cap = 5 + game.hero_rank
+            hp = game.player['hp']
+            game.player['hp'] = min(game.max_hp, (hp * game.max_hp + old_cap - 1) // old_cap)
+            game.corrosion = min(119, game.corrosion) * CORROSION_DAMAGE_THRESHOLD // 120
+            game.migrate_floor_balance()
         old_light_turns = game.__dict__.pop('light_turns', 0)
         game.light_blessings = getattr(game, 'light_blessings', {'light_soul': old_light_turns} if old_light_turns else {})
         game.light_steps = getattr(game, 'light_steps', 0)
@@ -171,8 +197,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             if rune in ('conduct', 'pull'):
                 del game.inscriptions[family]
                 shards += 1
-        if not hasattr(game, 'dropped_runes'):
-            game.dropped_runes = list(dict.fromkeys(game.inscriptions.values()))
+        game.restore_rune_history()
+        old_stride = game.__dict__.pop('stride_launcher', False)
+        game.launcher_upgrades = getattr(game, 'launcher_upgrades', {'straight': STRIDE_LAUNCHER} if old_stride else {})
+        game.owned_launchers = list(dict.fromkeys([*getattr(game, 'owned_launchers', ()), *game.launcher_upgrades.values()]))
+        game.stride_ready = getattr(game, 'stride_ready', False)
+        game.barrier_ready = getattr(game, 'barrier_ready', False)
         for index in range(min(shards, len(RUNES))):
             game.drop_rune(f'legacy-rune-{index}', position(game.player))
         game.resolve_rune_features()
@@ -205,23 +235,65 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                          and not (feature['kind'] == 'shrine' and not feature['used']
                                   and self.depth not in SPRING_FLOORS and self.depth % 5)]
 
+    def restore_rune_history(self):
+        missing_drops = not hasattr(self, 'dropped_runes')
+        missing_landmarks = not hasattr(self, 'rune_landmarks')
+        if not (missing_drops or missing_landmarks):
+            return
+        if missing_drops:
+            dropped = list(self.inscriptions.values())
+            dropped.extend(f['rune'] for f in self.features if f['kind'] == 'rune')
+        if missing_landmarks:
+            self.rune_landmarks = {}
+        for depth, saved in self.floor_snapshots.items():
+            try:
+                snapshot = json.loads(zlib.decompress(b64decode(saved)))
+            except (ValueError, zlib.error):
+                continue
+            features = snapshot.get('features', ())
+            if missing_drops:
+                dropped.extend(f['rune'] for f in features if f['kind'] == 'rune')
+            if missing_landmarks:
+                records = self.known_ground_runes(features, snapshot.get('discovered_features', ()))
+                if records:
+                    self.rune_landmarks[depth] = records
+        if missing_drops:
+            self.dropped_runes = list(dict.fromkeys(dropped))
+
     def resolve_rune_features(self):
         self.features = [feature for feature in self.features
-                         if feature['kind'] != 'rune_shard'
-                         or (not feature['used'] and self.assign_rune_drop(feature))]
+                         if feature['kind'] != 'rune_shard' or not feature['used']]
+        for feature in self.features:
+            if feature['kind'] == 'rune_shard' and not self.assign_rune_drop(feature):
+                item = 'frost_smoke' if feature['id'] == 'cache' else 'recall'
+                feature.update(kind='dropped_item', item=item)
 
-    def drop_rune(self, ident, cell):
+    def drop_rune(self, ident, cell, *, fallback=None):
         feature = dict(id=ident, x=cell[0], y=cell[1], used=False)
-        if self.assign_rune_drop(feature):
-            self.features.append(feature)
-            if list(cell) in self.visible:
-                self.__dict__.setdefault('discovered_features', []).append(ident)
-            return True
-        return False
+        if not self.assign_rune_drop(feature):
+            if fallback is None:
+                return None
+            feature['kind'] = fallback
+        self.features.append(feature)
+        if list(cell) in self.visible:
+            self.__dict__.setdefault('discovered_features', []).append(ident)
+        return feature['kind']
 
     def ground_runes_here(self):
         return [f for f in self.features if f['kind'] == 'rune' and not f['used']
                 and position(f) == position(self.player)]
+
+    @staticmethod
+    def known_ground_runes(features, discovered):
+        known = set(discovered)
+        return [dict(rune=f['rune'], cell=position(f)) for f in features
+                if f['kind'] == 'rune' and not f['used'] and f['id'] in known]
+
+    def rune_journal(self):
+        current = self.known_ground_runes(self.features, self.discovered_features)
+        floors = {**self.rune_landmarks, str(self.depth): current}
+        return [dict(name=RUNES[record['rune']][0], depth=int(depth), cell=record['cell'])
+                for depth in sorted(floors, key=int) for record in floors[depth]]
 
     def archive_result(self):
         if self.result not in ('victory', 'defeat') or self.result_archived:
@@ -256,6 +328,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     def enter_room(self, prepare=True):
         self.floor_version = 3
+        self.floor_balance_version = BALANCE_VERSION
         layout = generate_layout(self.seed, self.depth)
         x, y = layout.pop('start')
         spawn = layout.pop('spawn')
@@ -267,7 +340,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         previous_rank = self.hero_rank
         self.hero_rank = max(previous_rank, chapter(self.depth))
         if self.hero_rank > previous_rank and self.player['hp'] > 0:
-            gain = self.hero_rank - previous_rank
+            gain = 5 * (self.hero_rank - previous_rank)
+            self.player['hp'] += gain
             self.note(f'进入新区域，生命上限 +{gain}。')
         self.recall_cell = [x, y]
         self.effects = []
@@ -283,7 +357,6 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.secret_clues = []
         self.seen_statues = []
         self.enemy_loot_count = 0
-        self.light_enemy_drop = False
         self.corruption_rooms = []
         self.mapped = []
         self.visible = []
@@ -312,6 +385,10 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     def change_floor(self, depth, arrival):
         """Freeze the departing map, while the player and run progression travel."""
+        known_runes = self.known_ground_runes(self.features, self.discovered_features)
+        if known_runes:
+            self.rune_landmarks[str(self.depth)] = known_runes
+        self.rune_landmarks.pop(str(depth), None)
         snapshot = {name: self.__dict__[name] for name in FLOOR_FIELDS if name in self.__dict__}
         snapshot['left_at'] = self.turn
         self.floor_snapshots[str(self.depth)] = b64encode(zlib.compress(
@@ -327,6 +404,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             for name in FLOOR_FIELDS:
                 self.__dict__.pop(name, None)
             self.__dict__.update(snapshot)
+            if not hasattr(self, 'floor_balance_version'):
+                self.migrate_floor_balance()
             self._wall_cells = set(map(tuple, self.walls))
             self._door_cells = set(map(tuple, self.doors))
             for tile in self.terrain:
@@ -345,6 +424,23 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.apply_corruption_population()
         if saved is not None:
             self.note(f'回到第 {self.depth} 层。')
+
+    def migrate_floor_balance(self):
+        depth = getattr(self, 'depth', 1)
+        rooms = self.rooms_data if hasattr(self, 'rooms_data') else ()
+        for enemy in self.enemies:
+            old_cap = enemy.get('maxHp', max(1, enemy['hp']))
+            home = enemy.get('home', -1)
+            boss_arena = 0 <= home < len(rooms) and rooms[home]['kind'] == 'boss'
+            cap = (4 if enemy['name'] == '分裂子群'
+                   else enemy_health(enemy['kind'], depth, boss_arena))
+            enemy['hp'] = min(cap, (max(0, enemy['hp']) * cap + old_cap - 1) // old_cap)
+            enemy['maxHp'] = cap
+            if 'intent' in enemy:
+                self.balance_enemy_intent(enemy, depth, legacy=True)
+        for wave in getattr(self, 'returning', ()):
+            wave['damage'] *= 3
+        self.floor_balance_version = BALANCE_VERSION
 
     def stair_landing(self, anchor, arrival):
         occupied = {tuple(position(enemy)) for enemy in self.enemies}
@@ -368,21 +464,26 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             return anchor
         return min(cells, key=lambda cell: (abs(cell[0] - anchor[0]) + abs(cell[1] - anchor[1]), cell))
 
+    @staticmethod
+    def sanity_cost(turn):
+        return int(turn % SANITY_TURNS_PER_POINT == 0)
+
     def tick_sanity(self):
         if not self.player['hp']:
             return
         if self.sanity:
-            self.sanity -= 1
-            if self.sanity == SANITY_LOW:
+            cost = self.sanity_cost(self.turn)
+            self.sanity -= cost
+            if cost and self.sanity == SANITY_LOW:
                 self.note('理智下降。未探索区域开始受到腐蚀。')
             if self.sanity:
                 return
             self.note('理智耗尽，诅咒开始侵蚀生命。')
-            self.corrosion = 120
+            self.corrosion = CORROSION_DAMAGE_THRESHOLD
         else:
             self.corrosion += self.max_hp
-        if self.corrosion >= 120:
-            self.corrosion -= 120
+        if self.corrosion >= CORROSION_DAMAGE_THRESHOLD:
+            self.corrosion -= CORROSION_DAMAGE_THRESHOLD
             self.player['hp'] -= 1
             self.record_status('damage', self.player, 1, source='诅咒腐蚀')
             self.note('诅咒腐蚀造成 1 伤。')
@@ -399,14 +500,6 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             self.record_status('sanity_gain', self.player, amount, source=source)
         return amount
 
-    def reward_sanity_kills(self, dead, outgoing, impacts, pulled):
-        kills = sum((outgoing[enemy['id']] > 0 or enemy['id'] in impacts or enemy is pulled)
-                    and 'summoner' not in enemy and enemy['kind'] not in ('bonepuppet', 'broodling')
-                    and enemy['name'] != '分裂子群' for enemy in dead)
-        amount = self.restore_sanity(kills * KILL_SANITY, '击杀')
-        if amount:
-            self.note(f'击杀回复 {amount} 理智。')
-
     def collect_light(self):
         if not self.player['hp']:
             return
@@ -414,12 +507,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             kind = feature['kind']
             if kind not in LIGHT_VALUES or feature['used'] or position(feature) != position(self.player):
                 continue
-            duration = LIGHT_VALUES[kind]
+            recovery, duration = LIGHT_VALUES[kind]
             remaining = self.light_blessings.get(kind, 0)
             if self.sanity == SANITY_MAX and remaining >= duration:
                 continue
             name = LIGHT_NAMES[kind]
-            amount = self.restore_sanity(duration, name)
+            amount = self.restore_sanity(recovery, name)
             self.light_blessings[kind] = max(remaining, duration)
             feature['used'] = True
             self.note(f'拾取{name} · 理智 +{amount}，效果剩余 {self.light_blessings[kind]} 拍。')
@@ -431,9 +524,10 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             if self.light_steps == LIGHT_HEAL_STEPS:
                 self.light_steps = 0
                 if self.player['hp'] < self.max_hp:
-                    self.player['hp'] += 1
-                    self.record_status('healed', self.player, 1, source='辉光')
-                    self.note('辉光 · 行走 50 步，恢复 1 生命。')
+                    amount = min(LIGHT_HEAL_AMOUNT, self.max_hp - self.player['hp'])
+                    self.player['hp'] += amount
+                    self.record_status('healed', self.player, amount, source='辉光')
+                    self.note(f'辉光 · 行走 {LIGHT_HEAL_STEPS} 步，恢复 {amount} 生命。')
         self.light_blessings = {kind: turns - 1 for kind, turns in self.light_blessings.items() if turns > 1}
         if 'light_radiant' not in self.light_blessings:
             self.light_steps = 0
@@ -466,7 +560,34 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     @property
     def max_hp(self):
-        return 5 + self.hero_rank
+        return 20 + 5 * self.hero_rank
+
+    @property
+    def heavy_available(self):
+        return True
+
+    @property
+    def movement_directions(self):
+        return {**DIRS, **DIAGONALS} if self.hero_class == 'fan' else DIRS
+
+    def can_step(self, start, destination):
+        x, y = start
+        nx, ny = destination
+        if not self.walkable(destination):
+            return False
+        if (x != nx and y != ny):
+            return all(self.walkable(cell) and not self.door_closed(cell, hero_position=start)
+                       for cell in ((nx, y), (x, ny), (nx, ny)))
+        return True
+
+    def dodge_targets(self):
+        if self.hero_class != 'straight' or self.dodge_cooldown or self.movement_locked():
+            return {}
+        x, y = position(self.player)
+        occupied = {tuple(position(enemy)) for enemy in self.enemies if position(enemy) in self.visible}
+        return {direction: [x + dx, y + dy] for direction, (dx, dy) in DIRS.items()
+                if [x + dx, y + dy] in self.visible and (x + dx, y + dy) not in occupied
+                and self.can_step((x, y), (x + dx, y + dy))}
 
     @property
     def cap(self):
@@ -484,10 +605,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
     def walkable(self,pos):
         return 0<=pos[0]<self.width and 0<=pos[1]<self.height and tuple(pos) not in self._wall_cells and not self.solid_terrain(pos) and not (self.locked and list(pos) == self.lock)
 
-    def door_closed(self, pos):
+    def door_closed(self, pos, *, hero_position=None):
         x, y = pos
-        return ((x, y) in self._door_cells
-                and (x, y) != (self.player['x'], self.player['y'])
+        if (x, y) not in self._door_cells:
+            return False
+        hero = tuple(hero_position) if hero_position is not None else (self.player['x'], self.player['y'])
+        return ((x, y) != hero
                 and not any((e['x'], e['y']) == (x, y) and e['hp'] > 0 for e in self.enemies))
 
     def doorway_vertical(self, cell):
@@ -661,13 +784,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                 continue
             if enemy.get('fear', 0) and not enemy.get('dormant'):
                 self.plan_fear(enemy, player)
-            intent = enemy['intent']
-            attack = intent['action']
-            bonus = enemy_attack_bonus(enemy['kind'], self.depth, attack)
-            if bonus:
-                damage = intent.get('damage', 2 if attack in ('area', 'siege') else 1) + bonus
-                intent['damage'] = damage
-                intent['label'] = re.sub(r'\d+伤', f'{damage}伤', intent['label'], count=1)
+            self.balance_enemy_intent(enemy, self.depth)
             rooted = enemy.pop('rooted', False)
             frosted = enemy.pop('frosted', False)
             if enemy['intent']['action'] != 'move':
@@ -679,6 +796,24 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                 enemy.pop('frozen', None)
             elif self.mob_bound([enemy['x'], enemy['y']]) and enemy['intent'].get('mob_jump'):
                 enemy['intent'] = dict(action='wait', label='蛛网 · 无法跃进', cells=[])
+
+    @staticmethod
+    def balance_enemy_intent(enemy, depth, *, legacy=False):
+        intent = enemy['intent']
+        action = intent['action']
+        if action not in ('melee', 'wave', 'special_wave', 'area', 'siege', 'ignite'):
+            return
+        if not legacy and enemy['kind'] == 'mirrorboss' and action == 'special_wave':
+            return
+        power = intent.get('damage', 2 if action in ('area', 'siege') else 1)
+        if not legacy:
+            power += enemy_attack_bonus(enemy['kind'], depth, action)
+        damage = intent['damage'] = enemy_damage(power, depth)
+        label = intent.get('label', '攻击')
+        if re.search(r'\d+\s*伤', label):
+            intent['label'] = re.sub(r'\d+\s*伤', f'{damage}伤', label, count=1)
+        else:
+            intent['label'] = f'{label} · {damage}伤'
 
     def plan_patrol(self, enemy, player):
         enemy['intent']['label'] = '巡逻 · 观察四周'
@@ -1059,8 +1194,10 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                 self.note('制作了' + name + '。背包已满，成品放在脚下。')
             return
         if action == 'drink_dew':
-            amount = min(self.dew, self.max_hp - self.player['hp'])
-            self.dew -= amount
+            missing = self.max_hp - self.player['hp']
+            used = min(self.dew, (missing + DEW_HEAL - 1) // DEW_HEAL)
+            amount = min(missing, used * DEW_HEAL)
+            self.dew -= used
             self.player['hp'] += amount
             self.note(f'饮用露珠，恢复 {amount} 生命。')
         if action == 'search':
@@ -1083,7 +1220,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             return
         self.inventory.remove(choice)
         if choice == 'heal':
-            self.player['hp'] = min(self.max_hp, self.player['hp'] + 2)
+            self.player['hp'] = min(self.max_hp, self.player['hp'] + (45 * self.max_hp + 99) // 100)
             if getattr(self, 'poisoned', False):
                 self.poisoned = False
                 self.note('疗愈药剂解除了中毒。')
@@ -1162,15 +1299,17 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     @staticmethod
     def enemy_defense(enemy):
-        base = int(enemy['kind'] == 'escort' or enemy['intent']['action'] == 'guard')
+        base = 2 * (enemy['kind'] == 'escort' or enemy['intent']['action'] == 'guard')
         return max(0, base - enemy.get('defense_lost', 0))
 
     def wave_damage(self, damage, target, hits):
-        if hits == 0 and target['kind'] != 'escort' and target['intent']['action'] == 'guard' and {'pierce', 'heavy'} <= set(self.upgrades):
+        if hits == 0 and target['kind'] != 'escort' and target['intent']['action'] == 'guard' and 'pierce' in self.upgrades:
             return damage
         return max(0, damage - self.enemy_defense(target))
 
     def on_block(self):
+        if self.launcher == BARRIER_FAN:
+            self.barrier_ready = True
         if 'heart' in self.upgrades and 'refund' in self.upgrades:
             self.player['energy'] = min(self.cap, self.player['energy'] + 1)
 
@@ -1178,7 +1317,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         combos = [
             ('反击', ('heart', 'refund'), '成功格挡时额外获得 1 能量'),
             ('蓄能', ('echo', 'bag'), '回响改为每两次攒触发'),
-            ('穿透', ('pierce', 'heavy'), '重波与普通波均无视第一个敌人的盾'),
+            ('穿透', ('pierce',), '重波与普通波均无视第一个敌人的盾'),
         ]
         return [dict(name=name, requires=list(required), effect=effect,
                      active=all(k in self.upgrades for k in required))
@@ -1200,14 +1339,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                 stats.append(dict(label='单束最多命中', before=f'{before} 名', after=f'{after} 名'))
             else:
                 stats.append(dict(label='当前波形命中', after='维持现有范围'))
-        elif relic == 'heavy':
-            upgraded.player = dict(self.player, energy=upgraded.cap)
-            upgraded.counter = False
-            stats.extend([
-                dict(label='能量消耗', after=self.action_cost('heavy')),
-                dict(label='满能量伤害（格挡加成前）',
-                     after=upgraded.wave_damage_before_defense('heavy')),
-            ])
+        elif relic == 'reflect':
+            stats.append(dict(label='反弹耗能', after='1 能量'))
 
         combos = []
         for build in upgraded.builds():
@@ -1235,21 +1368,40 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             segments.append(current)
         return segments
 
-    def preview_details(self, action, direction):
-        if action not in ('wave', 'heavy', 'reflect'):
-            raise ValueError('请选择波、重波或反弹防御。')
-        targets = {e['id']: e for e in self.state()['enemies'] if not e.get('disguised')}
+    def preview_details(self, action, direction, choice=None):
+        if action not in ('wave', 'heavy', 'reflect', 'guard', 'charge', *self.movement_actions):
+            raise ValueError('请选择要试算的战斗动作。')
+        origin = position(self.player)
+        if action in self.movement_actions:
+            if not isinstance(direction, str) or direction not in self.movement_directions:
+                raise ValueError('请选择移动方向。')
+            dx, dy = self.movement_directions[direction]
+            if [origin[0] + dx, origin[1] + dy] not in self.visible:
+                raise ValueError('只能试算视野内的相邻地格。')
+        public = self.state()
+        targets = {e['id']: e for e in public['enemies'] if not e.get('disguised')}
         game = self.restore(self.dump())
         game.terrain = [tile for tile in game.terrain if not tile.get('hidden')]
-        game.act(action, direction, game.version)
-        hits = [{'name': e['name'], 'damage': game.preview_hits[i]}
-                for i, e in targets.items() if i in game.preview_hits]
+        game.act(action, direction, game.version, choice)
+        def visible_hits(damage):
+            return [dict(name=enemy['name'], damage=damage[ident])
+                    for ident, enemy in targets.items() if ident in damage]
+
+        total = Counter()
+        for damage in game._preview_hits.values():
+            total.update(damage)
+        hit_sources = {source: known for source, damage in game._preview_hits.items()
+                       if (known := visible_hits(damage))}
         events = []
         if any(effect['kind'] == 'mirror_split' and effect.get('origin') in self.visible
                for effect in game.effects):
             events.append('镜链 · 主束末端分裂')
         if action in ('wave', 'heavy') and 'gate_shield' in self.upgrades and self.gate_shield_ready:
             events.append('守门盾 · 本次主束附带击退')
+        if action in ('wave', 'heavy') and self.stride_range:
+            events.append('踏步枪 · 本次射程 +1')
+        if action in ('wave', 'heavy') and self.barrier_wide:
+            events.append('屏障扇 · 伤害 +2' if self.hero_class == 'fan' else '屏障扇 · 两侧各扩大一格')
         for tile in self.terrain:
             if [tile['x'], tile['y']] not in self.visible:
                 continue
@@ -1267,8 +1419,14 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             events.append('将融化冰封浅水，恢复导电')
         if any(position(fire) in self.visible for fire in game.ground_fire):
             events.append('下一拍仍有地火')
-        if any(w['owner'] == 'hero' for w in game.returning):
+        if any(w.get('tide_origin') for w in game.returning):
+            events.append('回旋球 · 下一拍飞回行动后的位置' if self.orb_wave
+                          else '潮折器 · 下一拍回波飞向行动后的位置')
+        elif any(w['owner'] == 'hero' for w in game.returning):
             events.append('下一拍沿去程返回')
+        if action == 'dodge' and origin in public['dangerCells'] and any(
+                effect['kind'] == 'energy_gain' and effect.get('source') == '闪避' for effect in game.effects):
+            events.append('闪避 · 回复 1 能量')
         events.extend(label for enemy_id, label in game._shot_events if enemy_id in targets)
         landing = game._wave_landing
         if landing:
@@ -1277,29 +1435,57 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             else:
                 events.append('飞雷神将进入视野外')
                 landing = None
-        elif action != 'reflect' and 'blink' in self.upgrades:
+        elif action in ('wave', 'heavy') and 'blink' in self.upgrades:
             events.append('飞雷神无落脚点')
         cells = [cell for effect in game.effects if effect['kind'] in ('wave', 'mirror_split')
                  for cell in effect['cells'] if cell in self.visible]
+        if action == 'dodge':
+            cells = [[origin[0] + dx, origin[1] + dy]]
         visible = set(map(tuple, self.visible))
         refraction = [segment for effect in game.effects if effect['kind'] == 'refraction'
                       for segment in self.visible_refraction_segments(effect, visible)]
+        interceptions = [
+            dict(guard=targets[hit['guard']]['name'], target=targets[hit['target']]['name'],
+                 cells=hit['cells'], damage=hit['damage'])
+            for hit in game._interceptions if hit['guard'] in targets and hit['target'] in targets
+            and all(tuple(cell) in visible for cell in hit['cells'])
+        ]
         conduction = sorted({tuple(cell) for effect in game.effects if effect['kind'] == 'conduction'
                              for cell in effect['cells'] if tuple(cell) in visible})
         knockback = [cell for effect in game.effects
                      if effect['kind'] == 'impact' and effect.get('targetId') in targets
                      for cell in effect['cells'] if cell in self.visible]
         # Report known sources only. A shot preview must not reveal an unseen attacker.
-        received = [dict(damage=hit['amount'], name=targets[hit['source']]['name']
-                         if hit['source'] in targets else hit['cause'])
-                    for hit in game._received_hits if hit['amount']
-                    and hit['cell'] in self.visible
-                    and (hit['source'] in targets or hit['source'] is None)]
+        block_left = self.guard_limit if action == 'guard' else 0
+        blocked, received = 0, []
+        for hit in game._incoming_hits:
+            source = hit['source']
+            if hit['cell'] not in self.visible or (source is not None and source not in targets):
+                continue
+            absorbed = hit['absorbed']
+            if action == 'guard':
+                # Hidden attacks do not consume the guard budget in the known-threat forecast.
+                absorbed = 0 if hit['bypassesGuard'] else min(block_left, hit['amount'])
+                block_left -= absorbed
+            blocked += absorbed
+            if (damage := hit['amount'] - absorbed):
+                received.append(dict(damage=damage, name=targets[source]['name'] if source in targets else hit['cause']))
+        defense = (dict(blocked=blocked, damage=sum(hit['damage'] for hit in received))
+                   if action in ('guard', 'charge', *self.movement_actions) else {})
+        if action in self.movement_actions:
+            if game.fall_transition:
+                defense['stepOutcome'] = 'fall'
+            elif position(game.player) == origin:
+                defense['stepOutcome'] = 'blocked'
+            else:
+                defense['stepOutcome'] = 'moved'
         reflected = game._reflected_hit
         reflected_damage = reflected[1] if reflected and reflected[0] in targets else 0
-        return dict(hits=hits, events=events, landing=landing, cells=cells, knockback=knockback, refraction=refraction,
+        return dict(hits=visible_hits(total), hitSources=hit_sources, events=events, landing=landing, cells=cells,
+                    knockback=knockback, refraction=refraction,
+                    interceptions=interceptions,
                     conduction=[list(cell) for cell in conduction],
-                    received=received, reflected=reflected_damage)
+                    received=received, reflected=reflected_damage, **defense)
 
     def supply_box(self):
         return next((f for f in self.features if f['kind'] == 'supply_choice'
@@ -1307,14 +1493,18 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
 
     def supply_options(self):
         items = ('smoke', 'lure') if self.depth < 6 else ('echo_smoke', 'grass_seed')
-        return [dict(id=item, name=ITEMS[item][0], description=ITEMS[item][1], supply=True)
-                for item in items]
+        options = [dict(id=item, name=ITEMS[item][0], description=ITEMS[item][1], supply=True)
+                   for item in items]
+        options.extend(dict(id=key, name=name, description=self.launcher_info(key)[2], supply=True, equipment=True)
+                       for key, (family, name, _) in LAUNCHERS.items()
+                       if self.weapon == family and key not in self.owned_launchers and self.launcher != key)
+        return options
 
     def make_choices(self,source):
         pool = [key for key in self.upgrade_catalog if key not in self.upgrades
                 and (key not in WAVE_RELIC_REQUIREMENTS or WAVE_RELIC_REQUIREMENTS[key] in self.upgrades)]
         # Give the first boss a dependable reward, while keeping build choices.
-        picks = ['heavy'] if self.depth == 5 and 'heavy' in pool else []
+        picks = ['reflect'] if self.depth == 5 and 'reflect' in pool else []
         remaining = [key for key in pool if key not in picks]
         rng = Random(self.seed + self.depth * 739 + source * 113)
         picks += rng.sample(remaining, min(3 - len(picks), len(remaining)))
@@ -1375,8 +1565,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     if room['kind']=='boss':
                         self.note('守关者已倒下。可继续探索，或前往阶梯完成试炼。')
                         self.award_boss_growth()
-                        if self.drop_rune(f'boss-rune-{room["id"]}', room['anchor']):
-                            self.note('守关者掉落了一枚刻印。')
+                        reward = self.drop_rune(f'boss-rune-{room["id"]}', room['anchor'], fallback='light_soul')
+                        self.note('守关者掉落了一枚刻印。' if reward == 'rune' else '守关者掉落了一份圣光。')
                         self.make_choices(room['id'])
                     elif self.depth % 5 == 4 and room['id'] == 1:
                         self.note('阶梯守卫已倒下，下层阶梯解锁。')
@@ -1396,16 +1586,17 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                         continue
                     elif kind == 'dew':
                         if self.player['hp'] < self.max_hp:
-                            self.player['hp'] += 1
-                            self.record_status('healed', self.player, 1, source='露珠')
-                            self.note('拾取露珠，恢复 1 生命。')
+                            amount = min(DEW_HEAL, self.max_hp - self.player['hp'])
+                            self.player['hp'] += amount
+                            self.record_status('healed', self.player, amount, source='露珠')
+                            self.note(f'拾取露珠，恢复 {amount} 生命。')
                         elif self.dew < DEW_CAPACITY:
                             self.dew += 1
                             self.note('收集露珠，留待受伤时饮用。')
                         else:
                             continue
                     elif kind == 'wonder':
-                        healed = min(3, self.max_hp - self.player['hp'])
+                        healed = min(9, self.max_hp - self.player['hp'])
                         self.player['hp'] += healed
                         self.player['energy'] = self.cap
                         if healed:
@@ -1421,9 +1612,10 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                             continue  # Springs from pre-balance saves follow the same schedule.
                         if self.player['hp'] >= self.max_hp:
                             continue
-                        self.player['hp'] += 1
-                        self.record_status('healed', self.player, 1, source='泉水')
-                        self.note('泉水恢复 1 生命。')
+                        healed = min(SPRING_HEAL, self.max_hp - self.player['hp'])
+                        self.player['hp'] += healed
+                        self.record_status('healed', self.player, healed, source='泉水')
+                        self.note(f'泉水恢复 {healed} 生命。')
                     elif kind == 'supply_choice':
                         continue
                     elif kind in ('chest', 'materials'):
@@ -1444,11 +1636,11 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
     def revive_if_possible(self):
         if self.player['hp'] == 0 and self.defeat_cause != '坠入深渊' and 'ankh' in self.inventory:
             self.inventory.remove('ankh')
-            self.player['hp'] = 2
+            self.player['hp'] = (2 * self.max_hp + 4) // 5
             self.poisoned = self.player_frosted = self.player_snared = False
             self.defeat_cause = None
             self.record_status('revive', self.player, self.player['hp'], source='护命符')
-            self.note('护命符碎裂，你恢复到 2 生命。')
+            self.note(f'护命符碎裂，你恢复到 {self.player["hp"]} 生命。')
 
     def act(self,action,direction,version,choice=None):
         if version != self.version:
@@ -1469,13 +1661,34 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             box = self.supply_box()
             if self.result or box is None or choice not in [entry['id'] for entry in self.choices]:
                 raise ValueError('请选择箱中的一件补给。')
-            if not self.can_pack(choice):
-                raise ValueError('背包已满，请先腾出一个槽位。')
-            self.inventory.append(choice)
+            if choice in LAUNCHERS:
+                family, name, _ = LAUNCHERS[choice]
+                if self.weapon != family or choice in self.owned_launchers or self.launcher == choice:
+                    raise ValueError('当前无法装备这把发射器。')
+                self.owned_launchers.append(choice)
+                self.launcher_upgrades[family] = choice
+                self.note(f'装备{name}，继承该系的锻造和刻印。')
+            else:
+                if not self.can_pack(choice):
+                    raise ValueError('背包已满，请先腾出一个槽位。')
+                self.inventory.append(choice)
+                self.note('取得战术补给：' + ITEMS[choice][0] + '。')
             box['used'] = True
             self.choices = []
             self.version += 1
-            self.note('取得战术补给：' + ITEMS[choice][0] + '。')
+            return
+        if action == 'equip_launcher':
+            if not self.can_upgrade_weapon():
+                raise ValueError('请先脱战并等待回波结算，再更换发射器。')
+            if choice == 'standard' and self.launcher:
+                self.launcher_upgrades.pop(self.weapon)
+            elif isinstance(choice, str) and choice in LAUNCHERS and choice in self.owned_launchers and (
+                    choice != self.launcher and LAUNCHERS[choice][0] == self.weapon):
+                self.launcher_upgrades[self.weapon] = choice
+            else:
+                raise ValueError('请选择同系且已取得的发射器。')
+            self.note('已更换为' + (self.launcher_details[1] if self.launcher else '初始发射器') + '。')
+            self.version += 1
             return
         if action == 'skip_reward':
             if self.result or not self.choices:
@@ -1505,7 +1718,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             return
         if not self.result and not self.choices:
             self.validate_mechanic_action(action, direction, choice)
-            if action == 'move' and self.movement_locked():
+            if action in self.movement_actions and self.movement_locked():
                 raise ValueError('当前无法移动，先攒、出波或防一拍。')
             if action in ACTIVE_RELICS:
                 name = ACTIVE_RELICS[action][0]
@@ -1581,6 +1794,46 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             return
         super().act(action, direction, version, choice)
 
+    def path_details(self, target, step_on_trap=False, forecast=False):
+        path = self.path_to(target, step_on_trap)
+        result = dict(path=path, version=self.version)
+        if forecast:
+            result['sanityForecast'] = self.path_sanity_forecast(path)
+        return result
+
+    def path_sanity_forecast(self, path):
+        known = set(self.discovered_features)
+        lights = {}
+        for feature in self.features:
+            if feature['id'] in known and not feature['used'] and feature['kind'] in LIGHT_VALUES:
+                lights.setdefault(tuple(position(feature)), []).append(feature['kind'])
+        expires = self.light_blessings.copy()
+        x, y = position(self.player)
+        sanity = self.sanity
+        recovered = 0
+        low_at = corrosion_at = None
+        for step, direction in enumerate(path, 1):
+            dx, dy = self.movement_directions[direction]
+            x, y = x + dx, y + dy
+            available = lights.get((x, y), [])
+            for index, kind in enumerate(available):
+                recovery, duration = LIGHT_VALUES[kind]
+                if sanity == SANITY_MAX and expires.get(kind, 0) >= step + duration:
+                    continue
+                gain = min(recovery, SANITY_MAX - sanity)
+                sanity += gain
+                recovered += gain
+                expires[kind] = max(expires.get(kind, 0), step + duration)
+                available.pop(index)
+                break
+            sanity = max(0, sanity - self.sanity_cost(self.turn + step))
+            if sanity <= SANITY_LOW and low_at is None:
+                low_at = step
+            if sanity == 0 and corrosion_at is None:
+                corrosion_at = step
+        return dict(start=self.sanity, end=sanity, lowAt=low_at, corrosionAt=corrosion_at,
+                    recovered=recovered)
+
     def path_to(self, target, step_on_trap=False):
         charted = getattr(self, 'mapped', [])
         if (not isinstance(target, list) or len(target) != 2
@@ -1622,8 +1875,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         danger.update(fire)
         contested = {tuple(enemy['intent']['target']) for enemy in self.enemies
                      if (enemy['x'], enemy['y']) in visible and enemy['intent']['action'] == 'move'}
-        cautious = bool(any(tuple(position(e)) in visible and not e.get('dormant') for e in self.enemies)
-                        or fire or self.has_threat() or self.returning)
+        cautious = bool(danger or self.has_threat() or self.returning)
         unsafe_first_steps = danger | contested
 
         queue = deque([(start, [])])
@@ -1635,13 +1887,13 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             at_clue = clue_target and max(adjacent) <= 1 and self.has_sight(cell, destination)
             if cell == destination or at_landmark or at_clue:
                 return path[:1] if cautious else path
-            for direction, (dx, dy) in DIRS.items():
+            for direction, (dx, dy) in self.movement_directions.items():
                 next_cell = cell[0] + dx, cell[1] + dy
                 if next_cell in visited or next_cell not in known or next_cell in occupied:
                     continue
-                if not self.walkable(next_cell) or next_cell in hazards:
+                if not self.can_step(cell, next_cell) or next_cell in hazards:
                     continue
-                if cell == start and cautious and next_cell in unsafe_first_steps:
+                if cell == start and next_cell in unsafe_first_steps:
                     continue
                 visited.add(next_cell)
                 queue.append((next_cell, path + [direction]))
@@ -1674,39 +1926,46 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         known=explored | mapped
         known_features = set(self.discovered_features)
         enemies=deepcopy([e for e in self.enemies if (e['x'],e['y']) in visible])
+        known_escorts = {e['id'] for e in enemies if e['kind'] == 'escort' and not e.get('disguised')}
         for e in enemies:
             if e['kind'] in PROFILES:
                 e['description'] = PROFILES[e['kind']][1]
             if e['kind'] in ENEMY_DESIGNS:
                 base = ENEMY_DESIGNS[e['kind']][3]
                 bonus = max(enemy_attack_bonus(e['kind'], self.depth, move) for move in ('melee', 'special_wave'))
-                e['attack'] = base + bonus
-                if e['kind'] == 'leapripper' and bonus:
-                    e['description'] += ' 深层横扫造成 2 伤。'
-                if e['kind'] == 'rushcrab':
-                    e['description'] += ' 挥钳造成 2 伤。'
-                if bonus and e['kind'] == 'siegeeye':
-                    e['description'] = e['description'].replace('2 伤长波', f'{e["attack"]} 伤长波')
+                e['attack'] = enemy_damage(base + bonus, self.depth)
             elif e['kind'] in ('ram', 'charger', 'escort'):
-                e['attack'] = 2
+                e['attack'] = enemy_damage(2, self.depth)
             elif e['kind'] == 'boss':
-                e['attack'] = 3 + enemy_attack_bonus('boss', self.depth, 'area')
+                e['attack'] = enemy_damage(3 + enemy_attack_bonus('boss', self.depth, 'area'), self.depth)
             elif e['kind'] == 'breaker':
-                e['attack'] = 2 + enemy_attack_bonus('breaker', self.depth, 'siege')
-                e['description'] = re.sub(r'2 伤|2伤', f'{e["attack"]} 伤', e['description'])
+                e['attack'] = enemy_damage(2 + enemy_attack_bonus('breaker', self.depth, 'siege'), self.depth)
+            elif e['kind'] == 'mirrorboss':
+                e['attack'] = self.mirror_boss_damage()
+            else:
+                e['attack'] = enemy_damage(1, self.depth)
             if not e.get('disguised'):
+                guard = self.wave_interceptor(e) if known_escorts else None
+                if guard and guard['id'] in known_escorts:
+                    e['guardedBy'] = guard['name']
                 if e.get('stolen'):
                     e['lootHint'] = '归还偷走的能量'
                 elif e['kind'] in FIXED_ENEMY_LOOT:
                     e['lootHint'] = ('固定掉落：疗愈药剂' if FIXED_ENEMY_LOOT[e['kind']] == 'kit'
-                                     else '掉落：随机刻印')
+                                     else '掉落：微光' if len(self.dropped_runes) >= len(RUNES) else '掉落：随机刻印')
                 elif e.get('regular_loot') and e['kind'] in ENEMY_LOOT:
                     _, kind = ENEMY_LOOT[e['kind']]
                     item = GROUND_SUPPLIES.get(kind, (None,))[0]
                     name = ITEMS[item][0] if item else '露珠'
                     chance = self.enemy_loot_chance(e)
-                    suffix = f'掉落概率 {chance}%' if chance else '已达掉落上限'
+                    suffix = f'掉落概率 {chance}%' if chance else '普通补给已达掉落上限'
                     e['lootHint'] = f'{name} · {suffix}'
+                e['lightLoot'] = self.enemy_light_chances(e)
+                if len(self.dropped_runes) >= len(RUNES):
+                    if e['kind'] == 'armedidol':
+                        e['lightLoot']['light_wisp'] = 100
+                    elif e['kind'] in ('boss', 'breaker', 'mirrorboss'):
+                        e['lightLoot']['light_soul'] = 100
             e.pop('regular_loot', None)
             e.pop('patrol', None)
             e['stun_marked'] = e.pop('stagger_hit_turn', None) == self.turn
@@ -1741,7 +2000,8 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                                        anchor=anchor if anchor and tuple(anchor) in known else None,
                                        blocksExit=discovered and self.depth % 5 == 4 and r['id'] == 1
                                                   and not r['cleared']))
-        upgrades=[dict(id=k,name=self.upgrade_catalog[k][0],description=FLOOR_UPGRADES.get(k, self.upgrade_catalog[k][1])) for k in self.upgrades]
+        upgrades=[dict(id=k,name=self.upgrade_catalog[k][0],description=FLOOR_UPGRADES.get(k, self.upgrade_catalog[k][1]))
+                  for k in self.upgrades if k in self.upgrade_catalog]
         choices=deepcopy(self.choices)
         bag_slots = self.packed_inventory()
         packable = (set(ITEMS) if len(bag_slots) < self.bag_capacity else
@@ -1749,7 +2009,9 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         for choice in choices:
             choice['description'] = FLOOR_UPGRADES.get(choice['id'], choice['description'])
             if choice.get('supply'):
-                choice['blocked'] = choice['id'] not in packable
+                choice['blocked'] = not choice.get('equipment') and choice['id'] not in packable
+                if choice.get('equipment') and choice['id'] in LAUNCHERS:
+                    choice['comparison'] = self.launcher_preview(choice['id'])
             elif choice['id'] in self.upgrade_catalog:
                 choice['preview'] = self.relic_preview(choice['id'])
         lure_targets = self.lure_targets() if any(item in THROWN_ITEMS for item in self.inventory) else []
@@ -1776,6 +2038,11 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
             upStairs=entrance if self.can_ascend() and entrance and tuple(entrance) in explored else None,
             fallTransition=deepcopy(self.fall_transition),
             sanity=self.sanity, sanityMax=SANITY_MAX, sanityLow=SANITY_LOW,
+            sanityTurnsPerPoint=SANITY_TURNS_PER_POINT,
+            dodgeTargets=self.dodge_targets(),
+            lightRecovery={kind: amount for kind, (amount, _) in LIGHT_VALUES.items()},
+            lightDuration={kind: duration for kind, (_, duration) in LIGHT_VALUES.items()},
+            lightHealAmount=LIGHT_HEAL_AMOUNT,
             lightBlessings=self.light_blessings.copy(), lightSteps=self.light_steps, lightStepGoal=LIGHT_HEAL_STEPS,
             openedShortcuts=opened_shortcuts,
             dew=self.dew, dewCapacity=DEW_CAPACITY,
@@ -1833,6 +2100,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                          for f in self.ground_supplies_here()],
             groundRunes=[dict(id=f['id'], name=RUNES[f['rune']][0], description=RUNES[f['rune']][1],
                               blocked=self.rune_incompatibility(f['rune'])) for f in self.ground_runes_here()],
+            runeJournal=self.rune_journal(),
             fullBagLandmarks=[f['id'] for f in self.features if f['id'] in known_features and not f['used']
                               and self.ground_items(f) and packable.isdisjoint(self.ground_items(f))],
             supplyOptions=self.supply_options() if any(f['kind'] == 'supply_choice' and not f['used']

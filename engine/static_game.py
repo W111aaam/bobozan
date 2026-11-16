@@ -11,9 +11,11 @@ def dispatch(path, payload, save):
         if path != 'state' and data.get('version') != game.version:
             raise ValueError('局面已更新，请重新选择。')
         if path == 'path':
-            return json.dumps(dict(result=dict(path=game.path_to(data.get('target'), data.get('stepOnTrap')), version=game.version)))
+            return json.dumps(dict(result=game.path_details(data.get('target'), data.get('stepOnTrap'),
+                                                            forecast=data.get('forecast') is True)))
         if path == 'preview':
-            return json.dumps(dict(result=game.preview_details(data.get('action'), data.get('direction'))))
+            return json.dumps(dict(result=game.preview_details(data.get('action'), data.get('direction'),
+                                                               data.get('choice'))))
         if path == 'action':
             game.act(data.get('action'), data.get('direction'), game.version, data.get('choice'))
         elif path == 'reset':
