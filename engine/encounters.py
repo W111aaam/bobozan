@@ -5,7 +5,7 @@ from dungeon import DIRS
 from enemy_design import ENEMY_LOOT, FIXED_ENEMY_LOOT, enemy_health
 
 # Percentages are absolute outcomes in the same roll as ordinary supplies.
-LIGHT_LOOT = {'light_wisp': 13, 'light_soul': 9, 'light_radiant': 3}
+LIGHT_LOOT = {'light_wisp': 10, 'light_soul': 7, 'light_radiant': 3}
 
 
 def cell(actor):
