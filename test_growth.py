@@ -2,7 +2,7 @@ import json
 import unittest
 from unittest.mock import patch
 
-from floor import FloorDungeon
+from floor import BOSS_FLOORS, FloorDungeon
 from growth import CLASSES, RUNES, WEAPON_DAMAGE
 from test_floor import go, place
 import test_mechanics
@@ -183,13 +183,48 @@ class GrowthTests(unittest.TestCase):
         self.assertEqual(game.features[0]['kind'], 'light_wisp')
         game.depth = 5
         game.enter_room()
+        boss, = game.enemies
         game.enemies = []
+        game.finish_side_enemies({}, [boss])
         game.finish_action()
         game.finish_action()
         boss_drops = [f for f in game.features if f['id'].startswith('boss-rune-')]
         self.assertEqual([f['kind'] for f in boss_drops], ['light_soul'])
+        self.assertEqual([f['kind'] for f in game.features if f['id'].startswith('boss-radiant-')],
+                         ['light_radiant'])
+        self.assertEqual([f['kind'] for f in game.features if f['id'].startswith('boss-core-')],
+                         ['forge_core'])
         self.assertEqual(game.bag_capacity, 10)
         self.assertTrue(game.choices)
+
+    def test_boss_drops_all_rewards_on_death_while_another_enemy_is_alive(self):
+        game = FloorDungeon(0)
+        game.depth = 20
+        game.enter_room()
+        boss, guard = game.enemies
+        boss.update(hp=1, intent=dict(action='wait', cells=[]))
+        place(game, (boss['x'] - 1, boss['y']))
+        game.player['energy'] = 3
+        panel = next(enemy for enemy in game.state()['enemies'] if enemy['id'] == boss['id'])
+        self.assertEqual(panel['lootHint'], '固定掉落：随机刻印、辉光和锻造核心')
+        self.assertEqual(panel['lightLoot']['light_radiant'], 100)
+        go(game, 'wave', 'right')
+        self.assertEqual(game.enemies, [guard])
+        self.assertFalse(game.choices)
+        saved = FloorDungeon.restore(game.dump())
+        saved.finish_side_enemies({}, [boss])
+        drops = [f for f in saved.features if f['id'].startswith('boss-')]
+        self.assertEqual([f['kind'] for f in drops], ['rune', 'light_radiant', 'forge_core'])
+        place(saved, (drops[0]['x'], drops[0]['y']))
+        saved.sanity = 100
+        go(saved, 'guard')
+        self.assertEqual(saved.sanity, 399)
+        self.assertEqual(len(saved.ground_runes_here()), 1)
+        self.assertEqual(saved.forge_cores, 1)
+        saved = FloorDungeon.restore(saved.dump())
+        go(saved, 'guard')
+        self.assertEqual(saved.forge_cores, 1)
+        self.assertFalse(any(feature['kind'] == 'forge_core' for feature in saved.state()['features']))
 
     def test_supply_comparison_predicts_launcher_with_current_build_without_equipping_it(self):
         game = test_mechanics.ExpeditionMechanicsTests().arena()
@@ -449,6 +484,15 @@ class GrowthTests(unittest.TestCase):
                     game = FloorDungeon.restore(game.dump())
                     game.change_floor(1, 'up')
                 game.drop_rune(f'test-rune-{index}', [game.player['x'], game.player['y']])
+            self.assertEqual(len(game.dropped_runes), len(RUNES) - len(BOSS_FLOORS))
+            for depth in BOSS_FLOORS:
+                game.change_floor(depth, 'down')
+                boss, *guards = game.enemies
+                game.enemies = guards
+                game.finish_side_enemies({}, [boss])
+                drops = [f['kind'] for f in game.features if f['id'].startswith('boss-')]
+                self.assertEqual(drops, ['rune', 'light_radiant', 'forge_core'])
+                game = FloorDungeon.restore(game.dump())
             self.assertEqual(len(game.dropped_runes), len(RUNES))
             self.assertEqual(set(game.dropped_runes), set(RUNES))
             self.assertLessEqual(len([f for f in game.features if f['kind'] == 'rune']), len(RUNES))
@@ -494,11 +538,11 @@ class GrowthTests(unittest.TestCase):
         restored = FloorDungeon.restore(existing)
         self.assertEqual(set(restored.dropped_runes), prior_runes)
         self.assertEqual(restored.rune, game.rune)
-        for index in range(len(RUNES) - len(prior_runes)):
+        for index in range(len(RUNES) - len(prior_runes) - len(BOSS_FLOORS)):
             self.assertEqual(restored.drop_rune(f'new-{index}', [3, 5]), 'rune')
             self.assertNotIn(restored.features[-1]['rune'], prior_runes)
         self.assertIsNone(restored.drop_rune('exhausted', [3, 5]))
-        self.assertEqual(set(restored.dropped_runes), set(RUNES))
+        self.assertEqual(len(restored.dropped_runes), max(len(prior_runes), len(RUNES) - len(BOSS_FLOORS)))
 
     def test_conduction_deals_equal_damage_in_connected_unfrozen_water(self):
         fixture = test_mechanics.ExpeditionMechanicsTests()
@@ -762,7 +806,9 @@ class GrowthTests(unittest.TestCase):
         restored = FloorDungeon.restore(json.loads(json.dumps(saved)))
         state = restored.state()
         self.assertEqual((state['weapon'], restored.inscriptions), ('return', {'straight': 'shatter'}))
-        self.assertEqual(len(state['groundRunes']), 4)
+        self.assertEqual(len(state['groundRunes']), 3)
+        self.assertTrue(any(f['kind'] == 'light_wisp' and f['id'].startswith('legacy-rune-')
+                            for f in restored.features))
         self.assertEqual(len(set(restored.dropped_runes)), len(restored.dropped_runes))
         self.assertNotIn('shatter', {f['rune'] for f in restored.ground_runes_here()})
         self.assertEqual([choice['id'] for choice in state['choices']], ['smoke', 'lure'])

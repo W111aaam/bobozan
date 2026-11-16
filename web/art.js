@@ -489,7 +489,7 @@ const art = (() => {
   return `<svg class="item-icon" viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${itemPixels(id)}</svg>`;
  }
  function prop(kind,x,y,used=false,item=null){
-  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew'})[kind]||kind;
+  const key=({cache:'chest',materials:'open_chest',supply_choice:'chest',recall:'chart',terror:'chart',ankh:'wonder',forge_core:'wonder',smoke:'smoke',echo_smoke:'smoke',dropped_item:'lure_cache',grass_seed:'seed',sun_seed:'seed',stolen_energy:'dew'})[kind]||kind;
   const sprite=used&&key==='chest'?'open_chest':used&&key==='shrine'?'dry_spring':key;
   if(!items[sprite])return '';
   if(!cache.has(sprite))cache.set(sprite,pixels(items[sprite],itemColors[sprite]||props));

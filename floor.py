@@ -7,7 +7,7 @@ import re
 import zlib
 from dungeon import Dungeon, DIRS, NAMES, UPGRADES
 from mechanics import ExpeditionMechanics, PROFILES, position
-from enemy_design import ENEMY_DESIGNS, ENEMY_LOOT, FIXED_ENEMY_LOOT, REINFORCEMENTS, enemy_health, enemy_damage, enemy_attack_bonus
+from enemy_design import BOSS_KINDS, ENEMY_DESIGNS, ENEMY_LOOT, FIXED_ENEMY_LOOT, REINFORCEMENTS, enemy_health, enemy_damage, enemy_attack_bonus
 from growth import Growth, CLASSES, RUNES, TALENT_FLOORS, BAG_RELICS, STRIDE_LAUNCHER, BARRIER_FAN, LAUNCHERS
 from layout import LAST_FLOOR, LIGHT_VALUES, REGIONS, ROOM_LABELS, RELIC_FLOORS, SPRING_FLOORS, chapter, generate_layout
 
@@ -22,6 +22,7 @@ CORROSION_DAMAGE_THRESHOLD = 1000
 LIGHT_HEAL_STEPS = 50
 LIGHT_HEAL_AMOUNT = 3
 BALANCE_VERSION = 1
+BOSS_FLOORS = tuple(range(5, LAST_FLOOR, 5))
 LIGHT_NAMES = {'light_wisp': '微光', 'light_soul': '圣光', 'light_radiant': '辉光'}
 FLOOR_FIELDS = ('floor_version', 'floor_balance_version', 'width', 'height', 'walls', 'doors', 'rooms_data', 'lock',
                 'lock_style', 'floor_theme', 'secret_doors', 'shortcut_doors', 'features', 'terrain',
@@ -112,6 +113,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.defeat_cause = None
         self.floor_snapshots = {}
         self.rune_landmarks = {}
+        self.boss_rune_floors = []
         self.sanity = SANITY_MAX
         self.corrosion = 0
         self.light_blessings = {}
@@ -204,7 +206,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         game.stride_ready = getattr(game, 'stride_ready', False)
         game.barrier_ready = getattr(game, 'barrier_ready', False)
         for index in range(min(shards, len(RUNES))):
-            game.drop_rune(f'legacy-rune-{index}', position(game.player))
+            game.drop_rune(f'legacy-rune-{index}', position(game.player), fallback='light_wisp')
         game.resolve_rune_features()
         game.choices = [choice for choice in game.choices
                         if choice.get('rewardType') not in ('emitter', 'blessing')]
@@ -238,19 +240,29 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
     def restore_rune_history(self):
         missing_drops = not hasattr(self, 'dropped_runes')
         missing_landmarks = not hasattr(self, 'rune_landmarks')
-        if not (missing_drops or missing_landmarks):
+        missing_bosses = not hasattr(self, 'boss_rune_floors')
+        if not (missing_drops or missing_landmarks or missing_bosses):
             return
         if missing_drops:
             dropped = list(self.inscriptions.values())
             dropped.extend(f['rune'] for f in self.features if f['kind'] == 'rune')
         if missing_landmarks:
             self.rune_landmarks = {}
+        if missing_bosses:
+            self.boss_rune_floors = [
+                self.depth for room in self.rooms_data if room['kind'] == 'boss' and room['cleared']
+            ]
         for depth, saved in self.floor_snapshots.items():
+            if not (missing_drops or missing_landmarks or int(depth) in BOSS_FLOORS):
+                continue
             try:
                 snapshot = json.loads(zlib.decompress(b64decode(saved)))
             except (ValueError, zlib.error):
                 continue
             features = snapshot.get('features', ())
+            if missing_bosses and any(room['kind'] == 'boss' and room['cleared']
+                                      for room in snapshot.get('rooms_data', ())):
+                self.boss_rune_floors.append(int(depth))
             if missing_drops:
                 dropped.extend(f['rune'] for f in features if f['kind'] == 'rune')
             if missing_landmarks:
@@ -264,13 +276,19 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         self.features = [feature for feature in self.features
                          if feature['kind'] != 'rune_shard' or not feature['used']]
         for feature in self.features:
-            if feature['kind'] == 'rune_shard' and not self.assign_rune_drop(feature):
+            if feature['kind'] == 'rune_shard' and (
+                    not self.ordinary_rune_available or not self.assign_rune_drop(feature)):
                 item = 'frost_smoke' if feature['id'] == 'cache' else 'recall'
                 feature.update(kind='dropped_item', item=item)
 
-    def drop_rune(self, ident, cell, *, fallback=None):
+    @property
+    def ordinary_rune_available(self):
+        reserved = sum(depth not in self.boss_rune_floors for depth in BOSS_FLOORS)
+        return len(RUNES) - len(self.dropped_runes) > reserved
+
+    def drop_rune(self, ident, cell, *, fallback=None, boss=False):
         feature = dict(id=ident, x=cell[0], y=cell[1], used=False)
-        if not self.assign_rune_drop(feature):
+        if not ((boss or self.ordinary_rune_available) and self.assign_rune_drop(feature)):
             if fallback is None:
                 return None
             feature['kind'] = fallback
@@ -278,6 +296,16 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
         if list(cell) in self.visible:
             self.__dict__.setdefault('discovered_features', []).append(ident)
         return feature['kind']
+
+    def drop_boss_rewards(self, room):
+        if room['kind'] != 'boss' or self.depth in self.boss_rune_floors:
+            return
+        self.boss_rune_floors.append(self.depth)
+        x, y = room['anchor']
+        reward = self.drop_rune(f'boss-rune-{room["id"]}', [x, y], fallback='light_soul', boss=True)
+        self.features.append(dict(id=f'boss-radiant-{room["id"]}', x=x, y=y, kind='light_radiant', used=False))
+        self.features.append(dict(id=f'boss-core-{room["id"]}', x=x, y=y, kind='forge_core', used=False))
+        self.note(f'守关者掉落了{"一枚刻印" if reward == "rune" else "一份圣光"}、一份辉光和一枚锻造核心。')
 
     def ground_runes_here(self):
         return [f for f in self.features if f['kind'] == 'rune' and not f['used']
@@ -1565,8 +1593,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     if room['kind']=='boss':
                         self.note('守关者已倒下。可继续探索，或前往阶梯完成试炼。')
                         self.award_boss_growth()
-                        reward = self.drop_rune(f'boss-rune-{room["id"]}', room['anchor'], fallback='light_soul')
-                        self.note('守关者掉落了一枚刻印。' if reward == 'rune' else '守关者掉落了一份圣光。')
+                        self.drop_boss_rewards(room)
                         self.make_choices(room['id'])
                     elif self.depth % 5 == 4 and room['id'] == 1:
                         self.note('阶梯守卫已倒下，下层阶梯解锁。')
@@ -1605,6 +1632,9 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     elif kind == 'key':
                         self.keys += 1
                         self.note('取得库房钥匙。')
+                    elif kind == 'forge_core':
+                        self.forge_cores += 1
+                        self.note('拾取一枚锻造核心。')
                     elif kind in LIGHT_VALUES:
                         continue
                     elif kind == 'shrine':
@@ -1952,7 +1982,10 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     e['lootHint'] = '归还偷走的能量'
                 elif e['kind'] in FIXED_ENEMY_LOOT:
                     e['lootHint'] = ('固定掉落：疗愈药剂' if FIXED_ENEMY_LOOT[e['kind']] == 'kit'
-                                     else '掉落：微光' if len(self.dropped_runes) >= len(RUNES) else '掉落：随机刻印')
+                                     else '掉落：随机刻印' if self.ordinary_rune_available else '掉落：微光')
+                elif e['kind'] in BOSS_KINDS:
+                    rune_reward = '随机刻印' if len(self.dropped_runes) < len(RUNES) else '圣光'
+                    e['lootHint'] = f'固定掉落：{rune_reward}、辉光和锻造核心'
                 elif e.get('regular_loot') and e['kind'] in ENEMY_LOOT:
                     _, kind = ENEMY_LOOT[e['kind']]
                     item = GROUND_SUPPLIES.get(kind, (None,))[0]
@@ -1961,11 +1994,12 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                     suffix = f'掉落概率 {chance}%' if chance else '普通补给已达掉落上限'
                     e['lootHint'] = f'{name} · {suffix}'
                 e['lightLoot'] = self.enemy_light_chances(e)
-                if len(self.dropped_runes) >= len(RUNES):
-                    if e['kind'] == 'armedidol':
-                        e['lightLoot']['light_wisp'] = 100
-                    elif e['kind'] in ('boss', 'breaker', 'mirrorboss'):
+                if e['kind'] in BOSS_KINDS:
+                    e['lightLoot']['light_radiant'] = 100
+                    if len(self.dropped_runes) >= len(RUNES):
                         e['lightLoot']['light_soul'] = 100
+                elif e['kind'] == 'armedidol' and not self.ordinary_rune_available:
+                    e['lightLoot']['light_wisp'] = 100
             e.pop('regular_loot', None)
             e.pop('patrol', None)
             e['stun_marked'] = e.pop('stagger_hit_turn', None) == self.turn
@@ -2115,7 +2149,7 @@ class FloorDungeon(Growth, ExpeditionMechanics, Dungeon):
                               else {'itemName': ITEMS[f['remaining_items'][0]][0]}
                               if f.get('remaining_items') else {}))
                       for f in self.features if f['id'] in known_features
-                      and not (f['used'] and (f['kind'] in LIGHT_VALUES or f['kind'] in ('dropped_item', 'rune')
+                      and not (f['used'] and (f['kind'] in LIGHT_VALUES or f['kind'] in ('dropped_item', 'rune', 'forge_core')
                                              or f['id'].startswith('drop-')))],
             upgradeCount=len(self.upgrade_catalog), enemies=enemies,cleared=self.cleared,result=self.result,choices=choices,upgrades=upgrades,
             log=self.log[:],effects=[dict(kind=f['kind'], cells=[c for c in f['cells'] if tuple(c) in visible],

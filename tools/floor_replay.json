@@ -5515,17 +5515,12 @@
     "choice": null
   },
   {
-    "action": "move",
-    "direction": "up",
-    "choice": null
-  },
-  {
-    "action": "move",
-    "direction": "right",
-    "choice": null
-  },
-  {
     "action": "charge",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "guard",
     "direction": null,
     "choice": null
   },
@@ -5566,7 +5561,7 @@
   },
   {
     "action": "move",
-    "direction": "left",
+    "direction": "up",
     "choice": null
   },
   {
@@ -5626,6 +5621,11 @@
   },
   {
     "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
     "direction": null,
     "choice": null
   },
@@ -5876,6 +5876,11 @@
   },
   {
     "action": "exit",
+    "direction": null,
+    "choice": null
+  },
+  {
+    "action": "charge",
     "direction": null,
     "choice": null
   },

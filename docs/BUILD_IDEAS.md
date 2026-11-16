@@ -22,7 +22,7 @@
 16. 锚链（主动遗物）消耗一拍和一次充能，拉近敌人一格或把自己拉向空地，推进楼层补充使用次数。**已完成**
 17. 预藏（主动遗物）消耗一拍和一次充能获得满能量，推进楼层补充使用次数。**已完成**
 18. 待定
-职业保留初始波形和颜色，替换发射器沿用该系的锻造等级与单刻印槽。所有种类的刻印共用每局的随机掉落池，每种最多掉落一次，留在地上也算已掉落。到达掉落位置后通过「脚下物品」装备或替换，人物界面只显示当前刻印。刻印池耗尽后，暗门、刺针库房、武器石像和守关战各有替代奖励。**已完成**
+职业保留初始波形和颜色，替换发射器沿用该系的锻造等级与单刻印槽。所有种类的刻印共用每局的随机掉落池，每种最多掉落一次，留在地上也算已掉落。到达掉落位置后通过「脚下物品」装备或替换，人物界面只显示当前刻印。每个尚未击败的守关者预留一枚刻印，倒下后掉落刻印、辉光和锻造核心。普通来源的刻印用完后，暗门、刺针库房和武器石像各有替代奖励。**已完成**
 战术补给箱共享一次领取机会，武器、刻印、补给或赐福的获取不会因进出房间重置。
 
 设计参考《破碎的像素地牢》的[武器能力](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/weapon/melee/Greatshield.java)、[浅水导电](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/wands/WandOfLightning.java)、[击退附魔](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/weapon/enchantments/Elastic.java)、[主动神器](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/artifacts/EtherealChains.java)和[饰品选择](https://github.com/00-Evan/shattered-pixel-dungeon/blob/master/core/src/main/java/com/shatteredpixel/shatteredpixeldungeon/items/trinkets/TrinketCatalyst.java)。
